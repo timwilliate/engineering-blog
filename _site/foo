@@ -1,0 +1,12 @@
+# Site settings
+title: computing.monsanto.com
+email: computing@monsanto.com
+description: > # this means to ignore newlines until "baseurl:" 
+  The engineers of Monsanto code to produce and deliver agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://computing.monsanto.com" # the base hostname & protocol for your site
+twitter_username: MonsantoCo
+github_username: MonsantoCo
+
+# Build settings
+markdown: kramdown
