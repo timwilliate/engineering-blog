@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
- <title>computing.monsanto.com</title>
- <link href="http://computing.monsanto.com/atom.xml" rel="self"/>
- <link href="http://computing.monsanto.com/"/>
- <updated>2015-01-22T15:18:27-06:00</updated>
- <id>http://computing.monsanto.com</id>
+ <title>computing</title>
+ <link href="http://demo.philcryer.com/atom.xml" rel="self"/>
+ <link href="http://demo.philcryer.com/"/>
+ <updated>2015-01-30T08:41:17-06:00</updated>
+ <id>http://demo.philcryer.com</id>
  <author>
    <name>Computing @ Monsanto.com</name>
    <email>computing@monsanto.com</email>
@@ -13,10 +13,36 @@
 
  
  <entry>
+   <title>Stoop: our first open source release</title>
+   <link href="http://demo.philcryer.com/code/2015/01/22/stoop-our-first-open-source-release/"/>
+   <updated>2015-01-22T13:52:21-06:00</updated>
+   <id>http://demo.philcryer.com/code/2015/01/22/stoop-our-first-open-source-release</id>
+   <content type="html">&lt;p&gt;We are happy to annouce the release of our first open source software, &lt;a href=&quot;https://github.com/MonsantoCo/stoop&quot;&gt;Stoop&lt;/a&gt;. Based on an existing &lt;a href=&quot;http://hackage.haskell.org/package/CouchDB&quot;&gt;Haskell library&lt;/a&gt;, Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We&amp;#39;ve released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a &lt;a href=&quot;https://github.com/MonsantoCo/stoop/pull/1&quot;&gt;pull request&lt;/a&gt; to fix something!&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Stoop&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;0.9.10-SNAPSHOT&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;scalaVersion&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;2.10.3&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;scalacOptions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;-deprecation&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;scalacOptions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;-feature&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;resolvers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Sonatype snapshots&amp;quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;at&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;http://oss.sonatype.org/content/repositories/snapshots/&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;resolvers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;Scalaz Bintray Repo&amp;quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;at&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;http://dl.bintray.com/scalaz/releases&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;resolvers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;spray repo&amp;quot;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;at&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;http://repo.spray.io&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libraryDependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Seq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalaz&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalaz-core&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;7.1.0&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;s&quot;&gt;&amp;quot;io.spray&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;spray-json&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;1.2.5&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalaz&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalaz-effect&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;7.1.0&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalaz&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalaz-concurrent&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;7.1.0&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                            &lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalaz.stream&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalaz-stream&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;0.6a&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libraryDependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;net.databinder.dispatch&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;dispatch-core&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;0.10.0&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libraryDependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalatest&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalatest_2.10&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;2.0&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;test&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libraryDependencies&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;org.scalacheck&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;scalacheck&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;1.10.1&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;test&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;publishMavenStyle&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+ </entry>
+ 
+ <entry>
    <title>Morte unde</title>
-   <link href="http://computing.monsanto.com/code/sortem/2015/01/21/first-post/"/>
+   <link href="http://demo.philcryer.com/code/sortem/2015/01/21/first-post/"/>
    <updated>2015-01-21T04:54:52-06:00</updated>
-   <id>http://computing.monsanto.com/code/sortem/2015/01/21/first-post</id>
+   <id>http://demo.philcryer.com/code/sortem/2015/01/21/first-post</id>
    <content type="html">&lt;h2&gt;Si primum siquis&lt;/h2&gt;
 
 &lt;p&gt;&lt;strong&gt;a sample post created by a lorem-markdownum generator&lt;/strong&gt;&lt;/p&gt;
@@ -78,9 +104,9 @@ simili&lt;/em&gt; in diu.&lt;/p&gt;
  
  <entry>
    <title>Welcome to Jekyll!</title>
-   <link href="http://computing.monsanto.com/jekyll/update/2015/01/19/welcome-to-jekyll/"/>
+   <link href="http://demo.philcryer.com/jekyll/update/2015/01/19/welcome-to-jekyll/"/>
    <updated>2015-01-19T04:54:52-06:00</updated>
-   <id>http://computing.monsanto.com/jekyll/update/2015/01/19/welcome-to-jekyll</id>
+   <id>http://demo.philcryer.com/jekyll/update/2015/01/19/welcome-to-jekyll</id>
    <content type="html">&lt;p&gt;You’ll find this post in your &lt;code&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
 
 &lt;p&gt;To add new posts, simply add a file in the &lt;code&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
@@ -99,9 +125,9 @@ simili&lt;/em&gt; in diu.&lt;/p&gt;
  
  <entry>
    <title>Introducing Lanyon</title>
-   <link href="http://computing.monsanto.com/2014/01/02/introducing-lanyon/"/>
+   <link href="http://demo.philcryer.com/2014/01/02/introducing-lanyon/"/>
    <updated>2014-01-02T00:00:00-06:00</updated>
-   <id>http://computing.monsanto.com/2014/01/02/introducing-lanyon</id>
+   <id>http://demo.philcryer.com/2014/01/02/introducing-lanyon</id>
    <content type="html">&lt;p&gt;Lanyon is an unassuming &lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll&lt;/a&gt; theme that places content first by tucking away navigation in a hidden drawer. It&amp;#39;s based on &lt;a href=&quot;http://getpoole.com&quot;&gt;Poole&lt;/a&gt;, the Jekyll butler.&lt;/p&gt;
 
 &lt;h3&gt;Built on Poole&lt;/h3&gt;
@@ -144,9 +170,9 @@ simili&lt;/em&gt; in diu.&lt;/p&gt;
  
  <entry>
    <title>Example content</title>
-   <link href="http://computing.monsanto.com/2014/01/01/example-content/"/>
+   <link href="http://demo.philcryer.com/2014/01/01/example-content/"/>
    <updated>2014-01-01T00:00:00-06:00</updated>
-   <id>http://computing.monsanto.com/2014/01/01/example-content</id>
+   <id>http://demo.philcryer.com/2014/01/01/example-content</id>
    <content type="html">&lt;div class=&quot;message&quot;&gt;
   Howdy! This is an example blog post that shows several types of HTML content supported in this theme.
 &lt;/div&gt;
@@ -274,9 +300,9 @@ simili&lt;/em&gt; in diu.&lt;/p&gt;
  
  <entry>
    <title>What's Jekyll?</title>
-   <link href="http://computing.monsanto.com/2013/12/31/whats-jekyll/"/>
+   <link href="http://demo.philcryer.com/2013/12/31/whats-jekyll/"/>
    <updated>2013-12-31T00:00:00-06:00</updated>
-   <id>http://computing.monsanto.com/2013/12/31/whats-jekyll</id>
+   <id>http://demo.philcryer.com/2013/12/31/whats-jekyll</id>
    <content type="html">&lt;p&gt;&lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll&lt;/a&gt; is a static site generator, an open-source tool for creating simple yet powerful websites of all shapes and sizes. From &lt;a href=&quot;https://github.com/mojombo/jekyll/blob/master/README.markdown&quot;&gt;the project&amp;#39;s readme&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;

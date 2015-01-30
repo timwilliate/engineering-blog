@@ -10,7 +10,7 @@ relative_permalinks: true
 
 # Setup
 #title:               Lanyon
-tagline:             ' ~ a blog from the engineers at Monsanto'
+tagline:             ' // a blog from the engineers of Monsanto'
 #description:         'A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
 #url:                 http://lanyon.getpoole.com
 baseurl:             /
@@ -26,12 +26,13 @@ author:
 version:             1.0.0
 
 # Site settings
-title: computing.monsanto.com
+title: computing
 email: computing@monsanto.com
 description: > # this means to ignore newlines until "baseurl:" 
   The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.
 #baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://computing.monsanto.com" # the base hostname & protocol for your site
+#url: "http://computing.monsanto.com" # the base hostname & protocol for your site
+url: "http://demo.philcryer.com" # the base hostname & protocol for your site
 twitter_username: MonsantoCo
 github_username: MonsantoCo
 

@@ -11,7 +11,7 @@
 
   <title>
     
-      computing.monsanto.com &middot;  ~ a blog from the engineers at Monsanto
+      computing &middot;  // a blog from the engineers of Monsanto
     
   </title>
 
@@ -84,6 +84,10 @@
         
       
     
+      
+        
+      
+    
 
     <span class="sidebar-nav-item">Currently v1.0.0</span>
   </nav>
@@ -102,14 +106,44 @@
       <div class="masthead">
         <div class="container">
           <h3 class="masthead-title">
-            <a href="/" title="Home">computing.monsanto.com</a>
-            <small> ~ a blog from the engineers at Monsanto</small>
+            <a href="/" title="Home">computing</a>
+            <small> // a blog from the engineers of Monsanto</small>
           </h3>
         </div>
       </div>
 
       <div class="container content">
         <div class="posts">
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/code/2015/01/22/stoop-our-first-open-source-release/">
+        Stoop: our first open source release
+      </a>
+    </h1>
+
+    <span class="post-date">22 Jan 2015</span>
+
+    <p>We are happy to annouce the release of our first open source software, <a href="https://github.com/MonsantoCo/stoop">Stoop</a>. Based on an existing <a href="http://hackage.haskell.org/package/CouchDB">Haskell library</a>, Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We&#39;ve released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a <a href="https://github.com/MonsantoCo/stoop/pull/1">pull request</a> to fix something!</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">name</span> <span class="o">:=</span> <span class="s">&quot;Stoop&quot;</span>
+<span class="n">version</span> <span class="o">:=</span> <span class="s">&quot;0.9.10-SNAPSHOT&quot;</span>
+<span class="n">scalaVersion</span> <span class="o">:=</span> <span class="s">&quot;2.10.3&quot;</span>
+<span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-deprecation&quot;</span>
+<span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-feature&quot;</span>
+<span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Sonatype snapshots&quot;</span> <span class="n">at</span> <span class="s">&quot;http://oss.sonatype.org/content/repositories/snapshots/&quot;</span>
+<span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Scalaz Bintray Repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://dl.bintray.com/scalaz/releases&quot;</span>
+<span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;spray repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://repo.spray.io&quot;</span>
+<span class="n">libraryDependencies</span> <span class="o">++=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-core&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+                            <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-json&quot;</span> <span class="o">%</span> <span class="s">&quot;1.2.5&quot;</span><span class="o">,</span>
+                            <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-effect&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+                            <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-concurrent&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+                            <span class="s">&quot;org.scalaz.stream&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-stream&quot;</span> <span class="o">%</span> <span class="s">&quot;0.6a&quot;</span><span class="o">)</span>
+<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;net.databinder.dispatch&quot;</span> <span class="o">%%</span> <span class="s">&quot;dispatch-core&quot;</span> <span class="o">%</span> <span class="s">&quot;0.10.0&quot;</span>
+<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalatest&quot;</span> <span class="o">%</span> <span class="s">&quot;scalatest_2.10&quot;</span> <span class="o">%</span> <span class="s">&quot;2.0&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalacheck&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalacheck&quot;</span> <span class="o">%</span> <span class="s">&quot;1.10.1&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+<span class="n">publishMavenStyle</span> <span class="o">:=</span> <span class="kc">true</span>
+</code></pre></div>
+  </div>
   
   <div class="post">
     <h1 class="post-title">
@@ -387,32 +421,11 @@ simili</em> in diu.</p>
 
   </div>
   
-  <div class="post">
-    <h1 class="post-title">
-      <a href="/2013/12/31/whats-jekyll/">
-        What's Jekyll?
-      </a>
-    </h1>
-
-    <span class="post-date">31 Dec 2013</span>
-
-    <p><a href="http://jekyllrb.com">Jekyll</a> is a static site generator, an open-source tool for creating simple yet powerful websites of all shapes and sizes. From <a href="https://github.com/mojombo/jekyll/blob/master/README.markdown">the project&#39;s readme</a>:</p>
-
-<blockquote>
-<p>Jekyll is a simple, blog aware, static site generator. It takes a template directory [...] and spits out a complete, static website suitable for serving with Apache or your favorite web server. This is also the engine behind GitHub Pages, which you can use to host your project’s page or blog right here from GitHub.</p>
-</blockquote>
-
-<p>It&#39;s an immensely useful tool and one we encourage you to use here with Hyde.</p>
-
-<p>Find out more by <a href="https://github.com/mojombo/jekyll">visiting the project on GitHub</a>.</p>
-
-  </div>
-  
 </div>
 
 <div class="pagination">
   
-    <span class="pagination-item older">Older</span>
+    <a class="pagination-item older" href="/page2">Older</a>
   
   
     <span class="pagination-item newer">Newer</span>
