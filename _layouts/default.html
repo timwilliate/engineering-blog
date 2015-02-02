@@ -13,7 +13,7 @@
       <div class="masthead">
         <div class="container">
           <h3 class="masthead-title">
-            <a href="/" title="Home">{{ site.title }}</a>
+            <a href="/" title="Home"><span class="title-mon">Monsanto</span><span class="title-comp">{{ site.title }}</span></a>
             <small>{{ site.tagline }}</small>
           </h3>
         </div>
@@ -23,6 +23,8 @@
         {{ content }}
       </div>
     </div>
+
+    {% include foot.html %}
 
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
 

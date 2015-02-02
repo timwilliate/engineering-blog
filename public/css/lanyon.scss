@@ -1,3 +1,9 @@
+---
+---
+
+$font-main : Verdana, Helvetica, sans-serif;
+$font-sub  : "Times New Roman";
+$black     : #494949;
 /*
  *  ___
  * /\_ \
@@ -34,18 +40,21 @@
  * Update the foundational and global aspects of the page.
  */
 
+
+
 /* Prevent scroll on narrow devices */
+
 html,
 body {
   overflow-x: hidden;
 }
 
 html {
-  font-family: "PT Serif", Georgia, "Times New Roman", serif;
+  font-family: $font-main
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: $font-main;
   font-weight: 400;
   color: #313131;
   letter-spacing: -.025rem;
@@ -148,7 +157,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 14rem;
   visibility: hidden;
   overflow-y: auto;
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: $font-main;
   font-size: .875rem; /* 15px */
   color: rgba(255,255,255,.6);
   background-color: #202020;
@@ -168,6 +177,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 .sidebar-item {
   padding: 1rem;
+  font-size:14px;
+  font-width: 100;
+  font-family: "Times New Roman";
 }
 .sidebar-item p:last-child {
   margin-bottom: 0;
@@ -323,16 +335,23 @@ a.sidebar-nav-item:focus {
 
 /* Related posts */
 .related {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $black;
+}
+.related h2{
+  font-size:16px;
+  font-weight: 500;
 }
 .related-posts {
   padding-left: 0;
   list-style: none;
+
 }
 .related-posts h3 {
   margin-top: 0;
+  margin-bottom:2;
+  font-size:14px;
 }
 .related-posts li small {
   font-size: 75%;
@@ -358,7 +377,7 @@ a.sidebar-nav-item:focus {
   overflow: hidden; /* clearfix */
   margin-left: -1rem;
   margin-right: -1rem;
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: $font-main;
   color: #ccc;
   text-align: center;
 }
@@ -435,12 +454,12 @@ a.pagination-item:hover {
 .theme-base-08 .sidebar,
 .theme-base-08 .sidebar-toggle:active,
 .theme-base-08 #sidebar-checkbox:checked ~ .sidebar-toggle {
-  background-color: #ac4142;
+  background-color: $black;
 }
 .theme-base-08 .container a,
 .theme-base-08 .sidebar-toggle,
 .theme-base-08 .related-posts li a:hover {
-  color: #ac4142;
+  color: $black;
 }
 
 /* Orange */
@@ -551,3 +570,5 @@ a.pagination-item:hover {
 .layout-reverse.sidebar-overlay #sidebar-checkbox:checked ~ .sidebar {
   box-shadow: -.25rem 0 .5rem rgba(0,0,0,.1);
 }
+
+

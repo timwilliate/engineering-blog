@@ -10,7 +10,7 @@ relative_permalinks: true
 
 # Setup
 #title:               Lanyon
-tagline:             ' // a blog from the engineers of Monsanto'
+tagline:             ' //from engineers, for engineers'
 #description:         'A reserved <a href="http://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
 #url:                 http://lanyon.getpoole.com
 baseurl:             /
@@ -26,7 +26,7 @@ author:
 version:             1.0.0
 
 # Site settings
-title: computing
+title: Computing
 email: computing@monsanto.com
 description: > # this means to ignore newlines until "baseurl:" 
   The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.
@@ -40,3 +40,6 @@ site.github.repo: github.com/MonsantoCo/computing.monsanto.com
 
 # Build settings
 #markdown: kramdown
+#
+#sass:
+#    sass_dir: _sass

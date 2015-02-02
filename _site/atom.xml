@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
- <title>computing</title>
+ <title>Computing</title>
  <link href="http://demo.philcryer.com/atom.xml" rel="self"/>
  <link href="http://demo.philcryer.com/"/>
- <updated>2015-01-30T08:41:17-06:00</updated>
+ <updated>2015-02-02T07:56:49-06:00</updated>
  <id>http://demo.philcryer.com</id>
  <author>
    <name>Computing @ Monsanto.com</name>
