@@ -9,7 +9,7 @@ relative_permalinks: true
 # Setup
 #title:               Lanyon
 tagline:             ' //from engineers, for engineers'
-#baseurl:             /
+baseurl:             /
 paginate:            5
 
 # About/contact
