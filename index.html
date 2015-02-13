@@ -21,18 +21,18 @@ title: Home
 
 <div class="pagination">
   {% if paginator.next_page %}
-    <a class="pagination-item older" href="{{ site.baseurl }}page{{paginator.next_page}}">&lt; Older</a>
+    <a class="pagination-item older" href="{{ site.baseurl }}page{{paginator.next_page}}"> <code><=  Older </code></a>
   {% else %}
-    <span class="pagination-item older">&lt; Older</span>
+    <span class="pagination-item older"><code><=  Older </code></span>
   {% endif %}
   {% if paginator.previous_page %}
     {% if paginator.page == 2 %}
-      <a class="pagination-item newer" href="{{ site.baseurl }}">Newer &gt;</a>
+      <a class="pagination-item newer" href="{{ site.baseurl }}"><code> Newer =></code></a>
     {% else %}
-      <a class="pagination-item newer" href="{{ site.baseurl }}page{{paginator.previous_page}}">Newer</a>
+      <a class="pagination-item newer" href="{{ site.baseurl }}page{{paginator.previous_page}}"><code> Newer =></code></a>
     {% endif %}
   {% else %}
-    <span class="pagination-item newer">Newer &gt;</span>
+    <span class="pagination-item newer"><code> Newer =></code></span>
   {% endif %}
 </div>
   {{ include foot.html }}
