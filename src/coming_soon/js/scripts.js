@@ -4,7 +4,7 @@ function externalLinks() { if (!document.getElementsByTagName) return; var ancho
 
 /** Add class to BODY if screen size is desktop or mobile **/
 
-$(document).ready(function() {  
+$(document).ready(function() {
     "use strict";
 	var $window = $(window),
     $html = $('body');
@@ -29,7 +29,7 @@ $(document).ready(function() {
 $(document).ready(function() {
 	"use strict";
 	$("#countdowncont").countdown({
-		date: "12 june 2016 12:00:00", /** Enter new date here **/
+		date: "06 april 2015 09:00:00", /** Enter new date here **/
 		format: "on"
 	},
 	function() {
