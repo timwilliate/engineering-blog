@@ -2,9 +2,11 @@
 
 ## Function
 
-This is the engineering blog of Monsanto engineers, where we’ll share ideas we have, open source software we use and have created. Watch this space for future articles.
+This is the engineering blog of the Monsanto IT engineers, where we’ll share ideas we have, along with open source software we have created and processes we’ve adopted. Watch this space for future articles.
 
+## Colophon
 
+To build this site we’ve used a open source software and free online resources. The static site generation is handled by [Jekyll](http://jekyllrb.com/), using the [Layton theme](https://github.com/poole/lanyon), and the code was written in [Markdown](https://en.wikipedia.org/wiki/Markdown) and edited in [Vim](http://www.vim.org/). This site is hosted on [GitHub Pages](https://pages.github.com/).
 
 ## License
 

@@ -1,14 +1,33 @@
-# Site settings
-title: Your awesome title
-email: your-email@domain.com
-description: > # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://yourdomain.com" # the base hostname & protocol for your site
-twitter_username: jekyllrb
-github_username:  jekyll
+# Dependencies
+markdown:            redcarpet
+highlighter:         pygments
 
-# Build settings
-markdown: kramdown
+# Permalinks - `relative_permalinks` ensures post links from the index work properly
+permalink:           pretty
+relative_permalinks: true
+
+# Setup
+#title:               Lanyon
+tagline:             ' //from engineers, for engineers'
+baseurl:             
+paginate:            5
+
+# About/contact
+author:
+  name:              Engieering @ Monsanto.com
+  url:               "http://engineering.monsanto.com"
+  email:             engineering@monsanto.com
+
+
+# Site settings
+title: Computing
+email: computing@monsanto.com
+description: > # this means to ignore newlines until "baseurl:" 
+  The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.
+url: ""
+twitter_username: MonsantoCo
+github_username: MonsantoCo
+site.github.repo: github.com/MonsantoCo/blog
+
+# Custom vars
+version:             0.0.1
