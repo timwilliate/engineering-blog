@@ -1,7 +1,8 @@
 ---
 layout: post
-title2: "Stoop: our first open source release"
+title: "Stoop: our first open source release"
 subtitle: "A Scala DSL for interfacing with CouchDB"
+header-img: "img/mon-field_rows.jpg"
 category: code
 tags: [open source, scala, couchdb]
 ---
