@@ -90,7 +90,7 @@ git push origin gh-pages
 
 ## Questions?
 
-Feel free to reach out on our [Contact page](http://ec2-54-174-166-239.compute-1.amazonaws.com/contact/) or open an [issue](https://github.com/MonsantoCo/engineering-blog/issues) for us to fix. As always, pull request welcome!
+Feel free to reach out on our [Contact page](http://ec2-54-174-166-239.compute-1.amazonaws.com/contact/) or open an [issue](https://github.com/MonsantoCo/engineering-blog/issues) for us to fix. As always, [pull requests](https://github.com/MonsantoCo/engineering-blog/pulls) welcome!
 
 
 ## License
