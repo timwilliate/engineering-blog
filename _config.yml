@@ -1,0 +1,18 @@
+# Site settings
+title: Engineering at Monsanto
+header-img: img/home-bg.jpg
+email: engineering@Monsanto.com
+description: "The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world."
+baseurl: ""
+url: ""
+twitter_username: MonsantoCo
+youtube_username: MonsantoCo
+github_username:  MonsantoCo
+facebook_username: MonsantoCo
+
+# Build settings
+markdown: kramdown
+highlighter: pygments
+permalink: pretty
+paginate: 5
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
