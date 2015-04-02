@@ -5,7 +5,7 @@ header-img: img/mon-hello-1.jpg
 email: engineering@Monsanto.com
 description: "The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world."
 baseurl: ""
-url: ""
+url: "http://engineering.monsanto.com"
 twitter_username: MonsantoCo
 youtube_username: MonsantoCo
 github_username:  MonsantoCo
@@ -17,3 +17,16 @@ highlighter: pygments
 permalink: pretty
 paginate: 5
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+
+# Sitemap
+sitemap:
+    file: "/sitemap.xml"
+    exclude:
+        - "/rss.xml"
+        - "/atom.xml"
+        - "/feed.xml"
+        - "/feed/index.xml"
+    include_posts:
+        - "/index.html"
+    change_frequency_name: "change_frequency"
+    priority_name: "priority"#
