@@ -1,7 +1,8 @@
 # Site settings
 title: Engineering at Monsanto
 #header-img: img/home-bg.jpg
-header-img: img/mon-hello-1.jpg
+#header-img: img/mon-hello-1.jpg
+header-img: img/mon-field_rows.jpg
 email: engineering@Monsanto.com
 description: "The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world."
 baseurl: ""
