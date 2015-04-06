@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "This is a new post"
-subtitle: "This is the optional subtitle line"
+title: “We are Monsanto Engineering
+subtitle: “Our Diversity of IT Innovation”
 header-img: "img/mon-field_rows.jpg"
 #header-img: "img/mon-monmouth.jpg"
 category: code
