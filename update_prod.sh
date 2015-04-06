@@ -36,10 +36,6 @@ else
   git checkout gh-pages
 fi
 
-ls -la ${TEMP}
-ls -la ${TEMP}/clone
-
-exit 0
 echo -e "\nDeploying into gh-pages branch:"
 rm -rf *
 cp -R ${TEMP}/_site/* .
