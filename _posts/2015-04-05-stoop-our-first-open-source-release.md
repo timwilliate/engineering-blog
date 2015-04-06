@@ -3,7 +3,6 @@ layout: post
 title: "Stoop: our first open source release"
 subtitle: "A Scala DSL for interfacing with CouchDB"
 header-img: "img/mon-field_rows.jpg"
-#header-img: "img/mon-monmouth.jpg"
 category: code
 tags: [open source, scala, couchdb]
 ---
