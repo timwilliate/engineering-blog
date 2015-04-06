@@ -1,9 +1,8 @@
 ---
 layout: post
-title: "Monsanto Introduction"
-subtitle: "This is how a road gets made"
+title: "We are Monsanto Engineering"
+subtitle: "Our Diversity of IT Innovation"
 header-img: "img/mon-field_rows.jpg"
-#header-img: "img/mon-monmouth.jpg"
 category: code
 tags: [open source, introduction, overview]
 ---
