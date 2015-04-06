@@ -10,6 +10,7 @@ tags: [open source, scala, couchdb]
 
 We are happy to annouce the release of our first open source software, [Stoop](https://github.com/MonsantoCo/stoop). Based on an existing [Haskell library](http://hackage.haskell.org/package/CouchDB), Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We've released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a [pull request](https://github.com/MonsantoCo/stoop/pulls) to fix something!
 
+{% highlight scala %}
     name := "Stoop"
     version := "0.9.10-SNAPSHOT"
     scalaVersion := "2.10.3"
@@ -27,3 +28,4 @@ We are happy to annouce the release of our first open source software, [Stoop](h
     libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "test"
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.10.1" % "test"
     publishMavenStyle := true
+{% endhighlight %}
