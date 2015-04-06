@@ -47,3 +47,5 @@ git push origin gh-pages 2>&1 | sed 's|'$URL'|[skipped]|g'
 echo -e "\nCleaning up:"
 rm -rf "${CLONE}"
 rm -rf "${SITE}"
+
+exit 0
