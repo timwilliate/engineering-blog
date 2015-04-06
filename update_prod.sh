@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "---> Updating gh-pages with master generated content"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
@@ -20,5 +21,6 @@ git add -A
 git commit -m "Published updates on `date`"
 git push origin $DEST_BRANCH
 git checkout $SOURCE_BRANCH
+echo "---> Update complete"
 
 exit 0
