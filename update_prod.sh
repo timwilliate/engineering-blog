@@ -2,7 +2,8 @@
 set -e
 set -o pipefail
 
-URL=$1
+#URL=$1
+URL="https://github.com/MonsantoCo/engineering-blog"
 SRC=$(pwd)
 TEMP=$(mktemp -d -t eng-XXX)
 trap "rm -rf ${TEMP}" EXIT
