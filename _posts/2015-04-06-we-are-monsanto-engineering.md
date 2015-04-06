@@ -10,6 +10,7 @@ tags: [open source, introduction, overview]
 At Monsanto, we are engineers: in our history we’ve engineered [molecules](https://en.wikipedia.org/wiki/Light-emitting_diode#Initial_commercial_development), [materials](https://en.wikipedia.org/wiki/AstroTurf), and [medicines](https://en.wikipedia.org/wiki/L-DOPA). Now as a purely agricultural company, we not only engineer plants, but the systems that develop, manufacture, monitor and deploy them.
 
 Monsanto might not be the first company that springs to mind when you think of cutting-edge software engineering. We’re a bit different: instead of being highly focused on a narrow segment of IT like social media analytics, Monsanto is all about diversity (and [not just this kind](http://news.monsanto.com/press-release/corporate/monsanto-open-all-company-signs-human-rights-campaign-equality-pledge)). In the coming posts, we will share our experiences and code for dealing with a multitude of topics. We have several image analysis and computer vision teams, on projects like our robotic automated greenhouse.
+
 {% youtube nyAP1xmgur0 %}
 
 We develop both the hardware and software to acquire [hyper-spectral](http://en.wikipedia.org/wiki/Hyperspectral_imaging) images both in controlled environments as well as in the field.
