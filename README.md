@@ -90,7 +90,7 @@ git push origin gh-pages
 
 ## Questions?
 
-Feel free to reach out on our [Contact page](http://ec2-54-174-166-239.compute-1.amazonaws.com/contact/) or open an [issue](https://github.com/MonsantoCo/engineering-blog/issues) for us to fix. As always, [pull requests](https://github.com/MonsantoCo/engineering-blog/pulls) welcome!
+Feel free to reach out on our [Contact page](http://engineering.monsanto.com/contact/) or open an [issue](https://github.com/MonsantoCo/engineering-blog/issues) for us to fix. As always, [pull requests](https://github.com/MonsantoCo/engineering-blog/pulls) are welcome!
 
 
 ## License
@@ -122,3 +122,5 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## Thanks
