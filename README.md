@@ -70,7 +70,7 @@ git commit -m "This is what I did to the code"
 git push (git fetch; git rebase)
 ```
 
-* Push to production
+## Push to production
 
 Once the editing is done and the post have been approved, push the existing code to `production`, by pushing it to the `gh-pages` branch.
 
