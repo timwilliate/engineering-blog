@@ -72,7 +72,7 @@ git push (git fetch; git rebase)
 
 ## Push to production
 
-**NOTE** we have a script `update_prod.sh` that automates the following steps
+**NOTE** we have a script `update_prod.sh` that automates all of these steps
 
 Once the editing is done and the post have been approved, push the existing code to `production`, by pushing it to the `gh-pages` branch.
 
@@ -82,13 +82,55 @@ git add .
 git commit -m "updates added `date`"
 ```
 
+Building the site from master branch to a temp diretory
+
+```
+git checkout master
+jekyll build -d /tmp/new
+``
+
+Change to the gh-pages branch
+
+```
+git checkout gh-pages
+```
+
+Clear the current content from the gh-pages branch, then copy the new content into gh-pages branch
+
+```
+git rm -qr .
+cp -r /tmp/new/. .
+```
+
+Cleaning up unneeded files
+
+```
+rm -r /tmp/new
+```
+
+Add/Commit/Push the new files to gh-pages branch
+
+```
+git add -A
+git commit -m "Published updates on `date`"
+git push origin gh-pages
+```
+
+Change back to the master branch
+
+```
+git checkout $SOURCE_BRANCH
+```
+
 Then do the actual push
 
 ```
 git push origin gh-pages
 ```
 
-Reload the site in a browser.
+Reload the site in a browser and enjoy!
+
+**NOTE** we have a script `update_prod.sh` that automates all of these steps
 
 ## Questions?
 
