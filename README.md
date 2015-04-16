@@ -72,6 +72,8 @@ git push (git fetch; git rebase)
 
 ## Push to production
 
+**NOTE** we have a script `update_prod.sh` that automates the following steps
+
 Once the editing is done and the post have been approved, push the existing code to `production`, by pushing it to the `gh-pages` branch.
 
 First add and commit, if you haven't already
@@ -86,7 +88,7 @@ Then do the actual push
 git push origin gh-pages
 ```
 
-(NOTE: we have a script `promote_to_prod.sh` that automates these steps)
+Reload the site in a browser.
 
 ## Questions?
 
