@@ -25,7 +25,7 @@ echo "---> Syncing branch with any remote changes"
 git pull
 
 echo "---> Copying new content into gh-pages branch"
-git rm -qr .
+git rm -fqr .
 cp -r $TMP_DIR/. .
 
 echo "---> Cleaning up unneeded files"
