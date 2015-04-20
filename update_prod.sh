@@ -24,8 +24,10 @@ git checkout $DEST_BRANCH
 echo "---> Syncing branch with any remote changes"
 git pull
 
-echo "---> Copying new content into gh-pages branch"
+echo "---> Removing existing content from gh-pages branch"
 git rm -fqr .
+
+echo "---> Copying new content into gh-pages branch"
 cp -r $TMP_DIR/. .
 
 echo "---> Cleaning up unneeded files"
