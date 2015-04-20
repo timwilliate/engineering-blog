@@ -10,7 +10,7 @@ SELF=`basename $0`
 SOURCE_BRANCH="master"
 DEST_BRANCH="gh-pages"
 TMP_LOG=`git log | head -n1 | cut -d" " -f2`
-TMP_DIR="tmp-$TMP_LOG"
+TMP_DIR="/tmp/$TMP_LOG"
 
 echo "---> Changing to master branch"
 git checkout $SOURCE_BRANCH
