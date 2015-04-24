@@ -1,5 +1,6 @@
 # Site settings
 title: Engineering at Monsanto
+name: Engineering at Monsanto
 #header-img: img/home-bg.jpg
 #header-img: img/mon-hello-1.jpg
 header-img: img/mon-field_rows.jpg
@@ -21,7 +22,8 @@ exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
 # Sitemap
 sitemap:
-    file: "/sitemap.xml"
+    #file: "/sitemap.xml"
+    file: "/feed.xml"
     exclude:
        - "/rss.xml"
        - "/atom.xml"
@@ -31,3 +33,4 @@ sitemap:
        - "/index.html"
     change_frequency_name: "change_frequency"
     priority_name: "priority"#
+
