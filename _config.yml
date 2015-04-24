@@ -16,18 +16,18 @@ facebook_username: MonsantoCo
 markdown: kramdown
 highlighter: pygments
 permalink: pretty
-paginate: 5
+#paginate: 5
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
 # Sitemap
 sitemap:
     file: "/sitemap.xml"
     exclude:
-        - "/rss.xml"
-        - "/atom.xml"
-        - "/feed.xml"
-        - "/feed/index.xml"
+       - "/rss.xml"
+       - "/atom.xml"
+       - "/feed.xml"
+       - "/feed/index.xml"
     include_posts:
-        - "/index.html"
+       - "/index.html"
     change_frequency_name: "change_frequency"
     priority_name: "priority"#
