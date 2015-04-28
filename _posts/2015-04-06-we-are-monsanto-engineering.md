@@ -3,7 +3,6 @@ layout: post
 title: "We are Monsanto Engineering"
 subtitle: "Our Diversity of IT Innovation"
 header-img: "img/mon-field_rows.jpg"
-category: code
 tags: [open source, introduction, overview]
 ---
 
