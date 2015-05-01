@@ -3,6 +3,7 @@ layout: post
 title: "We are Monsanto Engineering"
 subtitle: "Our Diversity of IT Innovation"
 header-img: "img/mon-field_rows.jpg"
+author: Ryan Richt
 tags: [open source, introduction, overview]
 ---
 
