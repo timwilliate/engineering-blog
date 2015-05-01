@@ -2,51 +2,49 @@
 
 set -e
 
-# variables you can change
-SRCE_BRANCH="master"
-DEST_BRANCH="gh-pages"
-DEVL_BRANCH="develop"
+srce="master"
+dest="gh-pages"
+devl="develop"
+self=`basename $0`
+tmpl=`git log | head -n1 | cut -d" " -f2`
+tmpd="/tmp/$tmpl"
 
 echo "---> Updating gh-pages with master generated content"
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $DIR
+ldir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $ldir
 
-SELF=`basename $0`
-TEMP_LOG=`git log | head -n1 | cut -d" " -f2`
-TEMP_DIR="/tmp/$TEMP_LOG"
+echo "---> Changing to $srce"
+git checkout $srce
 
-echo "---> Changing to $SRCE_BRANCH"
-git checkout $SRCE_BRANCH
+echo "---> Merging changes from $devl branch"
+git pull; git merge -m "merging from $devl on `date`" $devl
 
-echo "---> Merging changes from $DEVL_BRANCH branch"
-git pull; git merge $DEVL_BRANCH
+echo "---> Building from latest master to $tmpd"
+jekyll build -d $tmpd
 
-echo "---> Building from latest master to $TEMP_DIR"
-jekyll build -d $TEMP_DIR
+echo "---> Changing to $dest branch"
+git checkout $dest
 
-echo "---> Changing to $DEST_BRANCH branch"
-git checkout $DEST_BRANCH
-
-echo "---> Syncing $DEST_BRANCH  branch with any remote changes"
+echo "---> Syncing $dest  branch with any remote changes"
 git pull
 
-echo "---> Removing existing content from $DEST_BRANCH branch"
+echo "---> Removing existing content from $dest branch"
 git rm -qr .
 
-echo "---> Copying new content into $DEST_BRANCH branch"
-cp -r $TEMP_DIR/. .
+echo "---> Copying new content into $dest branch"
+cp -r $tmpd/. .
 
 echo "---> Cleaning up unneeded files"
-rm ./$SELF
-rm -r $TEMP_DIR
+rm ./$self
+rm -r $tmpd
 
-echo "---> Publishing to $DEST_BRANCH branch"
+echo "---> Publishing to $dest branch"
 git add -A
-git commit -m "Published updates on `date`"
-git push origin $DEST_BRANCH
+git commit -m "publishing updates to $dest on `date`"
+git push origin $dest
 
-echo "---> Changing back to $SRCE_BRANCH branch"
-git checkout $SRCE_BRANCH
+echo "---> Changing back to $srce branch"
+git checkout $srce
 
 echo "---> Update complete"
 
