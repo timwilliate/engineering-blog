@@ -1,6 +1,6 @@
 var GH_API_URI = "https://api.github.com"
 
-var REPOS_PER_ROW = 3;
+var REPOS_PER_ROW = 100000;
 
 var repos = [ ];
 
@@ -79,11 +79,12 @@ function addRepos(repos) {
 function addRepo(i, repo) {
   var row = $("#all-repos").children().last();
   if (! row || i % REPOS_PER_ROW == 0) {
-    row = $("<div>").addClass("repo-row row-fluid");
+    row = $("<div>").addClass("repo-row row");
     row.appendTo("#all-repos");
   }
 
-  var r = $("<div>").addClass("repo span4");
+  var c = $("<div>").addClass("col-lg-4 col-md-6 col-sm-6 col-xs-12");
+  var r = $("<div>").addClass("repo").appendTo(c);
   var a = $("<a>").attr("href", repo.html_url).appendTo(r);
 
   $("<i>").addClass("icon-star repo-icon").appendTo(a);
@@ -104,7 +105,7 @@ function addRepo(i, repo) {
   $("<h4>").addClass("name").text(repo.name).appendTo(a);
   $("<p>").addClass("description").text(repo.description).appendTo(a);
 
-  r.appendTo(row);
+  c.appendTo(row);
 }
 
 function updateMembers() {
