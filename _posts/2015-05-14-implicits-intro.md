@@ -31,16 +31,16 @@ So for this exercise, we'll see <span class="get-inner-type">a little
 method</span> that takes a List, and returns the <span class="type-name">type
 name</span> of the <span class="T"> contents of the list</span> .
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">import scala.reflect.runtime.universe._
 
-  def <span class="get-inner-type">getInnerType[<span class="T">T</span>]</span>(list:List[<span class="T">T</span>])(implicit tag:TypeTag[<span class="T">T</span>]) = tag.<span class="type-name">tpe.toString</span>
+def <span class="get-inner-type">getInnerType[<span class="T">T</span>]</span>(list:List[<span class="T">T</span>])(implicit tag:TypeTag[<span class="T">T</span>]) = tag.<span class="type-name">tpe.toString</span>
 </code></pre></div>
 
 Using that method, we can report on the inner type of a list:
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  val stringList: List[String] = List("A")
-  val stringName = <span class="get-inner-type">getInnerType</span>(stringList)
-  println( s"a list of $stringName")
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val stringList: List[String] = List("A")
+val stringName = <span class="get-inner-type">getInnerType</span>(stringList)
+println( s"a list of $stringName")
 </code></pre></div>
 
 will print out
@@ -64,11 +64,11 @@ The context of the call to getInnerType knows that `stringList` is a
 `List[String]`, so the compiler fills in the implicit for us.  The
 compiler fills the implicit as if we had called the method like this:
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">import scala.reflect.runtime.universe._
 
-  val stringList: List[String] = List("A")   
-  val stringName = <span class="get-inner-type">getInnerType</span>(stringList)<span class="T">(typeTag(String))</span>
-  println( s"a list of $stringName")
+val stringList: List[String] = List("A")   
+val stringName = <span class="get-inner-type">getInnerType</span>(stringList)<span class="T">(typeTag(String))</span>
+println( s"a list of $stringName")
 </code></pre></div>
 
 That typeTag method is defined in the scala.reflect.runtime.universe
@@ -89,20 +89,20 @@ class="T">generic type</span>.  For example, we will now add a <span
 class="grm">gratuitous method</span> that just delegates to <span
 class="get-inner-type">getInnerType</span>
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">import scala.reflect.runtime.universe._
 
-  def <span class="grm">gratuitousIntermediateMethod</span>[<span class="T">T</span>](list:List[<span class="T">T</span>]) = <span class="get-inner-type">getInnerType</span>(list)
+def <span class="grm">gratuitousIntermediateMethod</span>[<span class="T">T</span>](list:List[<span class="T">T</span>]) = <span class="get-inner-type">getInnerType</span>(list)
 </code></pre></div>
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  val stringList: List[String] = List("A") 
-  val stringName = <span class="grm">gratuitousIntermediateMethod</span>(stringList)
-  println( s"a list of $stringName")
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val stringList: List[String] = List("A") 
+val stringName = <span class="grm">gratuitousIntermediateMethod</span>(stringList)
+println( s"a list of $stringName")
 </code></pre></div>
 
 This code fails to compile though, with this scary compilation error.
 
-<div class="highlight"><pre> Error:(36, 83) No TypeTag available for T
-     def gratuitousIntermediateMethod`[`T`]`(list: List`[`T`]`) = getInnerType(list)
+<div class="highlight"><pre>Error:(36, 83) No TypeTag available for T
+  def gratuitousIntermediateMethod`[`T`]`(list: List`[`T`]`) = getInnerType(list)
 </pre></div>
 
 When the compiler tries to work on gratuitousIntermediateMethod, <span
@@ -115,15 +115,15 @@ So to make this work, the intermediate method needs to request the
 TypeTag itself, so that the compiler can pass the TypeTag down to
 getInnerType:
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">import scala.reflect.runtime.universe._
 
-  def <span class="grm">gratuitousIntermediateMethod</span>[<span class="T">T</span>](list:List[<span class="T">T</span>])(implicit tag :TypeTag[<span class="T">T</span>]) =
-     getInnerType(list)
+def <span class="grm">gratuitousIntermediateMethod</span>[<span class="T">T</span>](list:List[<span class="T">T</span>])(implicit tag :TypeTag[<span class="T">T</span>]) =
+   getInnerType(list)
 </code></pre></div>
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  val stringList: List[String] = List("A") 
-  val stringName = <span class="grm">gratuitousIntermediateMethod</span>(stringList)
-  println( s"a list of $stringName")
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val stringList: List[String] = List("A") 
+val stringName = <span class="grm">gratuitousIntermediateMethod</span>(stringList)
+println( s"a list of $stringName")
 </code></pre></div>
 
 This works just like our example without the gratuitous method.
@@ -144,14 +144,14 @@ explicit parameters this way. We could declare getInnerType with only
 one parameter list, all explicit parameters. Then the code would look
 like:
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">import scala.reflect.runtime.universe._
 
-  def getInnerType[<span class="T">T</span>](list:List[<span class="T">T</span>], tag :TypeTag[<span class="T">T</span>]) = tag.tpe.toString
+def getInnerType[<span class="T">T</span>](list:List[<span class="T">T</span>], tag :TypeTag[<span class="T">T</span>]) = tag.tpe.toString
 </code></pre></div>
 
-<div class="highlight"><pre><code class="language-scala" data-lang="scala">  val stringList: List[String] = List("A")
-  val stringName = getInnerType(stringList, typeTag(String))
-  println( s"a list of $stringName")
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val stringList: List[String] = List("A")
+val stringName = getInnerType(stringList, typeTag(String))
+println( s"a list of $stringName")
 </code></pre></div>
 
 Comparing the code with implicits and the one without, there is one
