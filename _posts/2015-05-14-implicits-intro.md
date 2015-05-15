@@ -147,13 +147,12 @@ like:
 <div class="highlight"><pre><code class="language-scala" data-lang="scala">  import scala.reflect.runtime.universe._
 
   def getInnerType[<span class="T">T</span>](list:List[<span class="T">T</span>], tag :TypeTag[<span class="T">T</span>]) = tag.tpe.toString
-</pre></div>
+</code></pre></div>
 
-<div class="highlight"><pre>
-  val stringList: List[String] = List("A")
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">  val stringList: List[String] = List("A")
   val stringName = getInnerType(stringList, typeTag(String))
   println( s"a list of $stringName")
-</pre></div>
+</code></pre></div>
 
 Comparing the code with implicits and the one without, there is one
 major difference: The top level code doesn't have a trace of the
