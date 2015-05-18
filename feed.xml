@@ -1,27 +1,53 @@
----
----
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
-        <title>{{ site.name | xml_escape }}</title>
-        <description>{% if site.description %}{{ site.description | xml_escape }}{% endif %}</description>
-        <link>{{ site.url }}</link>
-        <atom:link href="{{ site.url }}/feed.xml" rel="self" type="application/rss+xml" />
-        {% for post in site.posts limit:10 %}
+        <title>Engineering at Monsanto</title>
+        <description>The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.</description>
+        <link>http://engineering.monsanto.com</link>
+        <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
+        
             <item>
-                <title>{{ post.title | xml_escape }}</title>
-                {% if post.author.name %}
-                    <dc:creator>{{ post.author.name | xml_escape }}</dc:creator>
-                {% endif %}
-                {% if post.excerpt %}
-                    <description>{{ post.excerpt | xml_escape }}</description>
-                {% else %}
-                    <description>{{ post.content | xml_escape }}</description>
-                {% endif %}
-                <pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
-                <link>{{ site.url }}{{ post.url }}</link>
-                <guid isPermaLink="true">{{ site.url }}{{ post.url }}</guid>
+                <title>Learn implicits: Scala reflection</title>
+                
+                
+                    <description>&lt;p&gt;Implicits are arguably &lt;span class=&quot;banana&quot;&gt;the most&lt;/span&gt; unique and
+misunderstood language feature of Scala.  Unlike other advanced features in the
+language, they are very hard to avoid: most major libraries in Scala, starting
+from Scala collections, make heavy use of implicits. That use is not invisible
+to the users of the library, especially when we choose to look at the code. The
+other tricky part about implicits is that there are so many ways to use them,
+each with a different reason and pattern.  They can&amp;#39;t be fully explained in one
+coherent post.&lt;/p&gt;
+</description>
+                
+                <pubDate>Thu, 14 May 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/05/14/implicits-intro/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/14/implicits-intro/</guid>
             </item>
-        {% endfor %}
+        
+            <item>
+                <title>We are Monsanto Engineering</title>
+                
+                
+                    <description>&lt;p&gt;At Monsanto, we are engineers: in our history we’ve engineered &lt;a href=&quot;https://en.wikipedia.org/wiki/Light-emitting_diode#Initial_commercial_development&quot;&gt;molecules&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/AstroTurf&quot;&gt;materials&lt;/a&gt;, and &lt;a href=&quot;https://en.wikipedia.org/wiki/L-DOPA&quot;&gt;medicines&lt;/a&gt;. Now as a purely agricultural company, we not only engineer plants, but the systems that develop, manufacture, monitor and deploy them.&lt;/p&gt;
+</description>
+                
+                <pubDate>Mon, 06 Apr 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/04/06/we-are-monsanto-engineering/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/04/06/we-are-monsanto-engineering/</guid>
+            </item>
+        
+            <item>
+                <title>Stoop: our first open source release</title>
+                
+                
+                    <description>&lt;p&gt;We are happy to annouce the release of our first open source software, &lt;a href=&quot;https://github.com/MonsantoCo/stoop&quot;&gt;Stoop&lt;/a&gt;. Based on an existing &lt;a href=&quot;http://hackage.haskell.org/package/CouchDB&quot;&gt;Haskell library&lt;/a&gt;, Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We&amp;#39;ve released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a &lt;a href=&quot;https://github.com/MonsantoCo/stoop/pulls&quot;&gt;pull request&lt;/a&gt; to fix something!&lt;/p&gt;
+</description>
+                
+                <pubDate>Sun, 05 Apr 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/04/05/stoop-our-first-open-source-release/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/04/05/stoop-our-first-open-source-release/</guid>
+            </item>
+        
     </channel>
 </rss>
