@@ -10,9 +10,9 @@
 
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <title>Engineering at Monsanto</title>
+    <title>Stoop: our first open source release - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/">
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/04/05/stoop-our-first-open-source-release/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -80,16 +80,18 @@
 </nav>
 
 
-    <!-- Page Header -->
+    <!-- Post Header -->
 <header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
     <div class="heading-underlay">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="site-heading">
-                        <h1>Engineering at Monsanto</h1>
-                        <hr class="small">
-                        <span class="subheading">We produce code that powers agricultural products that support farmers all around the world.</span>
+                    <div class="post-heading">
+                        <h1>Stoop: our first open source release</h1>
+                        
+                        <h2 class="subheading">A Scala DSL for interfacing with CouchDB</h2>
+                        
+                        <span class="meta">Posted by Phil Cryer on April 5, 2015</span>
                     </div>
                 </div>
             </div>
@@ -97,73 +99,48 @@
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/2015/05/20/using-big-data-for-good/">
-        <h2 class="post-title">            Using Big Data for Good
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Big Data, it's not just for selling ads anymore
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by David Dooling on May 20, 2015</p>
-</div>
-<hr>
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-<div class="post-preview">
-    <a href="/2015/05/14/implicits-intro/">
-        <h2 class="post-title">            Learn implicits: Scala reflection
-        </h2>
-        
-        <h3 class="post-subtitle">
-            An intro to implicit parameters using Scala Reflection as an example
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Jorge Montero on May 14, 2015</p>
-</div>
-<hr>
+				<p>We are happy to annouce the release of our first open source software, <a href="https://github.com/MonsantoCo/stoop">Stoop</a>. Based on an existing <a href="http://hackage.haskell.org/package/CouchDB">Haskell library</a>, Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We&#39;ve released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a <a href="https://github.com/MonsantoCo/stoop/pulls">pull request</a> to fix something!</p>
 
-<div class="post-preview">
-    <a href="/2015/04/06/we-are-monsanto-engineering/">
-        <h2 class="post-title">            We are Monsanto Engineering
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Our Diversity of IT Innovation
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Ryan Richt on April 6, 2015</p>
-</div>
-<hr>
-
-<div class="post-preview">
-    <a href="/2015/04/05/stoop-our-first-open-source-release/">
-        <h2 class="post-title">            Stoop: our first open source release
-        </h2>
-        
-        <h3 class="post-subtitle">
-            A Scala DSL for interfacing with CouchDB
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Phil Cryer on April 5, 2015</p>
-</div>
-<hr>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">name</span> <span class="o">:=</span> <span class="s">&quot;Stoop&quot;</span>
+    <span class="n">version</span> <span class="o">:=</span> <span class="s">&quot;0.9.10-SNAPSHOT&quot;</span>
+    <span class="n">scalaVersion</span> <span class="o">:=</span> <span class="s">&quot;2.10.3&quot;</span>
+    <span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-deprecation&quot;</span>
+    <span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-feature&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Sonatype snapshots&quot;</span> <span class="n">at</span> <span class="s">&quot;http://oss.sonatype.org/content/repositories/snapshots/&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Scalaz Bintray Repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://dl.bintray.com/scalaz/releases&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;spray repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://repo.spray.io&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">++=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-core&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-json&quot;</span> <span class="o">%</span> <span class="s">&quot;1.2.5&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-effect&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-concurrent&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz.stream&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-stream&quot;</span> <span class="o">%</span> <span class="s">&quot;0.6a&quot;</span><span class="o">)</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;net.databinder.dispatch&quot;</span> <span class="o">%%</span> <span class="s">&quot;dispatch-core&quot;</span> <span class="o">%</span> <span class="s">&quot;0.10.0&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalatest&quot;</span> <span class="o">%</span> <span class="s">&quot;scalatest_2.10&quot;</span> <span class="o">%</span> <span class="s">&quot;2.0&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalacheck&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalacheck&quot;</span> <span class="o">%</span> <span class="s">&quot;1.10.1&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+    <span class="n">publishMavenStyle</span> <span class="o">:=</span> <span class="kc">true</span></code></pre></div>
 
 
-<!-- Pager -->
+                <hr>
 
-		</div>
-	</div>
-</div>
+                <ul class="pager">
+                    
+                    
+                    <li class="next">
+                        <a href="/2015/04/06/we-are-monsanto-engineering/" data-toggle="tooltip" data-placement="top" title="We are Monsanto Engineering">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
 
 <hr>
 
