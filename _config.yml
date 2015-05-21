@@ -14,6 +14,8 @@ facebook_username: MonsantoCo
 # Build settings
 #markdown: kramdown
 markdown: redcarpet
+redcarpet:
+  extensions: ["tables"]
 fenced_code_blocks: true
 highlighter: pygments
 permalink: pretty
