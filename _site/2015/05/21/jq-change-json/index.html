@@ -10,9 +10,9 @@
 
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <title>Code - Engineering at Monsanto</title>
+    <title>Modifying JSON on the command line - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/code/">
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/05/21/jq-change-json/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -80,16 +80,18 @@
 </nav>
 
 
-    <!-- Page Header -->
+    <!-- Post Header -->
 <header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
     <div class="heading-underlay">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="site-heading">
-                        <h1>Code</h1>
-                        <hr class="small">
-                        <span class="subheading">Our open source code repositories</span>
+                    <div class="post-heading">
+                        <h1>Modifying JSON on the command line</h1>
+                        
+                        <h2 class="subheading">Using jq to change a value</h2>
+                        
+                        <span class="meta">Posted by Jessica Kerr on May 21, 2015</span>
                     </div>
                 </div>
             </div>
@@ -97,32 +99,146 @@
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
-			    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/font-awesome.css">
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-    <div align="center">
-        <p>Hosted on GitHub <i class="fa fa-github"></i>
+				<style scoped>
+  .projectKey { color: #B22361 }
+  .newValue { color: #00B207 } 
+  .plus { color: brown }
+  .dot { color: hotpink }
+  .map { color: #FF4E00 } 
+  .toEntries { color: purple }
+  .fromEntries { color: #009FFF } 
+</style>
+
+<p>If you need to parse through some JSON data at the command line, <a href="http://stedolan.github.io/jq/"><code>jq</code></a> is here for you.
+<code>jq</code> is its own programming language. There are tons of examples of how to use <code>jq</code> to extract data from JSON; 
+this post shows how we use it to modify JSON.</p>
+
+<p>Amazon Cloud Formation turns a JSON stack definition (plus a JSON configuration file)
+ into a whole interconnected bunch of AWS resources. I frequently want to update my configuration. 
+Using <code>jq</code>, I can do this from the command line. That means I can script it for automated tests.</p>
+
+<p>The configuration file looks like this:</p>
+
+<div class="highlight"><pre><code class="language-json" data-lang="json">[{
+  "ParameterKey": "<span class="projectKey">Project</span>",
+  "ParameterValue": "&lt;changeMe&gt;"
+ }, 
+ {
+  "ParameterValue": "m3.medium"
+ }]
+
+</code></pre></div>
+
+<p>The JSON is an array of objects, each with ParameterKey and ParameterValue. I want to change the ParameterValue for <span class="projectKey">a particular ParameterKey</span>. Here&#39;s the syntax:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat config.json | 
+  jq '<span class="map">map</span>(if .ParameterKey == "<span class="projectKey">Project</span>"
+          then <span class="dot">.</span> <span class="plus">+</span> <span class="newValue">{"ParameterValue"="jess-project"}</span>
+          else <span class="dot">.</span>
+          end
+         )' > populated_config.json
+
+</code></pre></div>
+
+<p>This says, &quot;<span class="map">For each object in the array</span>:
+ check if ParameterKey is &quot;<span class="projectKey">Project</span>&quot;. If so,
+<span class="plus">combine</span> <span class="dot">that object</span>
+ with <span class="newValue">this other one</span> (right-hand-side values win, so my ParameterValue overrides the existing one). If not, leave <span class="dot">the object</span>
+alone.&quot; 
+The output file now contains</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">[{
+   "ParameterKey": "<span class="projectKey">Project</span>",
+   "ParameterValue": "<span class="newValue">jess-project</span>"
+ },
+ {
+   "ParameterKey": "DockerInstanceType",
+   "ParameterValue": "m3.medium"
+ }]
+</code></pre></div>
+
+<p>Hooray! The <code>jq</code> <span class="map">map</span> function, combined with a conditional, let me change a particular value.</p>
+
+<p>Since I do this often, and I&#39;m on a Mac, I made a crude bash function and threw it in my <a href="http://web.physics.ucsb.edu/%7Epcs/apps/bash/intro-bash.html">.bash_profile</a> so it will always be available:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">function populate-config() { 
+  jq "<span class="map">map</span>(if .ParameterKey == \"<span class="projectKey">$1</span>\" 
+          then . + {\"ParameterValue\":\"<span class="newValue">$2</span>"} 
+          else . 
+          end)";
+ }
+
+</code></pre></div>
+
+<p>Now I can say</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat config.json | 
+  populate-config <span class="projectKey">Project</span> <span class="newValue">jess-project</span> |
+  populate-config <span class="projectKey">DockerInstanceType</span> <span class="newValue">t2.micro</span> > populated_config.json
+</code></pre></div>
+
+<p>Piping to the <code>populate-config</code> function over and over lets me change multiple values.</p>
+
+<p>CAUTION:</p>
+
+<p>The <code>jq</code> <span class="map">map</span> function works on arrays. It&#39;s easy in this config file, because the JSON happens to be an array. If I&#39;m instead changing a value within an object, such as:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">{
+  "<span class="projectKey">honesty</span>": "Apple Jack",
+  "laughter": "Pinkie Pie",
+  "loyalty": "Rainbow Dash"
+}
+</code></pre></div>
+
+<p>then I must <span class="toEntries">convert the object&#39;s properties to an array</span>, <span class="map">map</span> over that array and then <span class="fromEntries">convert the array back into an object</span>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat ponies.json | 
+  jq '<span class="toEntries">to_entries</span> | 
+       <span class="map">map</span>(if .key == "<span class="projectKey">honesty</span>" 
+          then . + {"value":"<span class="newValue">Trixie</span>"} 
+          else . 
+          end
+         ) | 
+      <span class="fromEntries">from_entries</span>'
+</code></pre></div>
+
+<p>this gives:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">{
+  "<span class="projectKey">honesty</span>": "<span class="newValue">Trixie</span>",
+  "laughter": "Pinkie Pie",
+  "loyalty": "Rainbow Dash"
+}
+</code></pre></div>
+
+<p>That sneaky Trixie. Try running <code>cat ponies.json | jq to_entries</code> to see how this works.</p>
+
+<p>FURTHER INVESTIGATION:</p>
+
+<p>You might ask, how do I modify arrays of objects nested inside other objects? If you find the answer, please ping us on twitter <a href="http://twitter.com/MonPlatformEng">@MonPlatformEng</a> because I&#39;m wondering this too.</p>
+
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/05/20/using-big-data-for-good/" data-toggle="tooltip" data-placement="top" title="Using Big Data for Good">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
     </div>
-
-    <div id="loading">Loading...</div>
-
-    <div id="fallback" class="hidden">
-        <a class="btn" href="https://github.com/MonsantoCo">View Monsanto's Open Source Repositories</a>
-    </div>
-
-    <div id="all-repos" class="container-fluid"></div>
-
-    <div align="center">
-        <p><font size="3cm">(repository display build with code from <a href="https://github.com/gilt/gilt.github.com" alt="Gilt">Gilt</a>)</font></p>
-    </div>
-
-		</div>
-	</div>
-</div>
+</article>
 
 <hr>
 
