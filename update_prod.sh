@@ -36,8 +36,7 @@ git rm -qr .
 echo "---> Copying new content into $pages branch"
 cp -r $tmpd/. .
 
-echo "---> Cleaning up unneeded files"
-rm ./$self
+echo "---> Cleaning up jekyll build directory: $tmpd"
 rm -r $tmpd
 
 echo "---> Publishing to $pages branch"
