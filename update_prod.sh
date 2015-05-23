@@ -51,6 +51,9 @@ git checkout $master
 echo "---> Pushing $master branch to $origin"
 git push $origin $master
 
+echo "---> Switching back to $develop branch"
+git checkout $develop
+
 echo "---> Update complete"
 
 exit 0
