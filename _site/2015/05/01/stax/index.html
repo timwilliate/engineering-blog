@@ -10,9 +10,9 @@
 
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <title>Modifying JSON on the command line - Engineering at Monsanto</title>
+    <title>Stax - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/2015/05/22/jq-change-json/">
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/05/01/stax/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -87,11 +87,11 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>Modifying JSON on the command line</h1>
+                        <h1>Stax</h1>
                         
-                        <h2 class="subheading">Using jq to change a value</h2>
+                        <h2 class="subheading">Create and manage CloudFormation stacks in AWS</h2>
                         
-                        <span class="meta">Posted by Jessica Kerr on May 22, 2015</span>
+                        <span class="meta">Posted by Phil Cryer on May 1, 2015</span>
                     </div>
                 </div>
             </div>
@@ -105,120 +105,134 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-				<style scoped>
-  .projectKey { color: red }
-  .map { color: orange }
-  .plus { color: brown }
-  .newValue { color: blue }
-  .dot { color: hotpink }
-  .toEntries { color: purple }
-  .fromEntries { color: green }
-</style>
+				<p>When we were looking to build out an infrastructure in AWS (<a href="https://aws.amazon.com">Amazon Web Services</a>), we took some time to understand how the <a href="https://github.com/aws/aws-cli">aws-cli</a> (Universal Command Line Interface for Amazon Web Services) worked. With ideas from other projects found on <a href="https://github.com">GitHub</a>, we started wrapping commands in simple bash scripts, and pointed it to Cloudformation templates written in json. From there <a href="https://github.com/monsantoco/stax">stax</a> was born, and we have released it as open source under the <a href="http://opensource.org/licenses/BSD-3-Clause">BSD 3-clause license</a>.</p>
 
-<p>If you need to parse through some JSON data at the command line, <a href="http://stedolan.github.io/jq/"><code>jq</code></a> is here for you.
-<code>jq</code> is its own programming language. There are tons of examples of how to use <code>jq</code> to extract data from JSON; 
-this post shows how we use it to modify JSON.</p>
+<p>It’s easy to get started with stax to create and manage CloudFormation stacks (aka stax) in AWS (<a href="https://aws.amazon.com">Amazon Web Services</a>) and the project provides several CloudFormation templates, better yet, more can be generated using our <a href="https://github.com/MonsantoCo/cloudformation-template-generator">cloudformation-template-generator</a>.</p>
 
-<p><a href="http://aws.amazon.com/cloudformation/">AWS CloudFormation</a> turns a JSON stack definition (plus a JSON configuration file)
-into a whole interconnected bunch of AWS resources. I frequently want to update my configuration. 
-Using <code>jq</code>, I can do this from the command line. That means I can script it for automated tests.</p>
+<!--more-->
 
-<p>The configuration file looks like this:</p>
+<p>For launching new AWS instances with stax, you can use Linux (Debian GNU/Linux 7 and Ubuntu 14.04 are supported) and Apple OS X (tested on 10.10 and 10.9). When running with a default template, you will end up with a VPC setup like the following:</p>
 
-<div class="highlight"><pre><code class="language-json" data-lang="json">[{
-  "ParameterKey": "<span class="projectKey">Project</span>",
-  "ParameterValue": "&lt;changeMe&gt;"
- }, 
- {
-  "ParameterKey": "DockerInstanceType",
-  "ParameterValue": "m3.medium"
-}]
-</code></pre></div>
+<p><img src="/img/aws-stax.png" alt="AWS Stax Diagram"></p>
 
-<p>The JSON is an array of objects, each with ParameterKey and ParameterValue. I want to change the ParameterValue for <span class="projectKey">a particular ParameterKey</span>. Here&#39;s the syntax:</p>
+<p>CoreOS hosts run Docker containers on the Gateway and Service layer, while <a href="https://aws.amazon.com/amazon-linux-ami/">Amazon Linux</a> instances serve as NAT devices to direct traffic for the internal hosts. Additionally, one of the biggest requests we had was to simplify the connectivity to nodes once the stax was created. For this we have the <code>stax connect</code> function, that will ssh through the bastion/ssh host, and log you on to either a host on the gateway layer, or the services layer.</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat config.json | 
-  jq '<span class="map">map</span>(if .ParameterKey == "<span class="projectKey">Project</span>"
-          then <span class="dot">.</span> <span class="plus">+</span> <span class="newValue">{"ParameterValue"="jess-project"}</span>
-          else <span class="dot">.</span>
-          end
-         )' > populated_config.json
-</code></pre></div>
+<p>The Gateway layer:</p>
 
-<p>This says, &quot;<span class="map">For each object in the array</span>:
-check if ParameterKey is &quot;<span class="projectKey">Project</span>&quot;. If so,
-<span class="plus">combine</span> <span class="dot">that object</span>
-with <span class="newValue">this other one</span> (right-hand-side values win, so my ParameterValue overrides the existing one). If not, leave <span class="dot">the object</span> alone.&quot; 
-The output file now contains</p>
+<pre>
+$ stax connect gateway
+     _
+    | | every cloud has a silicon lining
+ ___| |_ __ ___  __
+/ __| __/ _` \ \/ /
+\__ \ || (_| |>  <
+|___/\__\__,_/_/\_\  0.9
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">[{
-   "ParameterKey": "<span class="projectKey">Project</span>",
-   "ParameterValue": "<span class="newValue">jess-project</span>"
- },
- {
-   "ParameterKey": "DockerInstanceType",
-   "ParameterValue": "m3.medium"
-}]
-</code></pre></div>
+[ ---- ]  checking if stax build is complete
+[ ---- ]  describe stax
+[ NAME ]  vpc-stax-42179-unrepulsed
+[ ---- ]    querying aws
+[ ---- ]    query complete
+[ ---- ]    see /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.json for details
+[ ---- ]    stack vpc-stax-42179-unrepulsed build complete
+[ ---- ]  connecting to stax: gateway
+Last login: Tue Apr 28 18:57:07 2015 from 10.183.1.208
+CoreOS stable (633.1.0)
+Failed Units: 3
+  nd.service
+  nginx.service
+  router.service
+core@ip-10-183-0-131 ~ $
+</pre>
 
-<p>Hooray! The <code>jq</code> <span class="map">map</span> function, combined with a conditional, let me change a particular value.</p>
+<p>So you’re logged into a gateway CoreOS box, and from the current <code>/etc/motd</code> you’ll see that in this case some services has failed to start.</p>
 
-<p>Since I do this often, and I&#39;m on a Mac, I made a crude bash function and threw it in my <a href="http://web.physics.ucsb.edu/%7Epcs/apps/bash/intro-bash.html">.bash_profile</a> so it will always be available:</p>
+<p>Now we’ll login to the Service layer:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">function populate-config() { 
-  jq "<span class="map">map</span>(if .ParameterKey == \"<span class="projectKey">$1</span>\" 
-          then . + {\"ParameterValue\":\"<span class="newValue">$2</span>"} 
-          else . 
-          end)"
-}
-</code></pre></div>
+<pre>
+$ stax connect service
+     _
+    | | all glory to the hypnotoad!
+ ___| |_ __ ___  __
+/ __| __/ _` \ \/ /
+\__ \ || (_| |>  <
+|___/\__\__,_/_/\_\  0.9
 
-<p>Now I can say</p>
+[ ---- ]  checking if stax build is complete
+[ ---- ]  describe stax
+[ NAME ]  vpc-stax-42179-unrepulsed
+[ ---- ]    querying aws
+[ ---- ]    query complete
+[ ---- ]    see /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.json for details
+[ ---- ]    stack vpc-stax-42179-unrepulsed build complete
+[ ---- ]  getting public IP (EIP)
+[ ---- ]    public IP (EIP): 52.6.248.224
+[ ---- ]    writing to /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.bastion
+[ ---- ]  get gateway and service IPs
+[ ---- ]    querying aws for gateway hosts
+[ ---- ]    getting service leaders
+[ ---- ]    querying aws for service hosts
+[ ---- ]    getting elk host
+[ ---- ]  creating ssh_config
+[ ---- ]    writing /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.ssh_config
+[ ---- ]    created /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.ssh_config
+[ ---- ]  connecting to stax: service
+CoreOS stable (633.1.0)
+core@ip-10-183-0-111 ~ $
+</pre>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat config.json | 
-  populate-config <span class="projectKey">Project</span> <span class="newValue">jess-project</span> |
-  populate-config <span class="projectKey">DockerInstanceType</span> <span class="newValue">t2.micro</span> > populated_config.json
-</code></pre></div>
+<p>Keeping in mind that this is only available when you’re in development, no external access is allowed to internal nodes directly without the bastion/ssh host, and shutting it down when running in production is highly recommended.</p>
 
-<p>Piping to the <code>populate-config</code> function over and over lets me change multiple values.</p>
+<p>Lastly a quick run of stax without arguments will show you the usage, giving you an idea of all lf the tasks the tool is capable of:</p>
 
-<p>CAUTION:</p>
+<pre>
+$ ./stax
+Usage: stax [OPTIONS] COMMAND
 
-<p>The <code>jq</code> <span class="map">map</span> function works on arrays. It&#39;s easy in this config file, because the JSON happens to be an array. If instead I&#39;m changing a value within an object, such as:</p>
+Options:
+  -c,--config=CONFIG       Use file CONFIG rather than config/vpc-default.json
+  -d,--debug               Turn on verbose messages
+  -h,--help                Output this message
+  -j,--jump=IP             SSH through host with IP address IP
+  -m,--module=MOD          Use config/MOD.json and template/MOD.json
+  -t,--template=TEMPLATE   Use file TEMPLATE rather than template/vpc-default.json
+  -v,--version             Print name and version information
+  -y,--yes                 Do not prompt for confirmation
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">{
-  "<span class="projectKey">honesty</span>": "Apple Jack",
-  "laughter": "Pinkie Pie",
-  "loyalty": "Rainbow Dash"
-}
-</code></pre></div>
+If an argument is required for a long option, so to the short. Same for
+optional arguments.
 
-<p>then I must <span class="toEntries">convert the object&#39;s properties to an array</span>, <span class="map">map</span> over that array and then <span class="fromEntries">convert the array back into an object</span>.</p>
+Commands:
+  add                Add functionality to an existing VPC
+  check              Run various tests against an existing stax
+  connect [TARGET]   Connect to bastion|gateway|service in the VPC stax over SSH
+  create             Create a new VPC stax in AWS
+  describe           Describe the stax created from this host
+  delete             Delete the existing VPC stax
+  dockerip-update    Fetch docker IP addresses and update related files
+  fleet              Run various fleetctl commands against the fleet cluster
+  help               Output this message
+  history            View history of recently created/deleted stax
+  list               List all completely built and running stax
+  rds PASSWORD       Create an RDS instance in the DB subnet
+  rds-delete RDSIN   Delete RDS instance RDSIN
+  remove ADD         Remove the previously added ADD
+  services           List servers that are available to run across a stax
+  start SERVICE      Start service SERVICE in the fleet cluster
+  test               Automated test to exercise functionality of stax
+  validate           Validate CloudFormation template
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat ponies.json | 
-  jq '<span class="toEntries">to_entries</span> | 
-       <span class="map">map</span>(if .key == "<span class="projectKey">honesty</span>" 
-          then . + {"value":"<span class="newValue">Trixie</span>"} 
-          else . 
-          end
-         ) | 
-      <span class="fromEntries">from_entries</span>'
-</code></pre></div>
+For more help, check the docs: https://github.com/MonsantoCo/stax
+</pre>
 
-<p>this gives:</p>
+<p>To try it out, just clone the repo and follow the documentation in the readme.</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">{
-  "<span class="projectKey">honesty</span>": "<span class="newValue">Trixie</span>",
-  "laughter": "Pinkie Pie",
-  "loyalty": "Rainbow Dash"
-}
-</code></pre></div>
+<pre>
+git clone https://github.com/MonsantoCo/stax
+more README.md
+</pre>
 
-<p>That sneaky Trixie. Try running <code>cat ponies.json | jq to_entries</code> to see how this works.</p>
-
-<p>FURTHER INVESTIGATION:</p>
-
-<p>You might ask, how do I modify arrays of objects nested inside other objects? If you find the answer, please ping us on twitter <a href="http://twitter.com/MonPlatformEng">@MonPlatformEng</a> because I&#39;m wondering this too.</p>
+<p>We hope that this tool will be useful to the community and look forward to feedback on what people think of it. We’re open to issues you might create or pull requests to make stax better.</p>
 
 
                 <hr>
@@ -226,9 +240,13 @@ The output file now contains</p>
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2015/05/20/using-big-data-for-good/" data-toggle="tooltip" data-placement="top" title="Using Big Data for Good">&larr; Previous Post</a>
+                        <a href="/2015/04/06/we-are-monsanto-engineering/" data-toggle="tooltip" data-placement="top" title="We are Monsanto Engineering">&larr; Previous Post</a>
                     </li>
                     
+                    
+                    <li class="next">
+                        <a href="/2015/05/14/implicits-intro/" data-toggle="tooltip" data-placement="top" title="Learn implicits: Scala reflection">Next Post &rarr;</a>
+                    </li>
                     
                 </ul>
 
