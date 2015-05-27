@@ -10,9 +10,9 @@
 
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <title>Stax - Engineering at Monsanto</title>
+    <title>Stoop: our first open source release - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/2015/05/01/stax/">
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/04/05/stoop-our-first-open-source-release/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -87,11 +87,11 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>Stax</h1>
+                        <h1>Stoop: our first open source release</h1>
                         
-                        <h2 class="subheading">Create and manage CloudFormation stacks in AWS</h2>
+                        <h2 class="subheading">A Scala DSL for interfacing with CouchDB</h2>
                         
-                        <span class="meta">Posted by Phil Cryer on May 1, 2015</span>
+                        <span class="meta">Posted by Phil Cryer on April 5, 2015</span>
                     </div>
                 </div>
             </div>
@@ -105,147 +105,34 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-				<p>When we were looking to build out an infrastructure in AWS (<a href="https://aws.amazon.com">Amazon Web Services</a>), we took some time to understand how the <a href="https://github.com/aws/aws-cli">aws-cli</a> (Universal Command Line Interface for Amazon Web Services) worked. With ideas from other projects found on <a href="https://github.com">GitHub</a>, we started wrapping commands in simple bash scripts, and pointed it to Cloudformation templates written in json. From there <a href="https://github.com/monsantoco/stax">stax</a> was born, and we have released it as open source under the <a href="http://opensource.org/licenses/BSD-3-Clause">BSD 3-clause license</a>.</p>
+				<p>We are happy to annouce the release of our first open source software, <a href="https://github.com/MonsantoCo/stoop">Stoop</a>. Based on an existing <a href="http://hackage.haskell.org/package/CouchDB">Haskell library</a>, Stoop is a Scala DSL for interfacing with CouchDB. Implementation can be easily switched between talking to an actual Couch or a fake (mock) one for testing. We&#39;ve released this under the Modified BSD License, so check it out and let us know if you have any questions, if you find bugs, or even if you have a <a href="https://github.com/MonsantoCo/stoop/pulls">pull request</a> to fix something!</p>
 
-<p>It’s easy to get started with stax to create and manage CloudFormation stacks (aka stax) in AWS (<a href="https://aws.amazon.com">Amazon Web Services</a>) and the project provides several CloudFormation templates, better yet, more can be generated using our <a href="https://github.com/MonsantoCo/cloudformation-template-generator">cloudformation-template-generator</a>.</p>
-
-<!--more-->
-
-<p>For launching new AWS instances with stax, you can use Linux (Debian GNU/Linux 7 and Ubuntu 14.04 are supported) and Apple OS X (tested on 10.10 and 10.9). When running with a default template, you will end up with a VPC setup like the following:</p>
-
-<p><img src="/img/aws-stax.png" alt="AWS Stax Diagram"></p>
-
-<p>CoreOS hosts run Docker containers on the Gateway and Service layer, while <a href="https://aws.amazon.com/amazon-linux-ami/">Amazon Linux</a> instances serve as NAT devices to direct traffic for the internal hosts. Additionally, one of the biggest requests we had was to simplify the connectivity to nodes once the stax was created. For this we have the <code>stax connect</code> function, that will ssh through the bastion/ssh host, and log you on to either a host on the gateway layer, or the services layer.</p>
-
-<p>The Gateway layer:</p>
-
-<pre>
-$ stax connect gateway
-     _
-    | | every cloud has a silicon lining
- ___| |_ __ ___  __
-/ __| __/ _` \ \/ /
-\__ \ || (_| |>  <
-|___/\__\__,_/_/\_\  0.9
-
-[ ---- ]  checking if stax build is complete
-[ ---- ]  describe stax
-[ NAME ]  vpc-stax-42179-unrepulsed
-[ ---- ]    querying aws
-[ ---- ]    query complete
-[ ---- ]    see /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.json for details
-[ ---- ]    stack vpc-stax-42179-unrepulsed build complete
-[ ---- ]  connecting to stax: gateway
-Last login: Tue Apr 28 18:57:07 2015 from 10.183.1.208
-CoreOS stable (633.1.0)
-Failed Units: 3
-  nd.service
-  nginx.service
-  router.service
-core@ip-10-183-0-131 ~ $
-</pre>
-
-<p>So you’re logged into a gateway CoreOS box, and from the current <code>/etc/motd</code> you’ll see that in this case some services has failed to start.</p>
-
-<p>Now we’ll login to the Service layer:</p>
-
-<pre>
-$ stax connect service
-     _
-    | | all glory to the hypnotoad!
- ___| |_ __ ___  __
-/ __| __/ _` \ \/ /
-\__ \ || (_| |>  <
-|___/\__\__,_/_/\_\  0.9
-
-[ ---- ]  checking if stax build is complete
-[ ---- ]  describe stax
-[ NAME ]  vpc-stax-42179-unrepulsed
-[ ---- ]    querying aws
-[ ---- ]    query complete
-[ ---- ]    see /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.json for details
-[ ---- ]    stack vpc-stax-42179-unrepulsed build complete
-[ ---- ]  getting public IP (EIP)
-[ ---- ]    public IP (EIP): 52.6.248.224
-[ ---- ]    writing to /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.bastion
-[ ---- ]  get gateway and service IPs
-[ ---- ]    querying aws for gateway hosts
-[ ---- ]    getting service leaders
-[ ---- ]    querying aws for service hosts
-[ ---- ]    getting elk host
-[ ---- ]  creating ssh_config
-[ ---- ]    writing /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.ssh_config
-[ ---- ]    created /home/phil/devel/stax/run/vpc-stax-42179-unrepulsed.ssh_config
-[ ---- ]  connecting to stax: service
-CoreOS stable (633.1.0)
-core@ip-10-183-0-111 ~ $
-</pre>
-
-<p>Keeping in mind that this is only available when you’re in development, no external access is allowed to internal nodes directly without the bastion/ssh host, and shutting it down when running in production is highly recommended.</p>
-
-<p>Lastly a quick run of stax without arguments will show you the usage, giving you an idea of all lf the tasks the tool is capable of:</p>
-
-<pre>
-$ ./stax
-Usage: stax [OPTIONS] COMMAND
-
-Options:
-  -c,--config=CONFIG       Use file CONFIG rather than config/vpc-default.json
-  -d,--debug               Turn on verbose messages
-  -h,--help                Output this message
-  -j,--jump=IP             SSH through host with IP address IP
-  -m,--module=MOD          Use config/MOD.json and template/MOD.json
-  -t,--template=TEMPLATE   Use file TEMPLATE rather than template/vpc-default.json
-  -v,--version             Print name and version information
-  -y,--yes                 Do not prompt for confirmation
-
-If an argument is required for a long option, so to the short. Same for
-optional arguments.
-
-Commands:
-  add                Add functionality to an existing VPC
-  check              Run various tests against an existing stax
-  connect [TARGET]   Connect to bastion|gateway|service in the VPC stax over SSH
-  create             Create a new VPC stax in AWS
-  describe           Describe the stax created from this host
-  delete             Delete the existing VPC stax
-  dockerip-update    Fetch docker IP addresses and update related files
-  fleet              Run various fleetctl commands against the fleet cluster
-  help               Output this message
-  history            View history of recently created/deleted stax
-  list               List all completely built and running stax
-  rds PASSWORD       Create an RDS instance in the DB subnet
-  rds-delete RDSIN   Delete RDS instance RDSIN
-  remove ADD         Remove the previously added ADD
-  services           List servers that are available to run across a stax
-  start SERVICE      Start service SERVICE in the fleet cluster
-  test               Automated test to exercise functionality of stax
-  validate           Validate CloudFormation template
-
-For more help, check the docs: https://github.com/MonsantoCo/stax
-</pre>
-
-<p>To try it out, just clone the repo and follow the documentation in the readme.</p>
-
-<pre>
-git clone https://github.com/MonsantoCo/stax
-more README.md
-</pre>
-
-<p>We hope that this tool will be useful to the community and look forward to feedback on what people think of it. We’re open to issues you might create or pull requests to make stax better.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">name</span> <span class="o">:=</span> <span class="s">&quot;Stoop&quot;</span>
+    <span class="n">version</span> <span class="o">:=</span> <span class="s">&quot;0.9.10-SNAPSHOT&quot;</span>
+    <span class="n">scalaVersion</span> <span class="o">:=</span> <span class="s">&quot;2.10.3&quot;</span>
+    <span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-deprecation&quot;</span>
+    <span class="n">scalacOptions</span> <span class="o">+=</span> <span class="s">&quot;-feature&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Sonatype snapshots&quot;</span> <span class="n">at</span> <span class="s">&quot;http://oss.sonatype.org/content/repositories/snapshots/&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;Scalaz Bintray Repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://dl.bintray.com/scalaz/releases&quot;</span>
+    <span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;spray repo&quot;</span> <span class="n">at</span> <span class="s">&quot;http://repo.spray.io&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">++=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-core&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-json&quot;</span> <span class="o">%</span> <span class="s">&quot;1.2.5&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-effect&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-concurrent&quot;</span> <span class="o">%</span> <span class="s">&quot;7.1.0&quot;</span><span class="o">,</span>
+        <span class="s">&quot;org.scalaz.stream&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalaz-stream&quot;</span> <span class="o">%</span> <span class="s">&quot;0.6a&quot;</span><span class="o">)</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;net.databinder.dispatch&quot;</span> <span class="o">%%</span> <span class="s">&quot;dispatch-core&quot;</span> <span class="o">%</span> <span class="s">&quot;0.10.0&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalatest&quot;</span> <span class="o">%</span> <span class="s">&quot;scalatest_2.10&quot;</span> <span class="o">%</span> <span class="s">&quot;2.0&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+    <span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.scalacheck&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalacheck&quot;</span> <span class="o">%</span> <span class="s">&quot;1.10.1&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+    <span class="n">publishMavenStyle</span> <span class="o">:=</span> <span class="kc">true</span></code></pre></div>
 
 
                 <hr>
 
                 <ul class="pager">
                     
-                    <li class="previous">
-                        <a href="/2015/04/06/we-are-monsanto-engineering/" data-toggle="tooltip" data-placement="top" title="We are Monsanto Engineering">&larr; Previous Post</a>
-                    </li>
-                    
                     
                     <li class="next">
-                        <a href="/2015/05/14/implicits-intro/" data-toggle="tooltip" data-placement="top" title="Learn implicits: Scala reflection">Next Post &rarr;</a>
+                        <a href="/2015/04/06/we-are-monsanto-engineering/" data-toggle="tooltip" data-placement="top" title="We are Monsanto Engineering">Next Post &rarr;</a>
                     </li>
                     
                 </ul>
