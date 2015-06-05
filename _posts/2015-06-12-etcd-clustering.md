@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "etcd clustering in AWS"
+title: "etcd Clustering in AWS"
 subtitle: "How to configure a robust etcd cluster based upon AWS autoscaling groups"
 header-img: "img/mon-field_rows.jpg"
 author: "T.J. Corrigan"
@@ -11,8 +11,7 @@ tags: [aws, distributed systems, coreos]
 
 For the last few months our team has been focused on building a robust, highly automated [docker](https://www.docker.com) container infrastructure in [AWS](http://aws.amazon.com). We choose to use [CoreOS](https://coreos.com) as our base operating system due to its lightweight and docker-centric nature. In addition we are also using [fleet](https://github.com/coreos/fleet), another CoreOS project, to handle scheduling containers across a cluster of machines and keeping them running even in the original host they are running on is terminated. Both CoreOS and fleet need a shared view of the current state of all the machines and containers running in the cluster. This is where [etcd]( https://github.com/coreos/etcd), yet another CoreOS project, comes into play. etcd is a distributed, consistent key-value store used for storing shared configuration and information surrounding containers and service discovery. In a large production environment etcd is designed to run on a subset of machines in the system, preferable either 3 or 5 hosts.
 
-![etcd clustering architecture](https://github.com/MonsantoCo/engineering-blog/blob/etcd-clustering/img/etcd-cluster-architecture.png)
-
+![etcd clustering architecture](/img/etcd-cluster-architecture.png)
 _[source](https://coreos.com/docs/cluster-management/setup/cluster-architectures/#production-cluster-with-central-services)_
 
 ## The Bootstrapping Problem
@@ -26,9 +25,10 @@ coreos:
   etcd2:
     addr: localhost:4001    
     peer-addr: localhost:7001
-    peers: localhost:7001,$ip_from_other_machine$:7001,$ip_from_another_machine$:7001
+    peers: $ip_from_this_machine$:7001,$ip_from_other_machine$:7001,$ip_from_another_machine$:7001
 ```
 While this approach works adequately there are a few major disadvantages:
+
 * Robustness
   
   These etcd server machines are critically important to the infrastructure and require special treatment. We were using hardcoded IPs, setting cloud watch alarms, and doing extra monitoring. Phil Cryer, a colleague of mine, recently did a talk on Pets vs Cattle (TODO add link) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
