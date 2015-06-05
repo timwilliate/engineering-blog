@@ -12,7 +12,7 @@ tags: [aws, distributed systems, coreos]
 For the last few months our team has been focused on building a robust, highly automated [docker](https://www.docker.com) container infrastructure in [AWS](http://aws.amazon.com). We choose to use [CoreOS](https://coreos.com) as our base operating system due to its lightweight and docker-centric nature. In addition we are also using [fleet](https://github.com/coreos/fleet), another CoreOS project, to handle scheduling containers across a cluster of machines and keeping them running even in the original host they are running on is terminated. Both CoreOS and fleet need a shared view of the current state of all the machines and containers running in the cluster. This is where [etcd]( https://github.com/coreos/etcd), yet another CoreOS project, comes into play. etcd is a distributed, consistent key-value store used for storing shared configuration and information surrounding containers and service discovery. In a large production environment etcd is designed to run on a subset of machines in the system, preferable either 3 or 5 hosts.
 
 ![etcd clustering architecture](/img/etcd-cluster-architecture.png)
-_[source](https://coreos.com/docs/cluster-management/setup/cluster-architectures/#production-cluster-with-central-services)_
+*[source](https://coreos.com/docs/cluster-management/setup/cluster-architectures/#production-cluster-with-central-services)*
 
 ## The Bootstrapping Problem
 
@@ -29,13 +29,13 @@ coreos:
 ```
 While this approach works adequately there are a few major disadvantages:
 
-* Robustness
-  
-  These etcd server machines are critically important to the infrastructure and require special treatment. We were using hardcoded IPs, setting cloud watch alarms, and doing extra monitoring. Phil Cryer, a colleague of mine, recently did a talk on Pets vs Cattle (TODO add link) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
+* **Robustness**
 
-* CloudFormation Updates
+	These etcd server machines are critically important to the infrastructure and require special treatment. We were using hardcoded IPs, setting cloud watch alarms, and doing extra monitoring. Phil Cryer, a colleague of mine, recently did a talk on Pets vs Cattle (TODO add link) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
 
-  Occassionaly we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have troubles re-establishing.
+* **CloudFormation Updates**
+
+	Occassionaly we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have troubles re-establishing.
   
 ### The Solution
 
