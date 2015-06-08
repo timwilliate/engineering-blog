@@ -4,6 +4,10 @@
 
 This is the engineering blog of Monsanto engineers, where we’ll share ideas we have, open source software we use and have created. Watch this space for future articles.
 
+## New Posts
+
+To contribute a new post, Monsanto engineers should check out the `engineering-blog` repo, create a branch, create your new post in the `_posts` directory, check it in, create a new [pull request](https://github.com/MonsantoCo/engineering-blog/pulls), calling out your new branch. After submitted it will go through the approval process. Thanks
+
 ## Usage and development
 
 * Our engineering blog is built by [Jekyll](http://jekyllrb.com/), so to work on it first install Jekyll. *If* you already have [Ruby](https://www.ruby-lang.org/) and [RubyGems](https://rubygems.org/) installed, this could be as easy as
