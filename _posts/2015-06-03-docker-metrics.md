@@ -38,19 +38,19 @@ Now that you have an overview of the different components lets put things togeth
   [Unit]
   Description=InfluxDB Service
 
-  Requires=docker.socket
-  After=docker.socket
+  Requires=docker.service
+  After=docker.service
 
   [Service]
-  Restart=on-failure
-  RestartSec=5
+  Restart=always
+  RestartSec=5s
 
   ExecStartPre=-/usr/bin/docker rm -f %p
   ExecStartPre=/usr/bin/docker pull tutum/influxdb:latest
 
   ExecStart=/usr/bin/docker run --publish=8083:8083 --publish=8086:8086 --name=%p tutum/influxdb:latest
 
-  ExecStopPost=-/usr/bin/docker stop %p
+  ExecStop=/usr/bin/docker stop %p
   ExecStopPost=-/usr/bin/docker rm -f %p
 
   [Install]
@@ -60,7 +60,7 @@ Now that you have an overview of the different components lets put things togeth
   MachineID=[your_machine_ID]
   ```
 
-  You can just extract and use the above `docker run` command if you prefer. I provide the above systemd unit for a more complete, "production-ready" example. You will notice the **[X-Fleet]** section is specific to `[fleet](https://github.com/coreos/fleet)` which is our container scheduler on CoreOS hosts (hence the `MachineID` which comes from `cat /etc/machine-id`). In a true production environment you would not hardcode the host using `MachineID` as I've done above but in my test setup I'm not using any service discovery mechanisms.
+  You can just extract and use the above `docker run` command if you prefer. I provide the above systemd unit for a more complete, "production-ready" example. You will notice the **[X-Fleet]** section is specific to `[fleet](https://github.com/coreos/fleet)` which is our container scheduler on CoreOS hosts (hence the `MachineID` which comes from `cat /etc/machine-id`). In a true production environment you would not hardcode the host using `MachineID` as I've done above but in my test setup I'm not using any service discovery mechanisms. For further production readiness you would use a data volume container or other means of persisting the storage when the container is restarted.
   To run the unit and create the required database for cAdvisor:
 
   ```sh
@@ -79,19 +79,19 @@ Now that you have an overview of the different components lets put things togeth
   [Unit]
   Description=Google Container Advisor (cAdvisor)
 
-  Requires=docker.socket
-  After=docker.socket
+  Requires=docker.service
+  After=docker.service
 
   [Service]
-  Restart=on-failure
-  RestartSec=5
+  Restart=always
+  RestartSec=5s
 
   ExecStartPre=-/usr/bin/docker rm -f %p
   ExecStartPre=/usr/bin/docker pull google/cadvisor:latest
 
-  ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --publish=8080:8080 --net=host --name=%p google/cadvisor:latest --logtostderr -storage_driver=influxdb -storage_driver_host=[influxdb_hostname]:8086 -storage_driver_db=cadvisor -storage_driver_user=root -storage_driver_password=root
+  ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --publish=8080:8080 --name=%p google/cadvisor:latest --logtostderr -storage_driver=influxdb -storage_driver_host=[influxdb_hostname]:8086 -storage_driver_db=cadvisor -storage_driver_user=root -storage_driver_password=root
 
-  ExecStopPost=-/usr/bin/docker stop %p
+  ExecStop=/usr/bin/docker stop %p
   ExecStopPost=-/usr/bin/docker rm -f %p
 
   [Install]
@@ -108,7 +108,7 @@ Now that you have an overview of the different components lets put things togeth
 
   The `Global=true` in the `fleet` specific section indicates that this unit will be started across all Docker container hosts. Again, ensure you replace the `[influxdb_hostname]` in the Docker run statement with the appropriate value for your InfluxDB host.
 
-  Here we are exposing required Docker host volumes to the container so it can read the host and container metrics from the Docker host. We are also publishing the **cAdvisor port to enable the built-in dashboard (on port 8080)**. You can refer to the cAdvisor documentation on the specific command line options but here we are providing the InfluxDB details, i.e. the storage driver type ('influxdb'), host, database name ('cadvisor'), database user ('root') and database password ('root').
+  Here we are exposing required Docker host volumes to the container so it can read the host and container metrics from the Docker host. We are also publishing the **cAdvisor port to enable the built-in dashboard (on port 8080)**. You can refer to the cAdvisor documentation on the specific command line options but here we are just providing the InfluxDB details, i.e. the storage driver type ('influxdb'), host, database name ('cadvisor'), database user ('root') and database password ('root').
 
   You can access the cAdvisor dashboard for each host via entering in your web browser, `http://[cadvisor_hostname]:8080`.
 
@@ -123,9 +123,9 @@ Now that you have an overview of the different components lets put things togeth
   [Unit]
   Description=Grafana UI Service
 
-  Requires=docker.socket
+  Requires=docker.service
   Wants=influxdb.service
-  After=docker.socket
+  After=docker.service
   After=influxdb.service
   BindsTo=influxdb.service
 
@@ -141,7 +141,7 @@ Now that you have an overview of the different components lets put things togeth
     --name=%p \
     grafana/grafana:latest
 
-  ExecStopPost=-/usr/bin/docker stop %p
+  ExecStop=/usr/bin/docker stop %p
   ExecStopPost=-/usr/bin/docker rm -f %p
 
   [Install]
@@ -167,7 +167,7 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
 2. Create a new data source connection to the `cadvisor` InfluxDB database by first exposing the data source menu by clicking on the Grafana fireball icon in the top left hand corner of the UI, then selecting _Data Sources_ -> _Add New_
 
-  ../img/grafana-newds.jpg
+  ../img/grafana-newds.png
 
   Enter the appropriate information:
 
@@ -177,7 +177,7 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
   Default (checked)
 
   **Http settings**
-  Url: http://[influxdb_hostname]:8080
+  Url: http://[influxdb_hostname]:8086
   Basic Auth (enabled)
   User: root
   Password: root
@@ -187,7 +187,7 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
   User: root
   Password: root
 
-  ../img/grafana-ds.jpg
+  ../img/grafana-ds.png
 
 3. Now comes what may be the hardest part, i.e. creating useful dashboards. Click on the _Home_ icon (top left corner) and select _+New_ to create a new dashboard.
 
@@ -199,11 +199,22 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
   Select the _no title (click here)_ and _edit_ from the displayed sub-menu.
 
-  ../img/grafana-edit.jpg
+  ../img/grafana-graph.jpg
 
+  Now we can create a quick first graph. In the _series_ section fill in 'stats', then 'Limit' in the _alias_ section. Use 'fs_limit' as the value for _mean_ in the _select_ section. Click on _+Add query_ to add an additional query/graph line and enter 'Usage' in the _alias_ section and 'fs_usage' as the value for _mean_ in the _select_ section here. You will see values being plotted as soon as we enter values, and by now you will realize we are doing a simple *file system limit vs usage graph**.
 
+  ../img/grafana-query.jpg
 
-## Future Work
-Heapster
-Heka
-Kafka
+  To complete our graph lets give it a better name, and more meaningful unit values. Click on _General_ and give your graph a name, for example 'File System'. Then click on 'Axes & Grid' and use the 'byte' unit for the _Left Y_ axis unit.
+
+  ../img/grafana-name.jpg
+  ../img/grafana-axis.jpg
+
+  Once complete, ensure you click the _Save_ icon (near top left of screen) to save your dashboard. By default Grafana 2.x saves dashboards to it's embedded sqlite3 database though they can be exported and imported as well. You can also use other supported storage backends.
+
+## Conclusion
+You've now built a Docker metrics collection system with a single Grafana dashboard for file system statistics. We've only just begun so relevant dashboards are still being built, but check out the [Grafana reference docs](http://docs.grafana.org/reference/graph/) to get better acquainted with it's capabilities. You can look out for future posts on more of the components being used in our platform solution such as [Heapster](https://github.com/GoogleCloudPlatform/heapster), which we are looking at for tying together all the cAdvisor agents and provide a cluster-view, and our take on persistent storage in a Docker environment.
+
+I hope this has proven useful to you. Please keep in touch and let us know your thoughts and what you might be working on as well.
+
+Good luck!
