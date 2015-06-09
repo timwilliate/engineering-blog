@@ -203,12 +203,12 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
   Now we can create a quick first graph. In the _series_ section fill in 'stats', then 'Limit' in the _alias_ section. Use 'fs_limit' as the value for _mean_ in the _select_ section. Click on _+Add query_ to add an additional query/graph line and enter 'Usage' in the _alias_ section and 'fs_usage' as the value for _mean_ in the _select_ section here. You will see values being plotted as soon as we enter values, and by now you will realize we are doing a simple *file system limit vs usage graph**.
 
-  ![Grafana Writing a Query](../img/grafana-query.jpg)
+  ![Grafana Writing a Query](../img/grafana-query.png)
 
   To complete our graph lets give it a better name, and more meaningful unit values. Click on _General_ and give your graph a name, for example 'File System'. Then click on 'Axes & Grid' and use the 'byte' unit for the _Left Y_ axis unit.
 
-  ![Grafana Naming a Graph](../img/grafana-name.jpg)
-  ![Grafana Axis Units](../img/grafana-axis.jpg)
+  ![Grafana Naming a Graph](../img/grafana-name.png)
+  ![Grafana Axis Units](../img/grafana-axis.png)
 
   Once complete, ensure you click the _Save_ icon (near top left of screen) to save your dashboard. By default Grafana 2.x saves dashboards to it's embedded sqlite3 database though they can be exported and imported as well. You can also use other supported storage backends.
 
