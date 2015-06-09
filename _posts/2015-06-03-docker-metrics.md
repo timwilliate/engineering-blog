@@ -112,9 +112,9 @@ Now that you have an overview of the different components lets put things togeth
 
   You can access the cAdvisor dashboard for each host via entering in your web browser, `http://[cadvisor_hostname]:8080`.
 
-  ../img/cadvisor-01.png
-  ../img/cadvisor-02.png
-  ../img/cadvisor-03.png
+  ![cAdvisor Home Page](../img/cadvisor-01.png)
+  ![cAdvisor Metrics 1](../img/cadvisor-02.png)
+  ![cAdvisor Metrics 2](../img/cadvisor-03.png)
 
 
 3. Install the Grafana dashboard using the fleet/systemd unit:
@@ -163,11 +163,11 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
 1. Start by opening a web page to `http://[grafana_hostname]:3000` and log in using the default Grafana credentials, **admin/admin**. _You will need to change this password and enable the appropriate authentication and authorization mechanisms for a production deployment_.
 
-  ../img/grafana-home.jpg
+  ![Grafana Home](../img/grafana-home.jpg)
 
 2. Create a new data source connection to the `cadvisor` InfluxDB database by first exposing the data source menu by clicking on the Grafana fireball icon in the top left hand corner of the UI, then selecting _Data Sources_ -> _Add New_
 
-  ../img/grafana-newds.png
+  ![Grafana New Data Source](../img/grafana-newds.png)
 
   Enter the appropriate information:
 
@@ -187,28 +187,28 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
   User: root
   Password: root
 
-  ../img/grafana-ds.png
+  ![Grafana Creating a Data Source](../img/grafana-ds.png)
 
 3. Now comes what may be the hardest part, i.e. creating useful dashboards. Click on the _Home_ icon (top left corner) and select _+New_ to create a new dashboard.
 
-  ../img/grafana-dash.jpg
+  ![Grafana Dashboard](../img/grafana-dash.jpg)
 
   Hover over, and select the thin green icon bar (top far left, below fireball) and _Add Panel_ -> _Graph_ from the displayed sub-menus.
 
-  ../img/grafana-newdash.jpg
+  ![Grafana New Dashboard](../img/grafana-newdash.jpg)
 
   Select the _no title (click here)_ and _edit_ from the displayed sub-menu.
 
-  ../img/grafana-graph.jpg
+  ![Grafana Creating a Graph](../img/grafana-graph.png)
 
   Now we can create a quick first graph. In the _series_ section fill in 'stats', then 'Limit' in the _alias_ section. Use 'fs_limit' as the value for _mean_ in the _select_ section. Click on _+Add query_ to add an additional query/graph line and enter 'Usage' in the _alias_ section and 'fs_usage' as the value for _mean_ in the _select_ section here. You will see values being plotted as soon as we enter values, and by now you will realize we are doing a simple *file system limit vs usage graph**.
 
-  ../img/grafana-query.jpg
+  ![Grafana Writing a Query](../img/grafana-query.jpg)
 
   To complete our graph lets give it a better name, and more meaningful unit values. Click on _General_ and give your graph a name, for example 'File System'. Then click on 'Axes & Grid' and use the 'byte' unit for the _Left Y_ axis unit.
 
-  ../img/grafana-name.jpg
-  ../img/grafana-axis.jpg
+  ![Grafana Naming a Graph](../img/grafana-name.jpg)
+  ![Grafana Axis Units](../img/grafana-axis.jpg)
 
   Once complete, ensure you click the _Save_ icon (near top left of screen) to save your dashboard. By default Grafana 2.x saves dashboards to it's embedded sqlite3 database though they can be exported and imported as well. You can also use other supported storage backends.
 
