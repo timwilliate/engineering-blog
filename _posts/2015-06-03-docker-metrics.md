@@ -7,7 +7,7 @@ author: "Stuart Wong"
 tags: [docker, sysadmin, metrics, devops]
 ---
 
-For some time now, we've been using [Docker](http://www.docker.com) with it's usage growing. As we continue our usage of Docker and provision more container hosts, one of the outstanding items on our issues list around collecting metrics and monitoring of containers and their hosts, has become necessary to address. This posting will walk you through how to glue together a few components in order to achieve Docker monitoring. All components are intentionally plug-and-play so if things need to be changed, any component can be (relatively) easily swapped out for an alternative.
+For some time now, we've been using [Docker](http://www.docker.com), with its usage growing. As we continue our usage of Docker and provision more container hosts, one of the outstanding items on our issues list around collecting metrics and monitoring of containers and their hosts, has become necessary to address. This posting will walk you through how to glue together a few components in order to achieve Docker monitoring. All components are intentionally plug-and-play so if things need to be changed, any component can be (relatively) easily swapped out for an alternative.
 
 ## Some assumptions
 Firstly, we assume that Docker is installed, configured and running on your hosts. We also further assume that you can connect to your Docker hosts with a web browser. It's also worth noting our requirements at this point since there will be some questions as to why certain decisions were made.
