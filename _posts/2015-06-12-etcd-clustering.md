@@ -31,7 +31,7 @@ While this approach works adequately there are a few disadvantages:
 
 * **Robustness**
 
-	These etcd server machines are critically important to the infrastructure and require special treatment. We were using static IPs, setting CloudWatch alarms, and doing extra monitoring. Phil Cryer, a colleague of mine, recently did a talk on Pets vs Cattle (TODO add link) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
+	These etcd server machines are critically important to the infrastructure and require special treatment. We were using static IPs, setting CloudWatch alarms, and doing extra monitoring. [Phil Cryer](https://twitter.com/fak3r), a colleague of mine, has been championining the concept of [Pets vs Cattle] (https://blog.engineyard.com/2014/pets-vs-cattle) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
 
 * **CloudFormation Updates**
 
