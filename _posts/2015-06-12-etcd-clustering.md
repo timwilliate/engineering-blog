@@ -16,7 +16,7 @@ For the last few months our team has been focused on building a robust, highly a
 
 ## The Bootstrapping Problem
 
-etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). Initially we used the [etcd discovery service](https://discovery.etcd.io/), but we saw strange behavior when using this with AWS Auto Scaling Groups, namely ghost IP addresses in the list the service would return. Plus, the discovery service does not handle the post-bootstrap problem of members joining and leaving the cluster. We ended up deciding to use the static method to reduce dependencies on external systems.
+etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). Initially we used the [etcd discovery service](https://discovery.etcd.io/), but we saw strange behavior when using this with AWS Auto Scaling Groups, namely ghost IP addresses in the list the service would return. Plus, the discovery service does not handle the post-bootstrap problem of members joining and leaving the cluster. In the end, we chose the static method to reduce dependencies on external systems.
 
 Our initial approach was to create 3 dedicated EC2 instances in AWS via [CloudFormation](http://aws.amazon.com/cloudformation/). This allowed us access to the IPs of these machines to use in the [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos) in a block like:
 
@@ -35,7 +35,7 @@ While this approach works adequately there are a few disadvantages:
 
 * **CloudFormation Updates**
 
-	Occassionally we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines, AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have trouble re-clustering.
+	Occasionally we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines, AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have trouble re-clustering.
   
 ## The Solution
 
@@ -136,7 +136,7 @@ The first step is to try and detect whether any members of the cluster have been
 
 ### etcd Bugs
 
-At this point we thought we had a great pattern for dealing with adding and removing machines from the cluster and started some scale testing. Whenever we terminated machines we saw that the cluster remained healthy, with 1 unhealthy node, until we tried to run the remove command. At this point the cluster went unhealthy. Fortunately everything eventually sorted itself out and the cluster regained stability after a few minutes. Once healthy, we were able to add the new machine and get back to a good state. While this solution worked, having an unhealth cluster for several minutes that was unable to accept writes was suboptimal. I filed a [bug report](https://github.com/coreos/etcd/issues/2888) with the CoreOS team and very quickly got a response and a solution (big kudos to the CoreOS team!). I've tested out their new builds and am happy to report we now have a reliable solution. The changes are merged in and hopefully we'll see a new release in the next week or two.
+At this point we thought we had a great pattern for dealing with adding and removing machines from the cluster and started some scale testing. Whenever we terminated a machine we saw that the cluster remained healthy, with one unhealthy node, until we tried to remove the dead node. After removing the dead node using the API, the cluster became unhealthy and would not accept writes. After a few minutes in this state, the cluster sorted things out and became healthy again. Once healthy, we were able to add the new machine and write to the cluster. I filed a [bug report](https://github.com/coreos/etcd/issues/2888) with the CoreOS team about this minutes-long unhealthy state after dead node removal and very quickly got a response and a solution (big kudos to the CoreOS team!). I've tested out their new builds and am happy to report we now have a reliable solution. Their fixes are merged in and hopefully we'll see them in a new release in the next week or two.
 
 ## Conclusion
 
