@@ -35,7 +35,7 @@ While this approach works adequately there are a few disadvantages:
 
 * **CloudFormation Updates**
 
-	Occassionaly we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines, AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have trouble re-clustering.
+	Occassionally we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines, AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have trouble re-clustering.
   
 ## The Solution
 
@@ -61,7 +61,7 @@ etcd_peer_urls=$(aws ec2 describe-instances --region us-east-1 --instance-ids \
   | jq -r '.Reservations[].Instances | map("http://" + .NetworkInterfaces[].PrivateIpAddress + ":2379")[]')
 ```
 
-This script starts off by querying the EC2 instance ID and IP address from AWS using their [instance metadata endpoint](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html)). With this information we are able to retrieve the name of the Auto Scaling Group that this particular instance belongs to by using the CLI and [jq](http://stedolan.github.io/jq/). From this we are then able to query for all the IPs of the machines in this Auto Scaling Group. We then write this information to file:
+This script starts off by querying the EC2 instance ID and IP address from AWS using their [instance metadata endpoint](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html). With this information we are able to retrieve the name of the Auto Scaling Group that this particular instance belongs to by using the CLI and [jq](http://stedolan.github.io/jq/). From this we are then able to query for all the IPs of the machines in this Auto Scaling Group. We then write this information to file:
 
 ```bash
 ETCD_INITIAL_CLUSTER_STATE=new
