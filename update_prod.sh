@@ -1,5 +1,5 @@
 #!/bin/bash
-# this is necessary because we use plugins not support by GitHub Pages
+# this is necessary because we use plugins not supported by GitHub Pages
 
 set -e
 
@@ -36,8 +36,7 @@ git rm -qr .
 echo "---> Copying new content into $pages branch"
 cp -r $tmpd/. .
 
-echo "---> Cleaning up unneeded files"
-rm ./$self
+echo "---> Cleaning up jekyll build directory: $tmpd"
 rm -r $tmpd
 
 echo "---> Publishing to $pages branch"
@@ -50,6 +49,9 @@ git checkout $master
 
 echo "---> Pushing $master branch to $origin"
 git push $origin $master
+
+echo "---> Switching back to $develop branch"
+git checkout $develop
 
 echo "---> Update complete"
 
