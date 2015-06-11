@@ -1,7 +1,11 @@
 ---
 layout: post
 title: "etcd Clustering in AWS"
+<<<<<<< HEAD
 subtitle: "How to configure a robust etcd cluster based upon AWS Auto Scaling Groups"
+=======
+subtitle: "Configure a robust etcd cluster in an AWS Auto Scaling Group"
+>>>>>>> add comment about discovery.etcd.io
 header-img: "img/mon-field_rows.jpg"
 author: "T.J. Corrigan"
 tags: [aws, distributed systems, coreos]
@@ -16,7 +20,7 @@ For the last few months our team has been focused on building a robust, highly a
 
 ## The Bootstrapping Problem
 
-etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). Initially we attempted to use the [etcd discovery service](https://discovery.etcd.io/) but something about our approach with AWS Auto Scaling Groups was causing erroneous IPs to get registered and interfere with proper bootstrapping. Instead of digging into the issue, we ended up using the static method to reduce dependencies on external systems and improve our robustness.
+etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). Initially we used the [etcd discovery service](https://discovery.etcd.io/), but we saw strange behavior when using this with AWS Auto Scaling Groups, namely ghost IP addresses in the list the service would return. Plus, the discovery service does not handle the post-bootstrap problem of members joining and leaving the cluster. We ended up deciding to use the static method to reduce dependencies on external systems.
 
 Our initial approach was to create 3 dedicated EC2 instances in AWS via [CloudFormation](http://aws.amazon.com/cloudformation/). This allowed us access to the IPs of these machines to use in the [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos) in a block like:
 
