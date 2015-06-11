@@ -7,6 +7,18 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>etcd Clustering in AWS</title>
+                
+                
+                    <description>&lt;h2&gt;Overview&lt;/h2&gt;
+</description>
+                
+                <pubDate>Fri, 12 Jun 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/06/12/etcd-clustering/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/12/etcd-clustering/</guid>
+            </item>
+        
+            <item>
                 <title>Secret STDIN Slurper</title>
                 
                 
