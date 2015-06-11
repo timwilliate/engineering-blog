@@ -1,5 +1,5 @@
 #!/bin/bash
-# this is necessary because we use plugins not support by GitHub Pages
+# this is necessary because we use plugins not supported by GitHub Pages
 
 set -e
 
