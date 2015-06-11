@@ -16,7 +16,7 @@ For the last few months our team has been focused on building a robust, highly a
 
 ## The Bootstrapping Problem
 
-etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). We ended up deciding to use the static method to reduce dependencies on external systems. 
+etcd requires an initial bootstrapping to form a cluster. This can be accomplished in [several ways](https://github.com/coreos/etcd/blob/master/Documentation/clustering.md). Initially we attempted to use the [etcd discovery service](https://discovery.etcd.io/) but something about our approach with AWS auto scaling groups was causing erroneous IPs to get registered and interfere with proper bootstrapping. Instead of digging into the issue, we ended up using the static method to reduce dependencies on external systems and improve our robustness.
 
 Our initial approach was to create 3 dedicated EC2 instances in AWS via [CloudFormation](http://aws.amazon.com/cloudformation/). This allowed us access to the IPs of these machines to use in the [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos) in a block like:
 
