@@ -116,7 +116,7 @@
 
 <p>etcd requires an initial bootstrapping to form a cluster. This can be accomplished in <a href="https://github.com/coreos/etcd/blob/master/Documentation/clustering.md">several ways</a>. Initially we used the <a href="https://discovery.etcd.io/">etcd discovery service</a>, but we saw strange behavior when using this with AWS Auto Scaling Groups, namely ghost IP addresses in the list the service would return. Plus, the discovery service does not handle the post-bootstrap problem of members joining and leaving the cluster. In the end, we chose the static method to reduce dependencies on external systems.</p>
 
-<p>Our initial approach was to create 3 dedicated EC2 instances in AWS via <a href="http://aws.amazon.com/cloudformation/">CloudFormation</a>. This allowed us access to the IPs of these machines to use in the <a href="https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos">cloud-config</a> in a block like:</p>
+<p>Our initial approach, using etcd 0.4, was to create 3 dedicated EC2 instances in AWS via <a href="http://aws.amazon.com/cloudformation/">CloudFormation</a>. This allowed us access to the IPs of these machines to use in the <a href="https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos">cloud-config</a> in a block like:</p>
 <div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">coreos</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">etcd</span><span class="p-Indicator">:</span>
     <span class="l-Scalar-Plain">addr</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost:4001</span>    
