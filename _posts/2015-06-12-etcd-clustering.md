@@ -22,7 +22,7 @@ Our initial approach was to create 3 dedicated EC2 instances in AWS via [CloudFo
 
 ``` yaml
 coreos:
-  etcd2:
+  etcd:
     addr: localhost:4001    
     peer-addr: localhost:7001
     peers: $ip_from_this_machine$:7001,$ip_from_other_machine$:7001,$ip_from_another_machine$:7001
@@ -31,7 +31,7 @@ While this approach works adequately there are a few disadvantages:
 
 * **Robustness**
 
-	These etcd server machines are critically important to the infrastructure and require special treatment. We were using static IPs, setting CloudWatch alarms, and doing extra monitoring. [Phil Cryer](https://twitter.com/fak3r), a colleague of mine, has been championining the concept of [Pets vs Cattle] (https://blog.engineyard.com/2014/pets-vs-cattle) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
+	These etcd server machines are critically important to the infrastructure and require special treatment. We were using static IPs, setting CloudWatch alarms, and doing extra monitoring. [Phil Cryer](https://twitter.com/fak3r), a colleague of mine, has been championing the concept of [Pets vs Cattle] (https://blog.engineyard.com/2014/pets-vs-cattle) and how we should avoid this sort of 'special' design, especially in an environment like AWS where Amazon doesn't guarantee the health of any given EC2 instance. 
 
 * **CloudFormation Updates**
 
@@ -73,7 +73,7 @@ and then instruct etcd to load this information when it starts up. With these ch
 
 ### Maintaining Cluster Membership
 
-Normally etcd is expecting that a machine would either remove itself from the cluster before exiting or would rejoin at a later time (e.g., in the event of a restart). We wanted to build something more robust where we could kill a machine and replace it with an entirely new machine without an hiccups in availability. Of course there were a few challenges&hellip;
+Normally etcd is expecting that a machine would either remove itself from the cluster before exiting or would rejoin at a later time (e.g., in the event of a restart). We wanted to build something more robust where we could kill a machine and replace it with an entirely new machine without any hiccups in availability. Of course there were a few challenges&hellip;
 
 #### Detecting New vs Existing Cluster
 
@@ -107,7 +107,7 @@ else
 fi
 ```
 
-The basic idea here is that we try to connect to each machine in the Auto Scaling Group to see if any of them are currently running etcd and if so, what are the members of the cluster. We assume that if no one responds this must be a new cluster. Now if someone does respond back with a list of potential members we could still potentially be in a bootstrapping situation. Remember that the first machine to come up will still likely know about the other machines in the Auto Scaling Group and will already know their IDs/IPs. So if our instance ID is in the list we assume we are just late to the party but still part of the initial bootstrapping. 
+The basic idea here is that we try to connect to each machine in the Auto Scaling Group to see if any of them are currently running etcd and if so, what are the members of the cluster. We assume that if no one responds this must be a new cluster. Now if someone does respond back with a list of potential members we could still potentially be in a bootstrapping situation. Remember that the first machine to come up will still likely know about the other machines in the Auto Scaling Group and will already know their instance IDs or IPs. So if our instance ID is in the list we assume we are just late to the party but still part of the initial bootstrapping. 
 
 #### Adding / Removing Members
 
