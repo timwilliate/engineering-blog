@@ -28,6 +28,12 @@ layout: default
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
 
 				{{ content }}
+                {% if page.author %}
+                    <div class="post-signature">
+                        <img src="/img/gravatar-test.jpeg">
+                        <span> <a href="https://www.github.com/{{ page.githubProfile }}">{{ page.author }}</a> posted on {{ page.date | date: "%B %-d, %Y" }} </span>
+                    </div>
+                {% endif %}
 
                 <hr>
 
