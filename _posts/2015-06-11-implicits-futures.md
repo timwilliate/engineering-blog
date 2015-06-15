@@ -24,7 +24,7 @@ Now, we'll take a look at another usage pattern every Scala programmer sees:
 implicits as an alternative to passing the same argument over and over. Scala Futures use implicit parameters in this way.
  
 There is [much](http://danielwestheide.com/blog/2013/01/09/the-neophytes-guide-to-scala-part-8-welcome-to-the-future.html) 
-to say about [futures](http://docs.scala-lang.org/overviews/core/futures.html) elsewhere. The gist of it is that a Future contains a value that may
+said about [futures](http://docs.scala-lang.org/overviews/core/futures.html) elsewhere. The gist of it is that a Future contains a value that may
 or may not have been computed yet.
 Futures let us spin off work into other threads, add more operations that should be performed on the result,
 define what should happen after failure, and (if we really must) wait for the operation to complete.
@@ -48,7 +48,7 @@ trait EmployeeGrabberBabber {
 I have [an implementation](https://gist.github.com/hibikir/5793ffe80c545f9971d1) for that trait, but it's not that important.
 
 {{"The first two methods"| sc: "raw"}} do synchronous IO: Whenever we call them, our thread will patiently wait until we get the requested information, leaving our thread blocked.
-{{"The second pair"| sc: "futureMethods"}} use Futures: {{"employee"| sc: "futureMethods"}}
+{{"The second pair"| sc: "futureMethods"}} uses Futures: {{"employee"| sc: "futureMethods"}}
  returns a Future[Employee], which will eventually provide an Employee, or error out.
   We do not wait for the operation to complete before returning; the caller gets the power of deciding whether to wait,
    whether to attach more actions, whether to handle errors.
@@ -58,7 +58,7 @@ With {{"the first set of methods"| sc: "raw"}}, if we wanted to get an Employee,
 val role = grabber.{{"rawRole"| sc: "raw"}}(employee)
 val bigEmployee = EmployeeWithRole(employee.id,employee.name,role)</code></pre></div>
 
-This is procedural programming. It holds up the calling thread until the entire calculation is made. You probably don't want to do this in a web application 
+This is imperative programming. It holds up the calling thread until the entire calculation is made. You probably don't want to do this in a web application 
 or in an event thread in a native UI toolkit.
 
 In contrast, the {{"asynchronous methods"| sc: "futureMethods"}} return instantly. We can keep right on defining what to do with the value -- inside the context of the Future.
