@@ -10,7 +10,7 @@ tags: [docker, sysadmin, metrics, devops]
 As our usage of [Docker](http://www.docker.com) grows and we provision more container hosts, collecting metrics and monitoring containers and hosts has become a necessity. This post will walk you through how to glue together a few components to deploy a monitoring solution for Docker. All components are intentionally plug-and-play, so if things need to be changed any component can be (relatively) easily swapped out for an alternative.
 
 ## Some assumptions
-First, we assume that Docker is installed, configured and running on your hosts. We further assume that you can connect to your Docker hosts with a web browser. It's worth noting some of our other requirements at this point since there will may be some questions as to why certain decisions were made.
+First, we assume that Docker is installed, configured and running on your hosts. We further assume that you can connect to your Docker hosts with a web browser. It's worth noting some of our other requirements at this point since there may be some questions as to why certain decisions were made.
 
   * Ease of deployment - We believe in fail fast, and succeed fast. We wanted an immediate solution to get up and running quickly, run some tests and make a quick, but informed decision.
   * Scalability - Success tends to have its own set of problems, namely scale. The solution needed to scale at all levels, handling both data velocity, volume and query demands.
