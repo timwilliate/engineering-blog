@@ -58,7 +58,7 @@ Now that you have an overview of the different components lets put things togeth
 
     [X-Fleet]
     MachineID=[your_machine_ID]
-	```
+    ```
 
     You can just extract and use the above `docker run` command if you prefer. I provide the above systemd unit for a more complete, "production-ready" example. You will notice the **[X-Fleet]** section is specific to [`fleet`](https://github.com/coreos/fleet), which is our container scheduler on CoreOS hosts (hence the `MachineID` which comes from `cat /etc/machine-id`). In a true production environment you would not hardcode the host using `MachineID` as I've done above, but in my test setup I'm not using any service discovery mechanisms. For further production readiness you would use a data volume container or other means of persisting the storage when the container is restarted.
 
@@ -77,34 +77,34 @@ Now that you have an overview of the different components lets put things togeth
 2.  We now start the [cAdvisor container](https://registry.hub.docker.com/u/google/cadvisor/) across all our hosts, using the this fleet/systemd unit:
 
     ```
-	[Unit]
-	Description=Google Container Advisor (cAdvisor)
+    [Unit]
+    Description=Google Container Advisor (cAdvisor)
 
-	Requires=docker.service
-	After=docker.service
+    Requires=docker.service
+    After=docker.service
 
-	[Service]
-	Restart=always
-	RestartSec=5s
+    [Service]
+    Restart=always
+    RestartSec=5s
 
-	ExecStartPre=-/usr/bin/docker rm -f %p
-	ExecStartPre=/usr/bin/docker pull google/cadvisor:latest
+    ExecStartPre=-/usr/bin/docker rm -f %p
+    ExecStartPre=/usr/bin/docker pull google/cadvisor:latest
 
-	ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw \
-	  --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro \
-	  --publish=8080:8080 --name=%p google/cadvisor:latest --logtostderr \
-	  -storage_driver=influxdb -storage_driver_host=[influxdb_hostname]:8086 \
-	  -storage_driver_db=cadvisor -storage_driver_user=root -storage_driver_password=root
+    ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw \
+      --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro \
+      --publish=8080:8080 --name=%p google/cadvisor:latest --logtostderr \
+      -storage_driver=influxdb -storage_driver_host=[influxdb_hostname]:8086 \
+      -storage_driver_db=cadvisor -storage_driver_user=root -storage_driver_password=root
 
-	ExecStop=/usr/bin/docker stop %p
-	ExecStopPost=-/usr/bin/docker rm -f %p
+    ExecStop=/usr/bin/docker stop %p
+    ExecStopPost=-/usr/bin/docker rm -f %p
 
-	[Install]
-	WantedBy=multi-user.target
+    [Install]
+    WantedBy=multi-user.target
 
-	[X-Fleet]
-	Global=true
-	```
+    [X-Fleet]
+    Global=true
+    ```
 
     To run the unit file:
 
@@ -145,7 +145,7 @@ Now that you have an overview of the different components lets put things togeth
 
     ExecStart=/usr/bin/docker run --publish=3000:3000 \
       --env INFLUXDB_HOST=%H --env INFLUXDB_PORT=8086 --env INFLUXDB_NAME=cadvisor \
-	  --env INFLUXDB_USER=root --env INFLUXDB_PASS=root \
+      --env INFLUXDB_USER=root --env INFLUXDB_PASS=root \
       --name=%p grafana/grafana:latest
 
     ExecStop=/usr/bin/docker stop %p
