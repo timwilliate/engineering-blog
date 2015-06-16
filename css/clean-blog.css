@@ -425,3 +425,7 @@ img::-moz-selection {
 body {
   webkit-tap-highlight-color: #0085a1;
 }
+.post-body img {
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
