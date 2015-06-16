@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <title>etcd Clustering in AWS - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/06/12/etcd-clustering/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css">
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>etcd Clustering in AWS</h1>
+                        
+                        <h2 class="subheading">Configuring a robust etcd cluster in an AWS Auto Scaling Group</h2>
+                        
+                        <span class="meta">Posted by T.J. Corrigan on June 12, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+				<h2>Overview</h2>
+
+<p>For the last few months our team has been focused on building a robust, highly automated <a href="https://www.docker.com">Docker</a> container infrastructure in <a href="http://aws.amazon.com">AWS</a>. We choose to use <a href="https://coreos.com">CoreOS</a> as our base operating system because it is lightweight and container-centric. We are using <a href="https://github.com/coreos/fleet">fleet</a>, another CoreOS project, to handle scheduling containers across a cluster of machines and keeping them running even if the original host they are running on is terminated. Both CoreOS and fleet need a shared view of the current state of all the machines and containers running in the cluster. This is where <a href="https://github.com/coreos/etcd">etcd</a>, yet another CoreOS project, comes in to play. etcd is a distributed, consistent key-value store used for storing shared configuration and information in a cluster. In a large production environment, etcd is designed to run on a subset of machines in the system, preferably either three or five hosts.</p>
+
+<p><img src="/img/etcd-cluster-architecture.png" alt="etcd clustering architecture">
+<em><a href="https://coreos.com/docs/cluster-management/setup/cluster-architectures/#production-cluster-with-central-services">source</a></em></p>
+
+<h2>The Bootstrapping Problem</h2>
+
+<p>etcd requires an initial bootstrapping to form a cluster. This can be accomplished in <a href="https://github.com/coreos/etcd/blob/master/Documentation/clustering.md">several ways</a>. Initially we used the <a href="https://discovery.etcd.io/">etcd discovery service</a>, but we saw strange behavior when using this with AWS Auto Scaling Groups, namely ghost IP addresses in the list the service would return. Plus, the discovery service does not handle the post-bootstrap problem of members joining and leaving the cluster. In the end, we chose the static method to reduce dependencies on external systems.</p>
+
+<p>Our initial approach, using etcd 0.4, was to create 3 dedicated EC2 instances in AWS via <a href="http://aws.amazon.com/cloudformation/">CloudFormation</a>. This allowed us access to the IPs of these machines to use in the <a href="https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos">cloud-config</a> in a block like:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">coreos</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">etcd</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">addr</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost:4001</span>    
+    <span class="l-Scalar-Plain">peer-addr</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">localhost:7001</span>
+    <span class="l-Scalar-Plain">peers</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">$ip_from_this_machine$:7001,$ip_from_other_machine$:7001,$ip_from_another_machine$:7001</span>
+</code></pre></div>
+<p>While this approach works adequately there are a few disadvantages:</p>
+
+<ul>
+<li><p><strong>Robustness</strong></p>
+
+<p>These etcd server machines are critically important to the infrastructure and require special treatment. We were using static IPs, setting CloudWatch alarms, and doing extra monitoring. <a href="https://twitter.com/fak3r">Phil Cryer</a>, a colleague of mine, has been championing the concept of <a href="https://blog.engineyard.com/2014/pets-vs-cattle">Pets vs Cattle</a> and how we should avoid this sort of &#39;special&#39; design, especially in an environment like AWS where Amazon doesn&#39;t guarantee the health of any given EC2 instance. </p></li>
+<li><p><strong>CloudFormation Updates</strong></p>
+
+<p>Occasionally we needed to make changes to our infrastructure. To do this we would use CloudFormation to update our configuration. If there were any changes to these etcd machines, AWS would reboot them to apply the changes, potentially all at the same time. If this happened our cluster would become unavailable and may have trouble re-clustering.</p></li>
+</ul>
+
+<h2>The Solution</h2>
+
+<p>In thinking of potential solutions we turned to a feature we were already using for our worker machines, <a href="http://aws.amazon.com/autoscaling">AWS Auto Scaling Groups</a>. In this case we don’t really want to scale up and down the number of etcd servers but do want to maintain a fixed cluster size, even if a host were to fail. However, this presented a new challenge in figuring out how to coordinate the bootstrapping of etcd. </p>
+
+<p>Around this time CoreOS released etcd2 into their alpha channel builds. This new version brought with it changes to bootstrapping and dynamic reconfiguration which gives us the flexibility we needed to manage cluster membership with Auto Scaling Groups.</p>
+
+<h3>Bootstrapping</h3>
+
+<p>Our first concern was to automate the bootstrapping process. Since we no longer had fixed IPs like in our previous approach we needed a mechanism to discover the other leaders. 
+Fortunately, the <a href="http://aws.amazon.com/cli/">Amazon CLI</a> provides us with the tools we need. However, since we are using CoreOS we couldn’t just install the cli but needed to create a container for the job. The next concern was how to get the credentials needed to use the cli. Here we used an <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html?console_help=true">IAM Instance Role</a> to give our server machines read-only permissions to <code>ec2:Describe*</code> and <code>autoscaling:Describe*</code>. With these tools, we can accomplish what we need with a simple BASH script:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">ec2_instance_id</span><span class="o">=</span><span class="k">$(</span>curl -s http://169.254.169.254/latest/meta-data/instance-id<span class="k">)</span>
+
+<span class="nv">ec2_instance_ip</span><span class="o">=</span><span class="k">$(</span>curl -s http://169.254.169.254/latest/meta-data/local-ipv4<span class="k">)</span>
+
+<span class="nv">asg_name</span><span class="o">=</span><span class="k">$(</span>aws autoscaling describe-auto-scaling-groups --region us-east-1 <span class="se">\</span>
+  <span class="p">|</span> jq --raw-output <span class="s2">&quot;.[] map(select(.Instances[].InstanceId | contains(\&quot;$ec2_instance_id\&quot;))) | .[].AutoScalingGroupName&quot;</span><span class="k">)</span>
+
+<span class="nv">etcd_peer_urls</span><span class="o">=</span><span class="k">$(</span>aws ec2 describe-instances --region us-east-1 --instance-ids <span class="se">\</span>
+  <span class="k">$(</span>aws autoscaling describe-auto-scaling-groups --region us-east-1 --auto-scaling-group-name <span class="nv">$asg_name</span> <span class="p">|</span> jq .AutoScalingGroups<span class="o">[</span>0<span class="o">]</span>.Instances<span class="o">[]</span>.InstanceId <span class="p">|</span> xargs<span class="k">)</span> <span class="se">\</span>
+  <span class="p">|</span> jq -r <span class="s1">&#39;.Reservations[].Instances | map(&quot;http://&quot; + .NetworkInterfaces[].PrivateIpAddress + &quot;:2379&quot;)[]&#39;</span><span class="k">)</span>
+</code></pre></div>
+<p>This script starts off by querying the EC2 instance ID and IP address from AWS using their <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html">instance metadata endpoint</a>. With this information we are able to retrieve the name of the Auto Scaling Group that this particular instance belongs to by using the CLI and <a href="http://stedolan.github.io/jq/">jq</a>. From this we are then able to query for all the IPs of the machines in this Auto Scaling Group. We then write this information to file:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">ETCD_INITIAL_CLUSTER_STATE</span><span class="o">=</span>new
+<span class="nv">ETCD_NAME</span><span class="o">=</span><span class="nv">$ec2_instance_id</span>
+<span class="nv">ETCD_INITIAL_CLUSTER</span><span class="o">=</span><span class="s2">&quot;$etcd_initial_cluster&quot;</span>
+</code></pre></div>
+<p>and then instruct etcd to load this information when it starts up. With these changes we were reliably able to boostrap etcd from an autoscaling group without any hardcoding!</p>
+
+<h3>Maintaining Cluster Membership</h3>
+
+<p>Normally etcd is expecting that a machine would either remove itself from the cluster before exiting or would rejoin at a later time (e.g., in the event of a restart). We wanted to build something more robust where we could kill a machine and replace it with an entirely new machine without any hiccups in availability. Of course there were a few challenges&hellip;</p>
+
+<h4>Detecting New vs Existing Cluster</h4>
+
+<p>The first thing we discovered is that you needed to explicitly tell etcd if this was a new cluster or if you were joining an existing cluster for etcd to work correctly. After a bit of trial and error we arrived at:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">etcd_existing_peer_urls</span><span class="o">=</span>
+<span class="nv">etcd_existing_peer_names</span><span class="o">=</span>
+<span class="nv">etcd_good_member_url</span><span class="o">=</span>
+
+<span class="k">for</span> url in <span class="nv">$etcd_peer_urls</span><span class="p">;</span> <span class="k">do</span>
+    <span class="k">case</span> <span class="s2">&quot;$url&quot;</span> in
+        *<span class="nv">$ec2_instance_ip</span>*<span class="o">)</span> <span class="k">continue</span><span class="p">;;</span>
+    <span class="k">esac</span>
+
+    <span class="nv">etcd_members</span><span class="o">=</span><span class="k">$(</span>curl -f -s <span class="nv">$url</span>/v2/members<span class="k">)</span>
+
+    <span class="k">if</span> <span class="o">[[</span> <span class="nv">$?</span> <span class="o">==</span> <span class="m">0</span> <span class="o">&amp;&amp;</span> <span class="nv">$etcd_members</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+        <span class="nv">etcd_good_member_url</span><span class="o">=</span><span class="s2">&quot;$url&quot;</span>
+        <span class="nb">echo</span> <span class="s2">&quot;etcd_members=$etcd_members&quot;</span>
+        <span class="nv">etcd_existing_peer_urls</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$etcd_members&quot;</span> <span class="p">|</span> jq --raw-output .<span class="o">[][]</span>.peerURLs<span class="o">[</span>0<span class="o">]</span><span class="k">)</span>
+        <span class="nv">etcd_existing_peer_names</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$etcd_members&quot;</span> <span class="p">|</span> jq --raw-output .<span class="o">[][]</span>.name<span class="k">)</span>
+        <span class="nb">break</span>
+<span class="nb">    </span><span class="k">fi</span>
+<span class="k">done</span>
+
+<span class="k">if</span> <span class="o">[[</span> <span class="nv">$etcd_existing_peer_urls</span> <span class="o">&amp;&amp;</span> <span class="nv">$etcd_existing_peer_names</span> !<span class="o">=</span> *<span class="s2">&quot;$ec2_instance_id&quot;</span>* <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;joining existing cluster&quot;</span>
+<span class="k">else</span>
+    <span class="nb">echo</span> <span class="s2">&quot;creating new cluster&quot;</span>
+<span class="k">fi</span>
+</code></pre></div>
+<p>The basic idea here is that we try to connect to each machine in the Auto Scaling Group to see if any of them are currently running etcd and if so, what are the members of the cluster. We assume that if no one responds this must be a new cluster. Now if someone does respond back with a list of potential members we could still potentially be in a bootstrapping situation. Remember that the first machine to come up will still likely know about the other machines in the Auto Scaling Group and will already know their instance IDs or IPs. So if our instance ID is in the list we assume we are just late to the party but still part of the initial bootstrapping. </p>
+
+<h4>Adding / Removing Members</h4>
+
+<p>Once we know that we are joining an existing cluster and the members of the cluster, we can begin the steps to add the new member to the existing cluster.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># eject bad members from cluster</span>
+<span class="nv">peer_regexp</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$etcd_peer_urls&quot;</span> <span class="p">|</span> sed <span class="s1">&#39;s/^.*http:\/\/\([0-9.]*\):[0-9]*.*$/contains(\\&quot;\1\\&quot;)/&#39;</span> <span class="p">|</span> xargs <span class="p">|</span> sed <span class="s1">&#39;s/  */ or /g&#39;</span><span class="k">)</span>
+
+<span class="nv">bad_peer</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;$etcd_members&quot;</span> <span class="p">|</span> jq --raw-output <span class="s2">&quot;.[] | map(select(.peerURLs[] | $peer_regexp | not )) | .[].id&quot;</span><span class="k">)</span>
+
+<span class="k">if</span> <span class="o">[[</span> <span class="nv">$bad_peer</span> <span class="o">]]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="k">for</span> bp in <span class="nv">$bad_peer</span><span class="p">;</span> <span class="k">do</span>
+        <span class="nb">echo</span> <span class="s2">&quot;removing bad peer $bp&quot;</span>
+        curl -f -s <span class="s2">&quot;$etcd_good_member_url/v2/members/$bp&quot;</span> -XDELETE
+    <span class="k">done</span>
+<span class="k">fi</span>
+
+<span class="nv">etcd_initial_cluster</span><span class="o">=</span><span class="k">$(</span>curl -s -f <span class="s2">&quot;$etcd_good_member_url/v2/members&quot;</span> <span class="p">|</span> jq --raw-output <span class="s1">&#39;.[] | map(.name + &quot;=&quot; + .peerURLs[0]) | .[]&#39;</span> <span class="p">|</span> xargs <span class="p">|</span> sed <span class="s1">&#39;s/  */,/g&#39;</span><span class="k">)$(</span><span class="nb">echo</span> <span class="s2">&quot;,$ec2_instance_id=http://${ec2_instance_ip}:2380&quot;</span><span class="k">)</span>
+
+<span class="nb">echo</span> <span class="s2">&quot;adding instance ID $ec2_instance_id with IP $ec2_instance_ip&quot;</span>
+curl -f -s -XPOST <span class="s2">&quot;$etcd_good_member_url/v2/members&quot;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span> -d <span class="s2">&quot;{\&quot;peerURLs\&quot;: [\&quot;http://$ec2_instance_ip:2380\&quot;], \&quot;name\&quot;: \&quot;$ec2_instance_id\&quot;}&quot;</span>
+</code></pre></div>
+<p>The first step is to try and detect whether any members of the cluster have been terminated. This can be deduced by comparing the list of members reported by etcd to the list of machines in the Auto Scaling Group. Once we find the bad host(s) we can go ahead and send a REST call to one of the good members of the cluster to remove the dead machine. Afterwards we can add the new machine to the cluster through another REST call before starting etcd. </p>
+
+<h3>etcd Bugs</h3>
+
+<p>At this point we thought we had a great pattern for dealing with adding and removing machines from the cluster and started some scale testing. Whenever we terminated a machine we saw that the cluster remained healthy, with one unhealthy node, until we tried to remove the dead node. After removing the dead node using the API, the cluster became unhealthy and would not accept writes. After a few minutes in this state, the cluster sorted things out and became healthy again. Once healthy, we were able to add the new machine and write to the cluster. I filed a <a href="https://github.com/coreos/etcd/issues/2888">bug report</a> with the CoreOS team about this minutes-long unhealthy state after dead node removal and very quickly got a response and a solution (big kudos to the CoreOS team!). I&#39;ve tested out their new builds and am happy to report we now have a reliable solution. Their fixes are merged in and hopefully we&#39;ll see them in a new release in the next week or two.</p>
+
+<h2>Conclusion</h2>
+
+<p>We have now built a fully automated solution to build etcd clusters on AWS Auto Scaling Groups. I&#39;m happy to announce that we have open-sourced our efforts (<a href="https://github.com/MonsantoCo/etcd-aws-cluster/">GitHub</a>/<a href="https://registry.hub.docker.com/u/monsantoco/etcd-aws-cluster/">DockerHub</a>) and hope they will be of use to the broader community. We welcome issues, contributions, comments, and questions.</p>
+
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/05/27/secret-stdin-slurper/" data-toggle="tooltip" data-placement="top" title="Secret STDIN Slurper">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>

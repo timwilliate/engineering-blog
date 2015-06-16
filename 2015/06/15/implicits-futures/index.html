@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <title>Learn implicits: Scala Futures - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/06/15/implicits-futures/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css">
+    
+    <link rel="stylesheet" href="/css/implicits-intro.css">
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Learn implicits: Scala Futures</h1>
+                        
+                        <h2 class="subheading">Exploring implicit parameters using Scala Futures</h2>
+                        
+                        <span class="meta">Posted by Jorge Montero on June 15, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<style scoped>
+  .raw { color: #D907E8 }
+  .futureMethods { color: #19BEFF }
+  .ec {color: #E80D0C }
+  .implicit {color: #1ab955 }
+  .implicitDecl {color: #FF9C00 }
+</style>
+
+<p>Implicits are difficult to understand because they have many different uses.
+In <a href="http://engineering.monsanto.com/2015/05/14/implicits-intro/">an earlier post</a>,
+we looked at implicit parameters and type tags.
+Now, we&#39;ll take a look at another usage pattern every Scala programmer sees: 
+implicits as an alternative to passing the same argument over and over. Scala Futures use implicit parameters in this way.</p>
+
+<p>There is <a href="http://danielwestheide.com/blog/2013/01/09/the-neophytes-guide-to-scala-part-8-welcome-to-the-future.html">much</a> 
+said about <a href="http://docs.scala-lang.org/overviews/core/futures.html">futures</a> elsewhere. The gist of it is that a Future contains a value that may
+or may not have been computed yet.
+Futures let us spin off work into other threads, add more operations that should be performed on the result,
+define what should happen after failure, and (if we really must) wait for the operation to complete.</p>
+
+<p>Everything we do asynchronously happens on some other thread. 
+Creating a future, adding operations after success, adding failure handling -- in each case, we need to tell it what thread to run on. 
+The futures library lets us specify this using implicit parameters.</p>
+
+<p>For illustration, let&#39;s define some data types and a fake Data Access Object with the following operations:</p>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">case class Employee(id:Int, name:String)
+case class Role(name:String, department :String)
+case class EmployeeWithRole(id :Int, name :String, role :Role)
+
+trait EmployeeGrabberBabber {
+  def <span class="raw">rawEmployee</span>(id :Int) :Employee
+  def <span class="raw">rawRole</span>(e :Employee) :Role
+  def <span class="futureMethods">employee</span>(id: Int)(<span class="implicit">implicit e :ExecutionContext</span>) :Future[Employee]
+  def <span class="futureMethods">role</span>(employee :Employee)(<span class="implicit">implicit e :ExecutionContext</span>) :Future[Role]
+}</code></pre></div>
+
+<p>I have <a href="https://gist.github.com/hibikir/5793ffe80c545f9971d1">an implementation</a> for that trait, but it&#39;s not that important.</p>
+
+<p><span class="raw">The first two methods</span> do synchronous IO: Whenever we call them, our thread will patiently wait until we get the requested information, leaving our thread blocked.
+<span class="futureMethods">The second pair</span> uses Futures: <span class="futureMethods">employee</span>
+ returns a Future[Employee], which will eventually provide an Employee, or error out.
+  We do not wait for the operation to complete before returning; the caller gets the power of deciding whether to wait,
+   whether to attach more actions, whether to handle errors.</p>
+
+<p>With <span class="raw">the first set of methods</span>, if we wanted to get an Employee, and then get their Role, and then combine that into an EmployeeWithRole:
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val employee = grabber.<span class="raw">rawEmployee</span>(100)
+val role = grabber.<span class="raw">rawRole</span>(employee)
+val bigEmployee = EmployeeWithRole(employee.id,employee.name,role)</code></pre></div></p>
+
+<p>This is imperative programming. It holds up the calling thread until the entire calculation is made. You probably don&#39;t want to do this in a web application 
+or in an event thread in a native UI toolkit.</p>
+
+<p>In contrast, the <span class="futureMethods">asynchronous methods</span> return instantly. We can keep right on defining what to do with the value -- inside the context of the Future.</p>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val bigEmployee: Future[EmployeeWithRole] =
+  grabber.<span class="futureMethods">employee</span>(100).flatMap { e =>
+    grabber.<span class="futureMethods">role</span>(e).map { r =>
+      EmployeeWithRole(e.id,e.name,r)
+    }
+  }</code></pre></div>
+
+<p>This code puts both operations together without blocking.</p>
+
+<p>Except, the code above does not work on its own. Remember those <span class="implicit">implicit parameters</span> defined above in EmployeeGrabberBabber?</p>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">def <span class="futureMethods">employee</span>(id :Int)(<span class="implicit">implicit e :ExecutionContext</span>) :Future[Employee]
+def <span class="futureMethods">role</span>(employee :Employee)(<span class="implicit">implicit e: ExecutionContext</span>) : Future[Role]
+</code></pre></div> 
+  
+
+<p>We did not define them, as the compiler helpfully reminds us.
+<div class="highlight"><pre><code>Error: Cannot find an <span class="implicit">implicit ExecutionContext</span>. You might pass
+an (implicit ec: ExecutionContext) parameter to your method
+or import scala.concurrent.ExecutionContext.Implicits.global.
+    grabber.<span class="futureMethods">employee</span>(100).flatMap { e =&gt;
+                    ^</code></pre></div></p>
+
+<p>That&#39;s a useful error message! While we could just add the import, we&#39;d not learn much from doing that, so let&#39;s dig deeper.</p>
+
+<p>Creating a Future starts an asynchronous operation on another thread. The ExecutionContext provides the thread pool that Future will use.
+Different execution contexts wrap different thread pools, with different properties.
+The one that the errors suggest, Scala&#39;s <a href="http://blog.jessitron.com/2014/02/scala-global-executioncontext-makes.html">global execution context</a>, suits us for now.</p>
+
+<p><span class="futureMethods">The Future-creating methods</span> declare two parameter lists. We can be perfectly clear about which ExecutionContext each should use by passing it explicitly:
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">val <span class="ec">ec</span> =  scala.concurrent.ExecutionContext.Implicits.global
+val bigEmployee: Future[EmployeeWithRole] =
+  grabber.<span class="futureMethods">employee</span>(100)(<span class="ec">ec</span>).flatMap { e =&gt;
+    grabber.<span class="futureMethods">role</span>(e)(<span class="ec">ec</span>).map { r =&gt;
+      EmployeeWithRole(e.id,e.name,r)
+    }
+  }</code></pre></div></p>
+
+<p>But that doesn&#39;t work either!
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">
+Error: Cannot find an <span class="implicit">implicit ExecutionContext</span>. You might pass
+an (implicit ec: ExecutionContext) parameter to your method
+or import scala.concurrent.ExecutionContext.Implicits.global.
+      grabber.<span class="futureMethods">employee</span>(100)(<span class="ec">ec</span>).flatMap { e =&gt;
+                                      ^</code></pre></div><br>
+The flatmap method on Future also wants an ExecutionContext! We gave that Future another operation to perform, and it needs a thread pool to run that on. 
+Future.map has the same problem, so pass the ExecutionContext there, too. This is getting tedious.</p>
+
+<div class="highlight"><pre><code class="language-scala" data-lang="json">val <span class="ec">ec</span> =  scala.concurrent.ExecutionContext.Implicits.global
+val bigEmployee: Future[EmployeeWithRole] =
+  grabber.<span class="futureMethods">employee</span>(100)(<span class="ec">ec</span>).flatMap { e =>
+    grabber.<span class="futureMethods">role</span>(e)(<span class="ec">ec</span>).map { r =>
+      EmployeeWithRole(e.id,e.name,r)
+    }(<span class="ec">ec</span>)
+  }(<span class="ec">ec</span>)</code></pre></div>
+
+<p>So now it&#39;s happy, and it&#39;s very clear which ExecutionContext every operation runs in. 
+But I&#39;m not happy, because it&#39;s repetitive and cluttered. It gets even more cluttered,
+ the more things we call on a Future. Just look at these signatures from the <a href="http://www.scala-lang.org/api/2.10.1/index.html#scala.concurrent.Future">Future API</a>:
+<div class="highlight"><pre><code>    def onSuccess[U](pf : PartialFunction[T, U])(<span class="implicit">implicit executor : ExecutionContext</span>)
+    def onFailure[U](callback : PartialFunction[Throwable, U])(<span class="implicit">implicit executor : ExecutionContext</span>) 
+    def onComplete[U](func : Try[T] =&gt; U)(<span class="implicit">implicit executor : ExecutionContext</span>)
+    def foreach[U](f : T =&gt; U)(<span class="implicit">implicit executor : ExecutionContext</span>) 
+    def transform[S](s : T =&gt; S, f : Throwable =&gt; Throwable)(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[S] 
+    def map[S](f : T =&gt; S)(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[S]
+    def flatMap[S](f : T =&gt; Future[S])(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[S] 
+    def filter(pred : T =&gt; Boolean)(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[T] 
+    def withFilter(p : T =&gt; Boolean)(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[T]
+    def collect[S](pf : T =&gt; S)(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[S] 
+    def recover[U &gt;: T](pf : PartialFunction[Throwable, U])(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[U] 
+    def recoverWith[U &gt;: T](pf : PartialFunction[Throwable, Future[U]])(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[U]
+    def andThen[U](pf : PartialFunction[Try[T], U])(<span class="implicit">implicit executor : ExecutionContext</span>) : Future[T]</code></pre></div></p>
+
+<p><span class="implicit">ExecutionContexts</span> everywhere. They&#39;re important, and sometimes we need to be specific about where each operation should run,
+ but the common case is that they can all run in the same pool. It is tedious, cluttered, and error-prone to repeat
+that same bit of information over and over.</p>
+
+<p>When a function has multiple parameter lists, Scala permits the <span class="implicit">implicit</span> keyword at the beginning of the last parameter list.
+<div class="highlight"><pre><code>  def <span class="futureMethods">employee</span>(id:Int)(<span class="implicit">implicit e:ExecutionContext</span>) :Future[Employee]</code></pre></div></p>
+
+<p>This instructs the Scala compiler to pull those arguments out of its magic hat, instead of requiring them to be passed each time. </p>
+
+<p><img src="/img/magic_hat.png" alt="Trixie&#39;s magic hat"></p>
+
+<p>If it&#39;s ok to use all those threads in the same pool, 
+then we can supply the execution context <span class="implicitDecl">implicitly</span>, which puts it in the magic hat:
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="implicitDecl">implicit val</span> <span class="ec">ec</span>: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+val bigEmployee: Future[EmployeeWithRole] =
+  grabber.<span class="futureMethods">employee</span>(100).flatMap { e =&gt;
+    grabber.<span class="futureMethods">role</span>(e).map { r =&gt;
+      EmployeeWithRole(e.id,e.name,r) 
+    }
+  }
+</code></pre></div></p>
+
+<p>Here, the <span class="implicitDecl">implicit</span> keyword is serving a different (but related) purpose than it did in the parameter list. 
+The <span class="implicitDecl">implicit val</span> goes into the compiler&#39;s magic hat for as long as that value is in scope.
+ The compiler can use it anywhere it needs to supply an <span class="implicit">implicit parameter</span> of type ExecutionContext, over and over.</p>
+
+<p>This lets us use for-comprehensions too, which take the place of flatmap and map:
+ <div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="implicitDecl">implicit val</span> <span class="ec">ec</span> =  scala.concurrent.ExecutionContext.Implicits.global
+val employeeWithRole = for { employee &lt;- grabber.<span class="futureMethods">employee</span>(200L)
+                            role &lt;- grabber.<span class="futureMethods">role</span>(employee) } 
+                            yield EmployeeWithRole(employee.id,employee.name,role)   </code></pre></div>  </p>
+
+<p>Much cleaner.</p>
+
+<p>This implicit-parameter-supplying feature only works if there is exactly one
+<span class="implicitDecl">value</span> of the needed type in the compiler&#39;s magic hat when the method that
+declares the <span class="implicit">implicit parameter</span> is called.  If none are available, you get that
+&quot;Cannot find an implicit&quot; compile error. If more than one are available,
+you get an &quot;ambiguous implicit&quot; error</p>
+
+<p>Of the many ways to get values into the magic hat, three make sense for the
+ExecutionContext. The simplest is to declare an <span class="implicitDecl">implicit val</span>, as above.  It
+stays in the magic hat as long as the val is in scope.  This is common inside an Akka actor:</p>
+
+<div class="highlight"><pre><code>class SomeActor extends Actor {
+  <span class="implicitDecl">implicit val</span> ec: ExecutionContext = context.dispatcher
+}</code></pre></div>
+
+<p>Another is to declare an <span class="implicit">implicit parameter</span>: that value is in the magic hat
+inside the method. This is good practice, because it lets the caller decide
+what to use. For example, this <span class="implicit">e</span> is available to the Future constructor:</p>
+
+<div class="highlight"><pre><code>  def <span class="futureMethods">employee</span>(id:Int)(<span class="implicit">implicit e :ExecutionContext</span>) :Future[Employee] = Future{...}</code></pre></div>
+
+<p>Finally, the most common way to punt on the selection of the execution context is to 
+import an <span class="implicitDecl">implicit val</span> in file scope:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">import scala.concurrent.ExecutionContext.Implicits.global
+</code></pre></div>
+<p>Inside <a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/concurrent/ExecutionContext.scala#L130">scala.concurrent.ExecutionContext.Implicits</a>, <span class="implicitDecl">global</span> 
+is an <span class="implicitDecl">implicit val</span>, so into the magic hat it goes. Adding this to the top of the file 
+chooses the default execution context for asynchronous operations.</p>
+
+<p>Any way you do it, one <span class="implicitDecl">implicit value</span> declaration saves repetition, 
+providing a default per scope while allowing an override at each function call. 
+The authors of the Future library put the ExecutionContext into an <span class="implicit">implicit parameter</span> for this reason:
+it&#39;s common to repeat the same value, common to pass it down through various methods,
+and essential that it be explicitly passed sometimes, at the caller&#39;s discretion.
+In this way, Scala lets library designers keep the interface clean and flexible at the same time. </p>
+
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/06/12/etcd-clustering/" data-toggle="tooltip" data-placement="top" title="etcd Clustering in AWS">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
