@@ -7,6 +7,18 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Doing Docker Metrics</title>
+                
+                
+                    <description>&lt;p&gt;As our usage of &lt;a href=&quot;http://www.docker.com&quot;&gt;Docker&lt;/a&gt; grows and we provision more container hosts, collecting metrics and monitoring containers and hosts has become a necessity. This post will walk you through how to glue together a few components to deploy a monitoring solution for Docker. All components are intentionally plug-and-play, so if things need to be changed any component can be (relatively) easily swapped out for an alternative.&lt;/p&gt;
+</description>
+                
+                <pubDate>Wed, 17 Jun 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/06/17/docker-metrics/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/17/docker-metrics/</guid>
+            </item>
+        
+            <item>
                 <title>Learn implicits: Scala Futures</title>
                 
                 
