@@ -1,10 +1,10 @@
 ---
 layout: post
 title: "Doing Docker Metrics"
-subtitle: "Doing Docker Metrics"
+subtitle: "How To Do Production Ready Docker Metrics"
 header-img: "img/mon-city_garden.jpg"
 author: "Stuart Wong"
-tags: [docker, sysadmin, metrics, devops]
+tags: [docker, sysadmin, metrics, devops, tutorial]
 ---
 
 As our usage of [Docker](http://www.docker.com) grows and we provision more container hosts, collecting metrics and monitoring containers and hosts has become a necessity. This post will walk you through how to glue together a few components to deploy a monitoring solution for Docker. All components are intentionally plug-and-play, so if things need to be changed any component can be (relatively) easily swapped out for an alternative.
