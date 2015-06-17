@@ -209,7 +209,7 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
     ![Grafana Creating a Graph](/img/grafana-graph.png)
 
-    Now we can create a quick first graph. In the _series_ section fill in 'stats', then 'Limit' in the _alias_ section. Use 'fs_limit' as the value for _mean_ in the _select_ section. Click on _+Add query_ to add an additional query/graph line and enter 'Usage' in the _alias_ section and 'fs\_usage' as the value for _mean_ in the _select_ section here. You will see values being plotted as soon as we enter values, and by now you will realize we are doing a simple *file system limit vs usage graph*.
+    Now we can create a quick first graph. In the _series_ section fill in 'stats', then 'Limit' in the _alias_ section. Use 'fs\_limit' as the value for _mean_ in the _select_ section. Click on _+Add query_ to add an additional query/graph line and enter 'Usage' in the _alias_ section and 'fs\_usage' as the value for _mean_ in the _select_ section here. You will see values being plotted as soon as we enter values, and by now you will realize we are doing a simple *file system limit vs usage graph*.
 
     ![Grafana Writing a Query](/img/grafana-query.png)
 
