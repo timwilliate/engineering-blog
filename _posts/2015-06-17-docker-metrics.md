@@ -179,21 +179,21 @@ Once your full stack is up, you'll then need to connect Grafana to your `cadviso
 
     Enter the appropriate information:
 
-    **Add data source settings**
-    Name: influxdb
-    Type: InfluxDB 0.8.x
-    Default (checked)
+    **Add data source settings**  
+    Name: influxdb  
+    Type: InfluxDB 0.8.x  
+    Default (checked)  
 
-    **Http settings**
-    Url: http://[influxdb_hostname]:8086
-    Basic Auth (enabled)
-    User: root
-    Password: root
+    **Http settings**  
+    Url: http://[influxdb_hostname]:8086  
+    Basic Auth (enabled)  
+    User: root  
+    Password: root  
 
-    **InfluxDB Details**
-    Database: cadvisor
-    User: root
-    Password: root
+    **InfluxDB Details**  
+    Database: cadvisor  
+    User: root  
+    Password: root  
 
     ![Grafana Creating a Data Source](/img/grafana-ds.png)
 
