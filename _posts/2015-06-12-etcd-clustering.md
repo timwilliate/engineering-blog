@@ -4,7 +4,7 @@ title: "etcd Clustering in AWS"
 subtitle: "Configuring a robust etcd cluster in an AWS Auto Scaling Group"
 header-img: "img/mon-field_rows.jpg"
 author: "T.J. Corrigan"
-tags: [aws, distributed systems, coreos]
+tags: [aws, distributed systems, coreos, tutorials]
 ---
 
 ## Overview
