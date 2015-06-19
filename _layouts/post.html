@@ -13,7 +13,7 @@ layout: default
                         {% if page.subtitle %}
                         <h2 class="subheading">{{ page.subtitle }}</h2>
                         {% endif %}
-                        <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
+                        <span class="meta">Posted{% if page.author %} by {{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
                     </div>
                 </div>
             </div>
@@ -29,9 +29,29 @@ layout: default
 
 				{{ content }}
                 {% if page.author %}
+
                     <div class="post-signature">
-                        <img src="/img/gravatar-test.jpeg">
-                        <span> <a href="https://www.github.com/{{ page.githubProfile }}">{{ page.author }}</a> posted on {{ page.date | date: "%B %-d, %Y" }} </span>
+                        {% if page.avatarUrl %}
+                            <img src="{{ page.avatarUrl }}&s=40">
+                        {% else %}
+                            <img src="/img/placeholder.jpg">
+                        {% endif %}
+                        <span>
+                            {{ page.author }} posted on {{ page.date | date: "%B %-d, %Y" }}
+                        </span>
+
+                            {% if page.twitterHandle %}
+                            <a  href="https://twitter.com/{{ page.twitterHandle }}">
+                                <i class="fa fa-twitter fa-1x "></i>
+                            </a>
+                            {% endif %}
+                            {% if page.githubProfile %}
+                            <a  href="https://www.github.com/{{ page.githubProfile }}">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            {% endif %}
+
+
                     </div>
                 {% endif %}
 

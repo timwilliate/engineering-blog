@@ -4,6 +4,9 @@ title: "Secret STDIN Slurper"
 subtitle: "The dangers of using STDIN to drive a BASH loop"
 header-img: "img/mon-city_garden.jpg"
 author: "David Dooling"
+githubProfile : "tj-corrigan"
+twitterHandle : "sm_tjc"
+avatarUrl : "https://avatars3.githubusercontent.com/u/1248896?v=3"
 tags: [bash, sysadmin, puzzlers]
 ---
 

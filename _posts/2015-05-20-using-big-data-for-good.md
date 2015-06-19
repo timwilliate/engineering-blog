@@ -4,6 +4,9 @@ title: "Using Big Data for Good"
 subtitle: "Big Data, it's not just for selling ads anymore"
 header-img: "img/mon-ankeny.jpg"
 author: "David Dooling"
+githubProfile : "tj-corrigan"
+twitterHandle : "sm_tjc"
+avatarUrl : "https://avatars3.githubusercontent.com/u/1248896?v=3"
 tags: [big data, genomics, IoT, precision farming]
 ---
 
