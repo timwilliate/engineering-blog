@@ -4,9 +4,9 @@ title: "Modifying JSON on the command line"
 subtitle: "Using jq to change a value"
 header-img: "img/mon-field_rows.jpg"
 author: "Jessica Kerr"
-githubProfile : "tj-corrigan"
-twitterHandle : "sm_tjc"
-avatarUrl : "https://avatars3.githubusercontent.com/u/1248896?v=3"
+githubProfile : "jessitron"
+twitterHandle : "jessitron"
+avatarUrl : "https://avatars3.githubusercontent.com/u/1149737?v=3"
 tags: [jq, json, aws, tutorials]
 ---
 

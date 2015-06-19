@@ -7,8 +7,7 @@ author: "T.J. Corrigan"
 githubProfile : "tj-corrigan"
 twitterHandle : "sm_tjc"
 avatarUrl : "https://avatars3.githubusercontent.com/u/1248896?v=3"
-
-tags: [aws, distributed systems, coreos]
+tags: [aws, distributed systems, coreos, tutorials]
 ---
 
 ## Overview
