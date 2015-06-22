@@ -4,6 +4,9 @@ title: "Stoop: our first open source release"
 subtitle: "A Scala DSL for interfacing with CouchDB"
 header-img: "img/mon-field_rows.jpg"
 author: Phil Cryer
+githubProfile : "philcryer"
+twitterHandle : "fak3r"
+avatarUrl : "https://avatars0.githubusercontent.com/u/43070?v=3"
 tags: [open source, scala, couchdb]
 ---
 
