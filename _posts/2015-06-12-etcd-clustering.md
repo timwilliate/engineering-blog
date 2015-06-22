@@ -4,6 +4,9 @@ title: "etcd Clustering in AWS"
 subtitle: "Configuring a robust etcd cluster in an AWS Auto Scaling Group"
 header-img: "img/mon-field_rows.jpg"
 author: "T.J. Corrigan"
+githubProfile : "tj-corrigan"
+twitterHandle : "sm_tjc"
+avatarUrl : "https://avatars3.githubusercontent.com/u/1248896?v=3"
 tags: [aws, distributed systems, coreos, tutorials]
 ---
 
@@ -20,7 +23,7 @@ etcd requires an initial bootstrapping to form a cluster. This can be accomplish
 
 Our initial approach, using etcd 0.4, was to create 3 dedicated EC2 instances in AWS via [CloudFormation](http://aws.amazon.com/cloudformation/). This allowed us access to the IPs of these machines to use in the [cloud-config](https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/#coreos) in a block like:
 
-``` yaml
+```yaml
 coreos:
   etcd:
     addr: localhost:4001    

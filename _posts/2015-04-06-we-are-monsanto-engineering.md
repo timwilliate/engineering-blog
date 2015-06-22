@@ -4,6 +4,9 @@ title: "We are Monsanto Engineering"
 subtitle: "Our Diversity of IT Innovation"
 header-img: "img/mon-field_rows.jpg"
 author: Ryan Richt
+githubProfile : "ryan-richt"
+twitterHandle : "ryan_richt"
+avatarUrl : "https://avatars2.githubusercontent.com/u/541228?v=3"
 tags: [open source, introduction, overview]
 ---
 

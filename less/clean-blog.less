@@ -124,13 +124,12 @@ hr.small {
 			/* when the user scrolls down, we hide the header right above the viewport */
 			position: fixed;
 			top: -61px;
-			background-color: fade(white, 90%);
-			border-bottom: 1px solid darken(white, 5%);
+			background-color: @light-black;
 			-webkit-transition: -webkit-transform 0.3s;
 			-moz-transition: -moz-transform 0.3s;
 			transition: transform 0.3s;
 			.navbar-brand {
-				color: @pea-green;
+				color: #ffffff;
 				&:hover,
 				&:focus {
 					color: @orange-select;
@@ -139,7 +138,7 @@ hr.small {
 			.nav {
 				li {
 					a {
-						color: @gray-dark;
+						color: white;
 						&:hover,
 						&:focus {
 							color: @orange-select;
@@ -476,6 +475,27 @@ body {
   img{
     border: 1px solid #ccc;
     border-radius: 3px;
+  }
+
+}
+.post-signature{
+  height: 40px;
+  margin-bottom: -20px;
+  img{
+    width:32px;
+    height: 32px;
+    border-radius: 16px;
+    display: inline;
+  }
+  .fa-stack{
+    font-size: 17px;
+  }
+  a{
+    text-decoration: none;
+    margin-left: 5px;
+  }
+  .signature-links{
+
   }
 
 }
