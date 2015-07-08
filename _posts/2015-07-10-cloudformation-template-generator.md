@@ -74,7 +74,7 @@ object `AWS::EC2::Subnet` extends DefaultJsonProtocol {
 ```
 The Resource companion objects always define an implicit [Spray-JSON](https://github.com/spray/spray-json) type class instance.
 
-So we lied about that its a perfect mapping to the JSON. In CloudFormation top level entities are held in a map with a user specified name as a key. In CFTG each Resource or Parameter has a "name" property that holds this label _inside_ each object so that it can be be more easily referenced from others.
+OK so its not quite a perfect mapping to the JSON. In CloudFormation top level entities are held in a map with a user specified name as a key. In CFTG each Resource or Parameter has a "name" property that holds this label _inside_ each object so that it can be be more easily referenced from others.
 
 But we do try to map as closely to CloudFormation as possible. We have non-idiomatic Scala capital field names in Resources to match that CloudFormation standard. We use Scala's back-tick labels to preserve the CloudFormation ```AWS::EC2::Subnet``` style names for better search-ability and familiarity with raw CloudFormation. We also support Conditions on resource which result in conditional creation, including a "when" convenience function that you can also use through:
 
@@ -192,10 +192,12 @@ There are several Amazon resources with documentation like:
 >...
 >
 >AliasTarget
->>*Alias resource record sets only:* Information about the domain to which >you are redirecting traffic.
+>
+>*Alias resource record sets only:* Information about the domain to which >you are redirecting traffic.
 >...
 >TTL
->>The resource record cache time to live (TTL), in seconds. *If you specify >this property, do not specify the AliasTarget property.* For alias target >records, the alias uses a TTL value from the target.
+>
+>The resource record cache time to live (TTL), in seconds. *If you specify >this property, do not specify the AliasTarget property.* For alias target >records, the alias uses a TTL value from the target.
 >...
 
 If this is relatively simple, we can (/did) just create a class with a private constructor and a set of defined factory methods, like this real example:
@@ -226,7 +228,9 @@ So we try to do this in a variety of places in CFTG to ensure we are creating AW
 
 Elsewhere, we use a more sophisticated pattern, that is obvious in Scala but we haven't seen documented anywhere, that we call the "Valid Combo Pattern." For this AWS resource:
 
->AWS::EC2::Route>>Creates a new route in a route table within a VPC. The route's target can be either a gateway attached to the VPC or a NAT instance in the VPC.
+>AWS::EC2::Route
+>
+>Creates a new route in a route table within a VPC. The route's target can be either a gateway attached to the VPC or a NAT instance in the VPC.
 >
 >...
 >
@@ -414,7 +418,7 @@ So now that we have methods to automate all of the above, the last major source 
 
 So yes, we do have this one symbolic operator in CFTG, and we read it as "flow." Each expression like `x ->- 22 / TCP ->- y` generates a list of ingress rules, in this case it generates a single rule that allows ingress traffic on port 22 over the TCP protocol from security group `x` to security group `y`.
 
-As you can see above, you can leave off `/ TCP` as it is the default. We also support other protocols such as ` / UDP` or ` / ICMP` or the wildcard ` / ALL`. We read `/` as "over," as in "22 over TCP" like you'd say "JSON over HTTP." (OK so I guess we lied, we have two, two symbolic operators.) We also support port ranges uses Scala ranges of ports like `(1 to 1024)`, as well as cherry-picked sequences of ports like `Seq(22, 5601)` Ranges also support protocols, and sequence elements can both have protocols and themselves be nested ranges.
+As you can see above, you can leave off `/ TCP` as it is the default. We also support other protocols such as ` / UDP` or ` / ICMP` or the wildcard ` / ALL`. We read `/` as "over," as in "22 over TCP" like you'd say "JSON over HTTP." (OK so I guess we have two, TWO symbolic operators.) We also support port ranges uses Scala ranges of ports like `(1 to 1024)`, as well as cherry-picked sequences of ports like `Seq(22, 5601)` Ranges also support protocols, and sequence elements can both have protocols and themselves be nested ranges.
 
 You can flow in either direction, because who wants to have to remember which ways the arrows are "supposed to go", meaning you can write the same ingress rule as either:
 
