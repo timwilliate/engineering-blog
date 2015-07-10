@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "CloudFormation Template Generator"
-subtitle: "or A Tour of Scala Type system Features"
+subtitle: "or A Tour of Scala Type System Features"
 header-img: "img/mon-hands_grains.jpg"
 author: "Ryan Richt"
 tags: [types, scala, aws, tutorials]
@@ -14,13 +14,13 @@ extra_css:
 
 ## TL;DR
 
-CloudFormation gives you a declarative specification to stand up complex AWS topologies. You can simplify creation of templates with potentially thousands of lines using our open source, type-safe library to generate templates with the full power of Scala. We use a variety of strategies to simplify creations of resources as well as encode consistency checks in Scala's type system.
+CloudFormation gives you a declarative specification to stand up complex AWS topologies. You can simplify creation of templates with potentially thousands of lines using our open source, type-safe [library ](https://github.com/MonsantoCo/cloudformation-template-generator) to generate templates with the full power of Scala. We use a variety of strategies to simplify creation of resources as well as encode consistency checks in Scala's type system.
 
 ## Hand-crafted Template Woes
 
-At Monsanto we have a reasonably complex infrastructure topology for managing Microservice applications in AWS. You may have seen our post open sourcing our Stax tool for simplifying interactions with AWS and managing our VPCs.
+At Monsanto we have a reasonably complex infrastructure topology for managing Microservice applications in AWS. You may have seen our post open sourcing our [Stax](http://engineering.monsanto.com/2015/07/08/stax/) tool for simplifying interactions with AWS and managing our VPCs. Or maybe you're jumping into the new AWS [Service Catalog](http://aws.amazon.com/servicecatalog/).
 
-Stax and underlying [CloudFormation](http://aws.amazon.com/cloudformation/) both work on a BYOT model - bring your own template. Our problem was, as our topology become more complex and many members of our team spent more and more time making changes, our template ballooned to ~5,000 lines of JSON. Worse, CloudFormation entries are not self-contained but also contain internal references:
+Stax, AWS Service Catalog, and underlying [CloudFormation](http://aws.amazon.com/cloudformation/) all work on a BYOT model - bring your own template. Our problem was, as our topology become more complex and many members of our team spent more and more time making changes, our template ballooned to ~5,000 lines of JSON. Worse, CloudFormation entries are not self-contained but also contain internal references:
 
 ```json
 "MyAutoScaleGroup": {
@@ -111,7 +111,13 @@ object IPMask {
   implicit def fromInt(i: Int): IPMask = IPMask(i)
 }
 
-case class CidrBlock(a: IPAddressSegment, b: IPAddressSegment, c: IPAddressSegment, d: IPAddressSegment, mask: IPMask)
+case class CidrBlock(
+	a: IPAddressSegment, 
+	b: IPAddressSegment, 
+	c: IPAddressSegment, 
+	d: IPAddressSegment, 
+	mask: IPMask
+)
 ...
 ```
 
@@ -124,7 +130,10 @@ val myBlock = CidrBlock(10, 10, 0, 0, 16)
 but have the type checking of:
 
 ```scala
-val myBlock = CidrBlock(IPAddressSegment(10), IPAddressSegment(10), IPAddressSegment(0), IPAddressSegment(0), IPMask(16))
+val myBlock = CidrBlock(
+	IPAddressSegment(10), IPAddressSegment(10), IPAddressSegment(0), IPAddressSegment(0), 
+	IPMask(16)
+)
 ```
 
 You'll note this is one of the few places we "cheat" with run-time (but remember this is template _generation_ runtime, not template instantiation runtime) with some [Design-by-contract](https://en.wikipedia.org/wiki/Design_by_contract) style checks for valid numerical ranges of IP segments.
@@ -192,14 +201,14 @@ object Token extends DefaultJsonProtocol {
   implicit def fromSome[R](oR: Some[R])(implicit ev1: R => Token[R]): Some[Token[R]] =
     oR.map(ev1).asInstanceOf[Some[Token[R]]]
 
-  implicit def fromOption[R](oR: Option[R])(implicit ev1: R => Token[R]): Option[Token[R]] =
-    oR.map(ev1)
+  implicit def fromOption[R](oR: Option[R])(implicit ev1: R => Token[R]): 
+  	Option[Token[R]] = oR.map(ev1)
 
-  implicit def fromResource[R <: Resource[R]](r: R)(implicit conv: (R) => ResourceRef[R]): Token[ResourceRef[R]] =
-    fromAny(conv(r))
+  implicit def fromResource[R <: Resource[R]](r: R)(implicit conv: (R) => ResourceRef[R]): 
+  	Token[ResourceRef[R]] = fromAny(conv(r))
 
-  implicit def fromSeq[R <: Resource[R]](sR: Seq[R])(implicit toRef: R => ResourceRef[R]): Seq[Token[ResourceRef[R]]] =
-    sR.map(r => fromAny(toRef(r)))
+  implicit def fromSeq[R <: Resource[R]](sR: Seq[R])(implicit toRef: R => ResourceRef[R]): 
+  	Seq[Token[ResourceRef[R]]] = sR.map(r => fromAny(toRef(r)))
 ```
 
 This includes the ability to automatically wrap options of things (including a more specific conversion to maintain Somes as such, more on that later), each of a sequence of Resources, etc.
@@ -259,8 +268,11 @@ Here to avoid writing a long constructor method four times, we specify a set of 
 @implicitNotFound("A Route can only have exactly ONE of GatewayId, InstanceId, NetworkInterfaceId or VpcPeeringConnectionId set")
 class ValidRouteCombo[G, I] private ()
 object ValidRouteCombo{
-  implicit object valid1T extends ValidRouteCombo[Some[Token[ResourceRef[`AWS::EC2::InternetGateway`]]], None.type]
-  implicit object valid2T extends ValidRouteCombo[None.type , Some[Token[ResourceRef[`AWS::EC2::Instance`]]]]
+  implicit object valid1T extends 
+  	ValidRouteCombo[Some[Token[ResourceRef[`AWS::EC2::InternetGateway`]]], None.type]
+  
+  implicit object valid2T extends 
+  	ValidRouteCombo[None.type , Some[Token[ResourceRef[`AWS::EC2::Instance`]]]]
   ...
 }
 ```
@@ -280,7 +292,10 @@ object `AWS::EC2::Route` extends DefaultJsonProtocol {
     GatewayId:                    G = None,
     InstanceId:                   I = None,
     Condition: Option[ConditionRef] = None
-   )(implicit ev1: ValidRouteCombo[G, I]) = new `AWS::EC2::Route`(name, RouteTableId, DestinationCidrBlock, GatewayId, InstanceId, Condition)
+   )(implicit ev1: ValidRouteCombo[G, I]) = 
+   		new `AWS::EC2::Route`(
+   			name, RouteTableId, DestinationCidrBlock, GatewayId, InstanceId, Condition
+   		)
 }	
 ```
 
@@ -301,19 +316,19 @@ object LoggingSupport {
   private val journalspewYaml = "/cloudconfig/journalctl.yaml"
 
   val loggingUnits =
-    yaml"""
-      |- $logspoutYaml
-      |- $logrotateYaml
-    """
+    yaml"" // yes this is supposed to be """, but I can't figure out how to make Markdown happy
+      -- $logspoutYaml
+      -- $logrotateYaml
+    ""
 }
 ...
-    yaml"""
+    yaml"" // this one too
       |#cloud-config
       |
       |coreos:
       |  units:
       |    ${LoggingSupport.loggingUnits}
-    """
+    ""
 ```
 
 First, we provide a YAML string interpolator that allows you to compose bits of YAML together, accounting for indenting. You can see this in the bottom section where we include a YAML list into the CoreOS units map.
