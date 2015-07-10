@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The engineers of Monsanto produce code that powers agricultural products that support farmers all around the world. Our goal of sustainable agriculture mirrors the way we present our ideas and code to the world.">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <title>CloudFormation Template Generator - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css">
+    
+    <link rel="stylesheet" href="/css/implicits-intro.css">
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-hands_grains.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>CloudFormation Template Generator</h1>
+                        
+                        <h2 class="subheading">or A Tour of Scala Type System Features</h2>
+                        
+                        <span class="meta">Posted by Ryan Richt on July 10, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<h2>TL;DR</h2>
+
+<p>CloudFormation gives you a declarative specification to stand up complex AWS topologies. You can simplify creation of templates with potentially thousands of lines using our open source, type-safe <a href="https://github.com/MonsantoCo/cloudformation-template-generator">library </a> to generate templates with the full power of Scala. We use a variety of strategies to simplify creation of resources as well as encode consistency checks in Scala&#39;s type system.</p>
+
+<h2>Hand-crafted Template Woes</h2>
+
+<p>At Monsanto we have a reasonably complex infrastructure topology for managing Microservice applications in AWS. You may have seen our post open sourcing our <a href="http://engineering.monsanto.com/2015/07/08/stax/">Stax</a> tool for simplifying interactions with AWS and managing our VPCs. Or maybe you&#39;re jumping into the new AWS <a href="http://aws.amazon.com/servicecatalog/">Service Catalog</a>.</p>
+
+<p>Stax, AWS Service Catalog, and underlying <a href="http://aws.amazon.com/cloudformation/">CloudFormation</a> all work on a BYOT model - bring your own template. Our problem was, as our topology become more complex and many members of our team spent more and more time making changes, our template ballooned to ~5,000 lines of JSON. Worse, CloudFormation entries are not self-contained but also contain internal references:</p>
+<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="s2">&quot;MyAutoScaleGroup&quot;</span><span class="err">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::AutoScaling::AutoScalingGroup&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;LoadBalancerNames&quot;</span><span class="p">:</span> <span class="p">[{</span>
+          <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;MyLoadBalancerA&quot;</span>
+        <span class="p">},</span> <span class="p">{</span>
+          <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;MyLoadBalancerB&quot;</span>
+        <span class="p">}],</span>
+        <span class="err">...</span>
+</code></pre></div>
+<p>meaning that changes to a template may require simultaneous edits to far-flung parts of the template you might not even know exist.</p>
+
+<p>Today we have reduced our template to ~500 lines of Scala that make use of our <a href="https://github.com/MonsantoCo/cloudformation-template-generator">CloudFormation Template Generator library</a> which is now open source under the BSD 3-clause license.</p>
+
+<h2>Goals</h2>
+
+<p>In designing CFTG, we wanted to eliminate repetition and many common errors that we saw in working with complex templates:</p>
+
+<ul>
+<li>Support generation of repetitive elements</li>
+<li>Constrain &quot;References&quot; to entities that actually exist</li>
+<li>Check the types of Maps and Functions like Fn::If</li>
+<li>Lift all of the stringly-typed parameters like AMI&#39;s or CIDR blocks into strong types</li>
+<li>Explicitly model optional fields</li>
+<li>Disallow the many mutually exclusive parameter settings described in the CloudFormation documentation</li>
+</ul>
+
+<p>We also wanted to create a &quot;layered&quot; set of abstractions. At the bottom most layer, we have objects that map directly to CloudFormation JSON objects and we are continuing to work on higher-order Builder functions to create groups of meaningful functionality, such as autoscaling groups with reasonable launch configs.</p>
+
+<p>In early versions and after aggressive refactoring we also noticed that the majority of our remaining template code concerned Security Groups and In/Egress Rules so we also created a DSL for ingress rules and a construct for implicit security groups we call &quot;SecurityGroupRoutables.&quot;</p>
+
+<p>Why didn&#39;t we use <a href="https://www.terraform.io">Terraform</a> or roll-our-own API calls? While these might be great solutions for some, Terraform did not (and still does not yet) support all of the resources types we needed to use. We also wanted the full power of a Turing-complete language like Scala to abstract complex elements. As fans of &quot;immutable infrastructure&quot; we also liked the idea of using CloudFormation where we have an authoritative, declarative specification of our entire environment without drift.</p>
+
+<h2>Low-Level Bits</h2>
+
+<p>We love <a href="https://github.com/spray/spray-json">Spray-JSON</a> and its type-class based system for mapping classes to JSON. All of our Resource classes look something like this:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">`AWS::EC2::Subnet`</span><span class="o">(</span>
+  <span class="n">name</span><span class="k">:</span>             <span class="kt">String</span><span class="o">,</span>
+  <span class="nc">VpcId</span><span class="k">:</span>            <span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::VPC`</span><span class="o">]],</span>
+  <span class="nc">AvailabilityZone</span><span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+  <span class="nc">CidrBlock</span><span class="k">:</span>        <span class="kt">Token</span><span class="o">[</span><span class="kt">CidrBlock</span><span class="o">],</span>
+  <span class="nc">Tags</span><span class="k">:</span>             <span class="kt">Seq</span><span class="o">[</span><span class="kt">AmazonTag</span><span class="o">],</span>
+  <span class="k">override</span> <span class="k">val</span> <span class="nc">Condition</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">ConditionRef</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span>
+  <span class="o">)</span> <span class="k">extends</span> <span class="nc">Resource</span><span class="o">[</span><span class="kt">`AWS::EC2::Subnet`</span><span class="o">]{</span>
+
+  <span class="k">def</span> <span class="n">when</span><span class="o">(</span><span class="n">newCondition</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">ConditionRef</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Condition</span><span class="o">)</span> <span class="k">=</span> <span class="n">copy</span><span class="o">(</span><span class="nc">Condition</span> <span class="k">=</span> <span class="n">newCondition</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">object</span> <span class="nc">`AWS::EC2::Subnet`</span> <span class="k">extends</span> <span class="nc">DefaultJsonProtocol</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">format</span><span class="k">:</span> <span class="kt">JsonFormat</span><span class="o">[</span><span class="kt">`AWS::EC2::Subnet`</span><span class="o">]</span> <span class="k">=</span> <span class="n">jsonFormat6</span><span class="o">(</span><span class="n">`AWS::EC2::Subnet`</span><span class="o">.</span><span class="n">apply</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The Resource companion objects always define an implicit <a href="https://github.com/spray/spray-json">Spray-JSON</a> type class instance.</p>
+
+<p>OK so it&#39;s not quite a perfect mapping to the JSON. In CloudFormation, top level entities are held in a map with a user specified name as a key. In CFTG each Resource or Parameter has a &quot;name&quot; property that holds this label <em>inside</em> each object so that it can be be more easily referenced from others.</p>
+
+<p>But we do try to map as closely to CloudFormation as possible. We have non-idiomatic Scala capital field names in Resources to match that CloudFormation standard. We use Scala&#39;s back-tick labels to preserve the CloudFormation <code>AWS::EC2::Subnet</code> style names for better search-ability and familiarity with raw CloudFormation. We also support Conditions on resource which result in conditional creation, including a &quot;when&quot; convenience function that you can also use through:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">com.monsanto.arch.cloudformation.model.simple.Builders._</span>
+
+<span class="k">object</span> <span class="nc">Example</span><span class="o">{</span>
+    <span class="o">...</span>
+    <span class="k">val</span> <span class="n">conditionalResource</span> <span class="k">=</span> <span class="n">when</span><span class="o">(</span><span class="n">someCondition</span><span class="o">){</span>
+        <span class="n">someResource</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<h2>More Types</h2>
+
+<p>This <code>AWS::EC2::Subnet</code> Resource also highlights a few other central concepts in CFTG: our reference types, our common usage of wrapper types for things like CIDR Blocks and Amazon&#39;s Tags, and the mysterious &quot;Token&quot; type.</p>
+
+<p>In CloudFormation, you can reference Resources, Parameters, Mappings and Conditions by name. In CFTG we force all of these to be by object reference using <code>ResourceRef</code>, <code>ConditionRef</code>, <code>ParameterRef</code>, and <code>MappingRef</code>. These references contain a type parameter of what they point to. For instance, to define an <code>AWS::EC2::Subnet</code> you have to pass in a <code>VpcId: Token[ResourceRef[AWS::EC2::VPC]]</code>. In stock CloudFormation this parameter is just a string, as are CIDR blocks, AMI IDs, etc., but in CFTG we have strict types for almost everything.</p>
+
+<p>Many of these types do have implicit conversions to make them easier to use: you can always pass a Resource instance, like an <code>AWS::EC2::Instance</code> to something that takes a <code>ResourceRef[AWS::EC2::Instance]</code> and it will be converted for you. Similarly for classes like CidrBlock which is defined like this:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Int</span><span class="o">){</span> <span class="n">require</span><span class="o">(</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span> <span class="o">&amp;&amp;</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">)</span> <span class="o">}</span>
+<span class="k">object</span> <span class="nc">IPAddressSegment</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromInt</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">IPAddressSegment</span> <span class="o">=</span> <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">IPMask</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Int</span><span class="o">){</span> <span class="n">require</span><span class="o">(</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">32</span> <span class="o">&amp;&amp;</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">)</span> <span class="o">}</span>
+<span class="k">object</span> <span class="nc">IPMask</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromInt</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">IPMask</span> <span class="o">=</span> <span class="nc">IPMask</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">CidrBlock</span><span class="o">(</span>
+    <span class="n">a</span><span class="k">:</span> <span class="kt">IPAddressSegment</span><span class="o">,</span> 
+    <span class="n">b</span><span class="k">:</span> <span class="kt">IPAddressSegment</span><span class="o">,</span> 
+    <span class="n">c</span><span class="k">:</span> <span class="kt">IPAddressSegment</span><span class="o">,</span> 
+    <span class="n">d</span><span class="k">:</span> <span class="kt">IPAddressSegment</span><span class="o">,</span> 
+    <span class="n">mask</span><span class="k">:</span> <span class="kt">IPMask</span>
+<span class="o">)</span>
+<span class="o">...</span>
+</code></pre></div>
+<p>This makes it valid to write simply:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">myBlock</span> <span class="k">=</span> <span class="nc">CidrBlock</span><span class="o">(</span><span class="mi">10</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">16</span><span class="o">)</span>
+</code></pre></div>
+<p>but have the type checking of:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">myBlock</span> <span class="k">=</span> <span class="nc">CidrBlock</span><span class="o">(</span>
+    <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="mi">10</span><span class="o">),</span> <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="mi">10</span><span class="o">),</span> <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="nc">IPAddressSegment</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> 
+    <span class="nc">IPMask</span><span class="o">(</span><span class="mi">16</span><span class="o">)</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>You&#39;ll note this is one of the few places we &quot;cheat&quot; with run-time (but remember this is template <em>generation</em> runtime, not template instantiation runtime) with some <a href="https://en.wikipedia.org/wiki/Design_by_contract">Design-by-contract</a> style checks for valid numerical ranges of IP segments.</p>
+
+<h2>Typed Functions</h2>
+
+<p>OK, so what is that funny <code>Token[T]</code> thing? It might be a terrible name (<a href="https://github.com/MonsantoCo/cloudformation-template-generator/pulls">Pull Requests welcome</a>), but it&#39;s purpose is to abstract over &quot;a literal <code>T</code>&quot; or &quot;an Amazon function that returns a <code>T</code>.&quot; In CFTG, we have versions of the built-in Amazon functions like:</p>
+
+<ul>
+<li><code>Fn::GetAtt</code></li>
+<li><code>Fn::Join</code></li>
+<li><code>Fn::FindInMap</code></li>
+<li><code>Fn::Base64</code></li>
+<li><code>Fn::Equals</code></li>
+<li><code>Fn::Not</code></li>
+<li><code>Fn::And</code></li>
+<li><code>Fn::Or</code></li>
+<li><code>Fn::If</code></li>
+</ul>
+
+<p>Consider the implementation of <code>Fn::If</code>:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">case</span> <span class="k">class</span> <span class="nc">`Fn::If`</span><span class="o">[</span><span class="kt">R</span> <span class="kt">:</span> <span class="kt">JsonFormat</span><span class="o">](</span>
+    <span class="n">conditionName</span> <span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span> 
+    <span class="n">valIfTrue</span><span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">],</span> 
+    <span class="n">valIfFalse</span><span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">]</span>
+<span class="o">)</span> <span class="k">extends</span> <span class="nc">AmazonFunctionCall</span><span class="o">[</span><span class="kt">R</span><span class="o">](</span><span class="s">&quot;Fn::If&quot;</span><span class="o">){</span>
+    <span class="k">type</span> <span class="kt">CFBackingType</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span> <span class="nc">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">],</span> <span class="nc">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span>
+    <span class="k">val</span> <span class="n">arguments</span> <span class="k">=</span> <span class="o">(</span><span class="n">conditionName</span><span class="o">,</span> <span class="n">valIfTrue</span><span class="o">,</span> <span class="n">valIfFalse</span><span class="o">)</span>
+<span class="o">...</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Here <code>R</code> is the logical return type of the <code>Fn::If</code> in CFTG (logical because this is <em>our</em> notion of a return type, not stock CloudFormation&#39;s). For instance I could have a: </p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">gatewayServiceELBSecGroup</span> <span class="k">=</span> <span class="c1">// Security group with 80 ingress rules</span>
+<span class="k">val</span> <span class="n">gatewayServiceELBSSLSecGroup</span> <span class="k">=</span> <span class="c1">// Security group with 443 ingress rules</span>
+
+<span class="k">val</span> <span class="n">serviceElbOrElbSSL</span><span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::SecurityGroup`</span><span class="o">]]</span> <span class="k">=</span>
+  <span class="n">`Fn::If`</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::SecurityGroup`</span><span class="o">]](</span>
+    <span class="s">&quot;ServiceELBSSLCertNameIsNotDefined&quot;</span><span class="o">,</span>
+    <span class="n">gatewayServiceELBSecGroup</span><span class="o">,</span>
+    <span class="n">gatewayServiceELBSSLSecGroup</span>
+  <span class="o">)</span>
+</code></pre></div>
+<p>I&#39;ve shown the explicit return type parameter of this <code>Fn::If</code> which here is a <code>Token[ResourceRef[`AWS::EC2::SecurityGroup`]]</code>, not just a string! In this way I could pass this value confidently to an <code>AWS::EC2::Instance</code> constructor that requires a Security Group.</p>
+
+<p>Back to Tokens, while you can explicitly wrap a Resource (and sometimes other values) you can always just pass a Resource or a Function return value and it will be promoted into a Token value using the implicit conversions:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">]</span>
+<span class="nc">object</span> <span class="nc">Token</span> <span class="k">extends</span> <span class="nc">DefaultJsonProtocol</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromAny</span><span class="o">[</span><span class="kt">R:</span> <span class="kt">JsonFormat</span><span class="o">](</span><span class="n">r</span><span class="k">:</span> <span class="kt">R</span><span class="o">)</span><span class="k">:</span> <span class="kt">AnyToken</span><span class="o">[</span><span class="kt">R</span><span class="o">]</span> <span class="k">=</span> <span class="nc">AnyToken</span><span class="o">(</span><span class="n">r</span><span class="o">)</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromOptionAny</span><span class="o">[</span><span class="kt">R:</span> <span class="kt">JsonFormat</span><span class="o">](</span><span class="n">or</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">AnyToken</span><span class="o">[</span><span class="kt">R</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="n">or</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">r</span> <span class="k">=&gt;</span> <span class="nc">Token</span><span class="o">.</span><span class="n">fromAny</span><span class="o">(</span><span class="n">r</span><span class="o">))</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromString</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">StringToken</span> <span class="o">=</span> <span class="nc">StringToken</span><span class="o">(</span><span class="n">s</span><span class="o">)</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromFunction</span><span class="o">[</span><span class="kt">R</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">AmazonFunctionCall</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> <span class="kt">FunctionCallToken</span><span class="o">[</span><span class="kt">R</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">FunctionCallToken</span><span class="o">[</span><span class="kt">R</span><span class="o">](</span><span class="n">f</span><span class="o">)</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromSome</span><span class="o">[</span><span class="kt">R</span><span class="o">](</span><span class="n">oR</span><span class="k">:</span> <span class="kt">Some</span><span class="o">[</span><span class="kt">R</span><span class="o">])(</span><span class="k">implicit</span> <span class="n">ev1</span><span class="k">:</span> <span class="kt">R</span> <span class="o">=&gt;</span> <span class="nc">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> <span class="kt">Some</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="n">oR</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">ev1</span><span class="o">).</span><span class="n">asInstanceOf</span><span class="o">[</span><span class="kt">Some</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">]]]</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromOption</span><span class="o">[</span><span class="kt">R</span><span class="o">](</span><span class="n">oR</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">R</span><span class="o">])(</span><span class="k">implicit</span> <span class="n">ev1</span><span class="k">:</span> <span class="kt">R</span> <span class="o">=&gt;</span> <span class="nc">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> 
+    <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">R</span><span class="o">]]</span> <span class="k">=</span> <span class="n">oR</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">ev1</span><span class="o">)</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromResource</span><span class="o">[</span><span class="kt">R</span> <span class="k">&lt;:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">R</span><span class="o">]](</span><span class="n">r</span><span class="k">:</span> <span class="kt">R</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">conv</span><span class="k">:</span> <span class="o">(</span><span class="kt">R</span><span class="o">)</span> <span class="o">=&gt;</span> <span class="nc">ResourceRef</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> 
+    <span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">R</span><span class="o">]]</span> <span class="k">=</span> <span class="n">fromAny</span><span class="o">(</span><span class="n">conv</span><span class="o">(</span><span class="n">r</span><span class="o">))</span>
+
+  <span class="k">implicit</span> <span class="k">def</span> <span class="n">fromSeq</span><span class="o">[</span><span class="kt">R</span> <span class="k">&lt;:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">R</span><span class="o">]](</span><span class="n">sR</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">R</span><span class="o">])(</span><span class="k">implicit</span> <span class="n">toRef</span><span class="k">:</span> <span class="kt">R</span> <span class="o">=&gt;</span> <span class="nc">ResourceRef</span><span class="o">[</span><span class="kt">R</span><span class="o">])</span><span class="k">:</span> 
+    <span class="kt">Seq</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">R</span><span class="o">]]]</span> <span class="k">=</span> <span class="n">sR</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">r</span> <span class="k">=&gt;</span> <span class="n">fromAny</span><span class="o">(</span><span class="n">toRef</span><span class="o">(</span><span class="n">r</span><span class="o">)))</span>
+</code></pre></div>
+<p>This includes the ability to automatically wrap options of things (including a more specific conversion to maintain Somes as such, more on that later), each of a sequence of Resources, etc.</p>
+
+<h2>Patterns for Encoding Complex Constraints</h2>
+
+<p>There are several Amazon resources with documentation like:</p>
+
+<blockquote>
+<p>AWS::Route53::RecordSet<br>
+...<br>
+AliasTarget<br>
+<em>Alias resource record sets only:</em> Information about the domain to which you are redirecting traffic.<br>
+...<br>
+TTL<br>
+The resource record cache time to live (TTL), in seconds. <em>If you specify this property, do not specify the AliasTarget property.</em> For alias target records, the alias uses a TTL value from the target.<br>
+...</p>
+</blockquote>
+
+<p>If this is relatively simple, we can (did) just create a class with a private constructor and a set of defined factory methods, like this real example:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">class</span> <span class="nc">`AWS::Route53::RecordSet`</span> <span class="k">private</span> <span class="o">(</span>
+  <span class="k">val</span> <span class="n">name</span><span class="k">:</span>            <span class="kt">String</span><span class="o">,</span>
+  <span class="k">val</span> <span class="nc">RecordName</span><span class="k">:</span>      <span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+  <span class="k">val</span> <span class="nc">RecordType</span><span class="k">:</span>      <span class="kt">Route53RecordType</span><span class="o">,</span>
+  <span class="k">val</span> <span class="nc">HostedZoneName</span><span class="k">:</span>  <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]],</span>
+  <span class="k">val</span> <span class="nc">HostedZoneId</span><span class="k">:</span>    <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]],</span>
+  <span class="k">val</span> <span class="nc">ResourceRecords</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]]]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+  <span class="k">val</span> <span class="nc">TTL</span><span class="k">:</span>             <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]]</span>      <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+  <span class="k">val</span> <span class="nc">AliasTarget</span><span class="k">:</span>     <span class="kt">Option</span><span class="o">[</span><span class="kt">Route53AliasTarget</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+  <span class="k">override</span> <span class="k">val</span> <span class="nc">Condition</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">ConditionRef</span><span class="o">]</span>    <span class="k">=</span> <span class="nc">None</span>
+  <span class="o">)</span> <span class="k">extends</span> <span class="nc">Resource</span><span class="o">[</span><span class="kt">`AWS::Route53::RecordSet`</span><span class="o">]{</span>
+  <span class="o">...</span>
+  <span class="o">}</span>
+<span class="k">object</span> <span class="nc">`AWS::Route53::RecordSet`</span> <span class="o">{</span>
+  <span class="o">...</span>
+  <span class="k">def</span> <span class="n">generalRecord</span><span class="o">(...)</span> <span class="k">=</span> <span class="k">new</span> <span class="n">`AWS::Route53::RecordSet`</span><span class="o">(...)</span>
+  <span class="k">def</span> <span class="n">aliasRecord</span><span class="o">(...)</span> <span class="k">=</span> <span class="k">new</span> <span class="n">`AWS::Route53::RecordSet`</span><span class="o">(...)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>So we try to do this in a variety of places in CFTG to ensure we are creating AWS resources that are &quot;correct by construction.&quot;</p>
+
+<p>Elsewhere, we use a more sophisticated pattern, that is obvious in Scala but we haven&#39;t seen documented anywhere, that we call the &quot;Valid Combo Pattern.&quot; For this AWS resource:</p>
+
+<blockquote>
+<p>AWS::EC2::Route</p>
+
+<p>Creates a new route in a route table within a VPC. The route&#39;s target can be either a gateway attached to the VPC or a NAT instance in the VPC.<br>
+...<br>
+GatewayId<br>
+...<br>
+Required: Conditional. <strong>You must specify only one of the following properties: GatewayId, InstanceId, NetworkInterfaceId, or VpcPeeringConnectionId.</strong></p>
+</blockquote>
+
+<p>Here to avoid writing a long constructor method four times, we specify a set of implicits values, one for each valid combo, from a class with a private constructor that others cannot create new instances of:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="nd">@implicitNotFound</span><span class="o">(</span><span class="s">&quot;A Route can only have exactly ONE of GatewayId, InstanceId, NetworkInterfaceId or VpcPeeringConnectionId set&quot;</span><span class="o">)</span>
+<span class="k">class</span> <span class="nc">ValidRouteCombo</span><span class="o">[</span><span class="kt">G</span>, <span class="kt">I</span><span class="o">]</span> <span class="nc">private</span> <span class="o">()</span>
+<span class="k">object</span> <span class="nc">ValidRouteCombo</span><span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">valid1T</span> <span class="k">extends</span> 
+    <span class="nc">ValidRouteCombo</span><span class="o">[</span><span class="kt">Some</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::InternetGateway`</span><span class="o">]]]</span>, <span class="kt">None.</span><span class="k">type</span><span class="o">]</span>
+
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">valid2T</span> <span class="k">extends</span> 
+    <span class="nc">ValidRouteCombo</span><span class="o">[</span><span class="kt">None.</span><span class="k">type</span> , <span class="kt">Some</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::Instance`</span><span class="o">]]]]</span>
+  <span class="o">...</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Then our factory method uses type parameters and implicits to make sure that a caller is filling in a valid set of Somes and Nones according to the defined implicits:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">object</span> <span class="nc">`AWS::EC2::Route`</span> <span class="k">extends</span> <span class="nc">DefaultJsonProtocol</span> <span class="o">{</span>
+<span class="o">...</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">[</span>
+    <span class="kt">G</span> <span class="k">&lt;:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::InternetGateway`</span><span class="o">]]]</span>,
+    <span class="kt">I</span> <span class="k">&lt;:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::Instance`</span><span class="o">]]]</span>
+  <span class="o">](</span>
+    <span class="n">name</span><span class="k">:</span>                         <span class="kt">String</span><span class="o">,</span>
+    <span class="nc">RouteTableId</span><span class="k">:</span>                 <span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::RouteTable`</span><span class="o">]],</span>
+    <span class="nc">DestinationCidrBlock</span><span class="k">:</span>         <span class="kt">CidrBlock</span><span class="o">,</span>
+    <span class="nc">GatewayId</span><span class="k">:</span>                    <span class="kt">G</span> <span class="o">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">InstanceId</span><span class="k">:</span>                   <span class="kt">I</span> <span class="o">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">Condition</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">ConditionRef</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span>
+   <span class="o">)(</span><span class="k">implicit</span> <span class="n">ev1</span><span class="k">:</span> <span class="kt">ValidRouteCombo</span><span class="o">[</span><span class="kt">G</span>, <span class="kt">I</span><span class="o">])</span> <span class="k">=</span> 
+        <span class="k">new</span> <span class="n">`AWS::EC2::Route`</span><span class="o">(</span>
+            <span class="n">name</span><span class="o">,</span> <span class="nc">RouteTableId</span><span class="o">,</span> <span class="nc">DestinationCidrBlock</span><span class="o">,</span> <span class="nc">GatewayId</span><span class="o">,</span> <span class="nc">InstanceId</span><span class="o">,</span> <span class="nc">Condition</span>
+        <span class="o">)</span>
+<span class="o">}</span>   
+</code></pre></div>
+<p>You can see the implicit parameter ev1 (evidence 1) witnesses that G,I are part of one of the valid combinations that we encoded above, namely that only one of the options can be a Some.</p>
+
+<p>Now we could implement the other <code>ValidRouteCombo</code>&#39;s for NetworkInterfaceId and VpcPeeringConnectionId each with one line of new code instead of 9 lines each of another constructor for each. Further, the Valid Combo Pattern encodes much more explicitly in the type system what is valid than the private constructor + factories approach.</p>
+
+<h2>YAML Support</h2>
+
+<p>In addition to our templates including lots of Amazon resources, they eventually accumulated many large and increasing complex <a href="https://coreos.com/docs/cluster-management/setup/cloudinit-cloud-config/">CloudConfig</a> configuration files to setup individual hosts. Some of the components formerly hand-coded in CloudFormation JSON were duplicated across many files.</p>
+
+<p>We support 2 features to abstract these common pieces and compose them back together:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">object</span> <span class="nc">LoggingSupport</span> <span class="o">{</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">logrotateYaml</span> <span class="k">=</span> <span class="s">&quot;/cloudconfig/logrotate.yaml&quot;</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">logspoutYaml</span> <span class="k">=</span> <span class="s">&quot;/cloudconfig/logspout.yaml&quot;</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">journalspewYaml</span> <span class="k">=</span> <span class="s">&quot;/cloudconfig/journalctl.yaml&quot;</span>
+
+  <span class="k">val</span> <span class="n">loggingUnits</span> <span class="k">=</span>
+    <span class="n">yaml</span><span class="s">&quot;&quot;</span> <span class="c1">// yes this is supposed to be &quot;&quot;&quot;, but I can&#39;t figure out how to make Markdown happy</span>
+      <span class="o">--</span> <span class="nc">$logspoutYaml</span>
+      <span class="o">--</span> <span class="nc">$logrotateYaml</span>
+    <span class="s">&quot;&quot;</span>
+<span class="o">}</span>
+<span class="o">...</span>
+    <span class="n">yaml</span><span class="s">&quot;&quot;</span> <span class="c1">// this one too</span>
+      <span class="o">|</span><span class="k">#</span><span class="n">cloud</span><span class="o">-</span><span class="n">config</span>
+      <span class="o">|</span>
+      <span class="o">|</span><span class="n">coreos</span><span class="k">:</span>
+      <span class="kt">|</span>  <span class="kt">units:</span>
+      <span class="o">|</span>    <span class="n">$</span><span class="o">{</span><span class="nc">LoggingSupport</span><span class="o">.</span><span class="n">loggingUnits</span><span class="o">}</span>
+    <span class="s">&quot;&quot;</span>
+</code></pre></div>
+<p>First, we provide a YAML string interpolator that allows you to compose bits of YAML together, accounting for indenting. You can see this in the bottom section where we include a YAML list into the CoreOS units map.</p>
+
+<p>Second, as you can see at the top, instead of a bit of YAML, you can instead provide a file path to your YAML files, in this case files under src/main/resources/cloudconfig, and the contents of that file will be transcluded (with indenting) into the interpolating YAML.</p>
+
+<h2>Higher-Order Builders</h2>
+
+<p>For simpler topologies, we have a set of convenience methods to more easily create common entities. For instance, many types of Resources, like <code>AWS::EC2::Instance</code>&#39;s require a constructor parameter for VPC and Subnet in which that instance will be contained. Our methods allow you to express a template in a way that visually resembles a diagram of your architecture. Logical/network containment is express in nested code blocks:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">withVpc</span><span class="o">(</span><span class="nc">ParameterRef</span><span class="o">(</span><span class="n">vpcCidrParameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">vpc</span> <span class="k">=&gt;</span>
+    <span class="n">withAZ</span><span class="o">(</span><span class="nc">ParameterRef</span><span class="o">(</span><span class="n">availabilityZone1Parameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">az1</span> <span class="k">=&gt;</span>
+      <span class="n">withSubnet</span><span class="o">(</span><span class="s">&quot;Public&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">publicSubnet1CidrParameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">pubSubnet1</span> <span class="k">=&gt;</span>
+          <span class="n">ec2</span><span class="o">(</span>
+             <span class="s">&quot;myInstance&quot;</span><span class="o">,</span>
+             <span class="nc">InstanceType</span> <span class="k">=</span> <span class="s">&quot;t2.micro&quot;</span><span class="o">,</span>
+             <span class="nc">KeyName</span> <span class="k">=</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">keyNameParameter</span><span class="o">),</span>
+             <span class="nc">ImageId</span> <span class="k">=</span> <span class="n">`Fn::FindInMap`</span><span class="o">[</span><span class="kt">AMIId</span><span class="o">](</span><span class="nc">MappingRef</span><span class="o">(</span><span class="n">amazonLinuxAMIMapping</span><span class="o">),</span> <span class="n">`AWS::Region`</span><span class="o">,</span> <span class="s">&quot;AMI&quot;</span><span class="o">),</span>
+             <span class="nc">SecurityGroupIds</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(),</span>
+             <span class="nc">Tags</span> <span class="k">=</span> <span class="nc">AmazonTag</span><span class="o">.</span><span class="n">fromName</span><span class="o">(</span><span class="s">&quot;myInstance&quot;</span><span class="o">),</span>
+             <span class="nc">UserData</span> <span class="k">=</span> <span class="nc">None</span>
+            <span class="o">)</span>
+          <span class="o">)</span>
+      <span class="o">}</span> <span class="o">++</span>
+      <span class="n">withSubnet</span><span class="o">(</span><span class="s">&quot;Private&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">privateSubnet1CidrParameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">priSubnet1</span> <span class="k">=&gt;</span>
+        <span class="o">...</span>
+      <span class="o">}</span>
+   <span class="o">}</span> <span class="o">++</span>
+   <span class="n">withAZ</span><span class="o">(</span><span class="nc">ParameterRef</span><span class="o">(</span><span class="n">availabilityZone2Parameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">az2</span> <span class="k">=&gt;</span>
+      <span class="n">withSubnet</span><span class="o">(</span><span class="s">&quot;Public&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">publicSubnet2CidrParameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">pubSubnet2</span> <span class="k">=&gt;</span>
+        <span class="o">...</span>
+      <span class="o">}</span> <span class="o">++</span>
+      <span class="n">withSubnet</span><span class="o">(</span><span class="s">&quot;Private&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">privateSubnet2CidrParameter</span><span class="o">)){</span> <span class="k">implicit</span> <span class="n">priSubnet2</span> <span class="k">=&gt;</span>
+        <span class="o">...</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This method above returns a <code>Template</code> whose JSON serialization is a CloudFormation template. The convenience methods <code>withVPC</code>, <code>withAZ</code> and <code>withSubnet</code> each take a few parameters, internally create a resource of the specified type and then take a block or function passing that resource along. Each of these expect you to return a <code>Template</code> and note that <code>Template</code>s can be composed with <code>++</code>. While <code>withVPC</code> is stand alone, some of the others also take implicit parameters, for instance:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">  <span class="k">def</span> <span class="n">withSubnet</span><span class="o">(</span><span class="n">visibility</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">ordinal</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">cidr</span><span class="k">:</span> <span class="kt">Token</span><span class="o">[</span><span class="kt">CidrBlock</span><span class="o">])</span>
+    <span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">`AWS::EC2::Subnet`</span><span class="o">)</span> <span class="o">=&gt;</span> <span class="nc">Template</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">vpc</span><span class="k">:</span> <span class="kt">`AWS::EC2::VPC`</span><span class="o">,</span> <span class="n">az</span><span class="k">:</span> <span class="kt">AZ</span><span class="o">)</span><span class="k">:</span> <span class="kt">Template</span> <span class="o">=</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
+</code></pre></div>
+<p>Subnets require a VPC and an AZ. To express this most succinctly, above we marked the passed along resources (vpc, az1, pubSubnet1, etc) as <code>implicit</code>. Turns out you can add the <code>implicit</code> modifier in front of parameters of lambdas in Scala, as in <code>Seq(1,2,3).map(implicit x =&gt; x + 1)</code> to bring <code>x</code> into implicit scope.</p>
+
+<p>Then, methods like <code>ec2()</code>, <code>elb</code>, <code>asg()</code> (autoscaling group) or <code>securityGroup</code> also use these implicit parameters so you dont have to keep passing them around:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">trait</span> <span class="nc">EC2</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">ec2</span><span class="o">(</span>
+    <span class="n">name</span><span class="k">:</span>               <span class="kt">String</span><span class="o">,</span>
+    <span class="nc">InstanceType</span><span class="k">:</span>       <span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+    <span class="nc">KeyName</span><span class="k">:</span>            <span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+    <span class="nc">ImageId</span><span class="k">:</span>            <span class="kt">Token</span><span class="o">[</span><span class="kt">AMIId</span><span class="o">],</span>
+    <span class="nc">SecurityGroupIds</span><span class="k">:</span>   <span class="kt">Seq</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::EC2::SecurityGroup`</span><span class="o">]],</span>
+    <span class="nc">Tags</span><span class="k">:</span>               <span class="kt">Seq</span><span class="o">[</span><span class="kt">AmazonTag</span><span class="o">],</span>
+    <span class="nc">Metadata</span><span class="k">:</span>           <span class="kt">Option</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">IamInstanceProfile</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">ResourceRef</span><span class="o">[</span><span class="kt">`AWS::IAM::InstanceProfile`</span><span class="o">]]]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">SourceDestCheck</span><span class="k">:</span>    <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">UserData</span><span class="k">:</span>           <span class="kt">Option</span><span class="o">[</span><span class="kt">`Fn::Base64`</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">Monitoring</span><span class="k">:</span>         <span class="kt">Option</span><span class="o">[</span><span class="kt">Boolean</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">Volumes</span><span class="k">:</span>            <span class="kt">Option</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">EC2MountPoint</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+    <span class="nc">Condition</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nc">None</span>
+    <span class="o">)(</span><span class="k">implicit</span> <span class="n">subnet</span><span class="k">:</span> <span class="kt">`AWS::EC2::Subnet`</span><span class="o">,</span> <span class="n">vpc</span><span class="k">:</span> <span class="kt">`AWS::EC2::VPC`</span><span class="o">)</span> <span class="k">=</span> <span class="c1">// IMPLICITS!</span>
+    <span class="nc">SecurityGroupRoutable</span> <span class="n">from</span> <span class="n">`AWS::EC2::Instance`</span><span class="o">(</span>
+      <span class="n">name</span><span class="o">,</span> <span class="nc">InstanceType</span><span class="o">,</span> <span class="nc">KeyName</span><span class="o">,</span> <span class="n">subnet</span><span class="o">,</span> <span class="nc">ImageId</span><span class="o">,</span> <span class="nc">Tags</span><span class="o">,</span> <span class="nc">SecurityGroupIds</span><span class="o">,</span> <span class="nc">Metadata</span><span class="o">,</span>
+      <span class="nc">IamInstanceProfile</span><span class="o">,</span> <span class="nc">SourceDestCheck</span><span class="o">,</span> <span class="nc">UserData</span><span class="o">,</span> <span class="nc">Monitoring</span><span class="o">,</span> <span class="nc">Volumes</span>
+    <span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>We also have a few methods to do things like create EIPs or CloudWatch alarms from EC2 instances as in:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">myEIP</span> <span class="k">=</span> <span class="n">myEC2Instance</span><span class="o">.</span><span class="n">withEIP</span><span class="o">(</span><span class="s">&quot;NAT1EIP&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">myCloudWatch</span> <span class="k">=</span> <span class="n">myEC2Instance</span><span class="o">.</span><span class="n">alarmOnSystemFailure</span><span class="o">(</span><span class="s">&quot;NATInstanceAlarm&quot;</span><span class="o">,</span> <span class="s">&quot;nat-instance&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">myEC2AndOutput</span> <span class="k">=</span> <span class="n">myEC2Instance</span><span class="o">.</span><span class="n">andOutput</span><span class="o">(</span><span class="s">&quot;NAT1EIP&quot;</span><span class="o">,</span> <span class="s">&quot;NAT 1 EIP&quot;</span><span class="o">)</span>
+</code></pre></div>
+<p>You can see these and other RichXYZ method pimps in com.monsanto.arch.cloudformation.model.simple.Builders.</p>
+
+<h2>SecurityGroupRoutables</h2>
+
+<p>Above you might have noticed this sneaky <code>SecurityGroupRoutable</code> type. After using all of the techniques above, you&#39;ll still be left with lots of code to make security groups and to associate various ones to various resources. We&#39;ve begun to create a new abstraction, <code>SecurityGroupRoutable</code>, currently supporting <code>AWS::EC2::Instance</code>&#39;s, <code>AWS::ElasticLoadBalancing::LoadBalancer</code>&#39;s and <code>AWS::AutoScaling::LaunchConfiguration</code>&#39;s / <code>AWS::AutoScaling::AutoScalingGroup</code>&#39;s. Instead of manually defining security groups for logically similar instances, we discovered it was less work overall to specify ingress rules point to point between all necessary Resource instances (or to define them in a function).</p>
+
+<p>So a <code>SecurityGroupRoutable[R &lt;: Resource[R]]</code> is a wrapper around a Resource that itself needs or can be associated with a security group, as well as an auto-generated security group specific for that <code>Resource</code> that is injected into the resource. In other words, every <code>Resource</code> that is wrapped in an SGR gets its own security group associated only to itself. Then instead of defining ingress/egress rules in the definition of that security group, we use the fact that CloudFormation also permits the definition of <code>AWS::EC2::SecurityGroupEgress</code> and <code>AWS::EC2::SecurityGroupIngress</code> rules as stand-alone resources that point to security groups.</p>
+
+<p>Several of the higher-level methods for creating <code>Resource</code>&#39;s above now return SGRs instead of bare <code>Resource</code>&#39;s. Note that SGRs have a <code>.template</code> method that returns a template containing both the <code>Resource</code> and its <code>SecurityGroup</code>.</p>
+
+<h2>Ingress Rule DSL</h2>
+
+<p>So now that we have methods to automate all of the above, the last major source of duplication and friction is in creating those Ingress and Egress rules between Security Groups or <code>SecurityGroupRoutables</code>. To solve this problem, we created a little DSL to specify the creation of many of these rules at once, and in an easy to grok syntax. A secondary goal was that these rules might be more easily audited by a non-developer security team.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala">    <span class="k">val</span> <span class="n">securityGroupA</span> <span class="k">=</span> <span class="n">securityGroup</span><span class="o">(</span><span class="s">&quot;A&quot;</span><span class="o">,</span> <span class="s">&quot;Group A&quot;</span><span class="o">)</span>
+    <span class="k">val</span> <span class="n">securityGroupB</span> <span class="k">=</span> <span class="n">securityGroup</span><span class="o">(</span><span class="s">&quot;B&quot;</span><span class="o">,</span> <span class="s">&quot;Group B&quot;</span><span class="o">)</span>
+
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">/</span> <span class="nc">UDP</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">/</span> <span class="nc">ICMP</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">/</span> <span class="nc">ALL</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">65536</span><span class="o">)</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">65536</span><span class="o">)</span> <span class="o">/</span> <span class="nc">ICMP</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">22</span><span class="o">,</span> <span class="mi">5601</span><span class="o">)</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">22</span><span class="o">,</span> <span class="o">(</span><span class="mi">5601</span> <span class="n">to</span> <span class="mi">5602</span><span class="o">)</span> <span class="o">/</span> <span class="nc">UDP</span><span class="o">,</span> <span class="mi">45</span> <span class="o">/</span> <span class="nc">ICMP</span><span class="o">,</span> <span class="mi">14</span> <span class="o">/</span> <span class="nc">TCP</span><span class="o">)</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+
+
+    <span class="n">securityGroupA</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">-&lt;-</span> <span class="n">securityGroupB</span>
+    <span class="n">securityGroupA</span> <span class="o">-&lt;-</span> <span class="mi">22</span> <span class="o">-&gt;-</span> <span class="n">securityGroupB</span>
+</code></pre></div>
+<p>So yes, we do have this one symbolic operator in CFTG, and we read it as &quot;flow.&quot; Each expression like <code>x -&gt;- 22 / TCP -&gt;- y</code> generates a list of ingress rules, in this case it generates a single rule that allows ingress traffic on port 22 over the TCP protocol from security group <code>x</code> to security group <code>y</code>.</p>
+
+<p>As you can see above, you can leave off <code>/ TCP</code> as it is the default. We also support other protocols such as <code>/ UDP</code> or <code>/ ICMP</code> or the wildcard <code>/ ALL</code>. We read <code>/</code> as &quot;over,&quot; as in &quot;22 over TCP&quot; like you&#39;d say &quot;JSON over HTTP.&quot; (OK so I guess we have two, TWO symbolic operators.) We also support port ranges, which use Scala ranges of ports like <code>(1 to 1024)</code>, as well as cherry-picked sequences of ports like <code>Seq(22, 5601)</code>. Ranges also support protocols, and sequence elements can both have protocols and themselves be nested ranges.</p>
+
+<p>You can flow in either direction, because who wants to have to remember which ways the arrows are &quot;supposed to go&quot;, meaning you can write the same ingress rule as either:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">a</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">-&gt;-</span> <span class="n">b</span>
+<span class="c1">//or</span>
+<span class="n">b</span> <span class="o">-&lt;-</span> <span class="mi">22</span> <span class="o">-&lt;-</span> <span class="n">a</span>
+</code></pre></div>
+<p>More importantly, you can use arrows facing in opposite directions to express bi-directional flows, meaning a pair of ingress rule lists, allowing ingress into each of the two security groups:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="c1">// either server can accept SSH traffic from the other</span>
+<span class="n">a</span> <span class="o">-&gt;-</span> <span class="mi">22</span> <span class="o">-&lt;-</span> <span class="n">b</span>
+<span class="c1">//same as</span>
+<span class="n">a</span> <span class="o">-&lt;-</span> <span class="mi">22</span> <span class="o">-&gt;-</span> <span class="n">b</span>
+</code></pre></div>
+<h2>Summary</h2>
+
+<p>Clearly this library is far from complete. Writing this post, it is obvious that we should replace <code>Fn::If</code>&#39;s first parameter (now a string Condition name) with a <code>ConditionRef</code>, it would be nice if we generated Egress rules in addition to Ingress rules from &quot;flows,&quot; etc. And if anyone has a great idea for modeling cross-cutting concerns like ASGs in a beautiful way, pull requests are always welcome!</p>
+
+<p>We hope though that CFTG is sufficiently advanced that you can use it in your work. We certainly use it to generate our complex Microservice environment templates at Monsanto, and are delighted to share it with all of you.</p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="https://avatars2.githubusercontent.com/u/541228?v=3&s=40">
+                        
+                        <span>
+                            Ryan Richt posted on July 10, 2015
+                        </span>
+
+                            
+                            <a  href="https://twitter.com/ryan_richt">
+                                <i class="fa fa-twitter fa-1x "></i>
+                            </a>
+                            
+                            
+                            <a  href="https://www.github.com/ryan-richt">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/07/08/stax/" data-toggle="tooltip" data-placement="top" title="Stax">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
