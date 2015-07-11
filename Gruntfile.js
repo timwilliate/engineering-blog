@@ -15,7 +15,8 @@ module.exports = function(grunt) {
                     paths: ["css"]
                 },
                 files: {
-                    "css/<%= pkg.name %>.css": "less/<%= pkg.name %>.less"
+                    "css/<%= pkg.name %>.css": "less/<%= pkg.name %>.less",
+                    "css/scala-colors.css": "less/scala-colors.less"
                 }
             },
             minified: {
@@ -24,7 +25,9 @@ module.exports = function(grunt) {
                     cleancss: true
                 },
                 files: {
-                    "css/<%= pkg.name %>.min.css": "less/<%= pkg.name %>.less"
+                    "css/<%= pkg.name %>.min.css": "less/<%= pkg.name %>.less",
+                    "css/scala-colors.min.css": "less/scala-colors.less"
+
                 }
             }
         },
@@ -40,7 +43,7 @@ module.exports = function(grunt) {
                     banner: '<%= banner %>'
                 },
                 files: {
-                    src: ['css/<%= pkg.name %>.css', 'css/<%= pkg.name %>.min.css', 'js/<%= pkg.name %>.min.js']
+                    src: ['css/<%= pkg.name %>.css','css/scala-colors.css', 'css/<%= pkg.name %>.min.css', 'css/scala-colors.min.css', 'js/<%= pkg.name %>.min.js']
                 }
             }
         },
@@ -49,17 +52,17 @@ module.exports = function(grunt) {
                 files: ['js/<%= pkg.name %>.js'],
                 tasks: ['uglify'],
                 options: {
-                    spawn: false,
-                },
+                    spawn: false
+                }
             },
             less: {
                 files: ['less/*.less'],
                 tasks: ['less'],
                 options: {
-                    spawn: false,
+                    spawn: false
                 }
-            },
-        },
+            }
+        }
     });
 
     // Load the plugins.
