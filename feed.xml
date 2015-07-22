@@ -7,13 +7,26 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>PaaSify your Apps</title>
+                
+                
+                    <description>&lt;p&gt;The age of cloud computing is already here, and companies who don&amp;#39;t adapt are at serious risk of getting left in the dust.  At Monsanto we have fully embraced the transformation this revolution has brought and are diligently on the path towards a modern IT landscape focused around public cloud, microservices, open source technologies, and &lt;a href=&quot;http://12factor.net/&quot;&gt;12 factor apps&lt;/a&gt;.  Transformations however, rarely happen overnight and like most enterprise companies we were starting the journey with a datacenter full of legacy and not-so-cloudy apps.  So our first step was to adopt
+&lt;a href=&quot;https://docs.cloudfoundry.org/concepts/overview.html&quot;&gt;Cloud Foundry&lt;/a&gt;, an open platform as a service which allowed our dev teams to start learning/adopting cloud designs on top of an agile platform in the safety of our private datacenter.  &lt;/p&gt;
+</description>
+                
+                <pubDate>Wed, 22 Jul 2015 00:00:00 -0600</pubDate>
+                <link>http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/</guid>
+            </item>
+        
+            <item>
                 <title>CloudFormation Template Generator</title>
                 
                 
                     <description>&lt;h2&gt;TL;DR&lt;/h2&gt;
 </description>
                 
-                <pubDate>Fri, 10 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Fri, 10 Jul 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</guid>
             </item>
@@ -25,7 +38,7 @@
                     <description>&lt;p&gt;When we were looking to build out an infrastructure in AWS (&lt;a href=&quot;https://aws.amazon.com&quot;&gt;Amazon Web Services&lt;/a&gt;), we took some time to understand how the &lt;a href=&quot;https://github.com/aws/aws-cli&quot;&gt;aws-cli&lt;/a&gt; (Universal Command Line Interface for Amazon Web Services) worked. With ideas from other projects found on &lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt;, we started wrapping commands in simple BASH scripts, and pointed it to CloudFormation templates written in JSON. From there &lt;a href=&quot;https://github.com/monsantoco/stax&quot;&gt;stax&lt;/a&gt; was born, and we have released it as open source under the &lt;a href=&quot;http://opensource.org/licenses/BSD-3-Clause&quot;&gt;BSD 3-clause license&lt;/a&gt;.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 08 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 08 Jul 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/08/stax/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/08/stax/</guid>
             </item>
@@ -37,7 +50,7 @@
                     <description>&lt;p&gt;As our usage of &lt;a href=&quot;http://www.docker.com&quot;&gt;Docker&lt;/a&gt; grows and we provision more container hosts, collecting metrics and monitoring containers and hosts has become a necessity. This post will walk you through how to glue together a few components to deploy a monitoring solution for Docker. All components are intentionally plug-and-play, so if things need to be changed any component can be (relatively) easily swapped out for an alternative.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 17 Jun 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 17 Jun 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/06/17/docker-metrics/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/17/docker-metrics/</guid>
             </item>
@@ -55,7 +68,7 @@
 &lt;/style&gt;
 </description>
                 
-                <pubDate>Mon, 15 Jun 2015 00:00:00 -0500</pubDate>
+                <pubDate>Mon, 15 Jun 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/06/15/implicits-futures/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/15/implicits-futures/</guid>
             </item>
@@ -67,7 +80,7 @@
                     <description>&lt;h2&gt;Overview&lt;/h2&gt;
 </description>
                 
-                <pubDate>Fri, 12 Jun 2015 00:00:00 -0500</pubDate>
+                <pubDate>Fri, 12 Jun 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/06/12/etcd-clustering/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/12/etcd-clustering/</guid>
             </item>
@@ -83,7 +96,7 @@ system, it has no dependencies to install, and it can be a powerful
 language when used properly.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 27 May 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 27 May 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</guid>
             </item>
@@ -103,7 +116,7 @@ language when used properly.&lt;/p&gt;
 &lt;/style&gt;
 </description>
                 
-                <pubDate>Fri, 22 May 2015 00:00:00 -0500</pubDate>
+                <pubDate>Fri, 22 May 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/05/22/jq-change-json/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/22/jq-change-json/</guid>
             </item>
@@ -128,7 +141,7 @@ eschew features for speed can be fraught with peril, forcing you to do a lot of
 engineering on your own.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 20 May 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 20 May 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/05/20/using-big-data-for-good/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/20/using-big-data-for-good/</guid>
             </item>
@@ -147,21 +160,9 @@ each with a different reason and pattern.  They can&amp;#39;t be fully explained
 coherent post.&lt;/p&gt;
 </description>
                 
-                <pubDate>Thu, 14 May 2015 00:00:00 -0500</pubDate>
+                <pubDate>Thu, 14 May 2015 00:00:00 -0600</pubDate>
                 <link>http://engineering.monsanto.com/2015/05/14/implicits-intro/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/14/implicits-intro/</guid>
-            </item>
-        
-            <item>
-                <title>We are Monsanto Engineering</title>
-                
-                
-                    <description>&lt;p&gt;At Monsanto, we are engineers: in our history we’ve engineered &lt;a href=&quot;https://en.wikipedia.org/wiki/Light-emitting_diode#Initial_commercial_development&quot;&gt;molecules&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/AstroTurf&quot;&gt;materials&lt;/a&gt;, and &lt;a href=&quot;https://en.wikipedia.org/wiki/L-DOPA&quot;&gt;medicines&lt;/a&gt;. Now as a purely agricultural company, we not only engineer plants, but the systems that develop, manufacture, monitor and deploy them.&lt;/p&gt;
-</description>
-                
-                <pubDate>Mon, 06 Apr 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/04/06/we-are-monsanto-engineering/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/04/06/we-are-monsanto-engineering/</guid>
             </item>
         
     </channel>
