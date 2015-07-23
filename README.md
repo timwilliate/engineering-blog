@@ -32,11 +32,17 @@ cd engineering-blog
 
 * Create a new page
 
-Copy one of the exsting pages, for example `about.html` and make some changes
+If you're starting with html copy one of the exsting pages, for example `about.html` and make some changes
 
 ```
 cp about.html new_page.html
 vi new_page.html
+```
+
+If you're starting with markdown copy an existing page from the _posts directory and make some changes
+```
+cp _posts/2015-07-08-stax.md _posts/xxxx-xx-xx-newpost.md
+vi _posts/xxxx-xx-xx-newpost.md
 ```
 
 Be sure to update the 'frontmatter', that's the code between the `---` marks. Their functions are self-explanitory. After that build the site with Jekyll (see below) to see how it looks.
@@ -58,7 +64,7 @@ Again, be sure to update the 'frontmatter', that's the code between the `---` ma
 jekyll build
 ```
 
-This will build the site and put all files needed into the `_site` directory. At this point you can open the index file in a browser and view the site in a browser. In your browser just choose `File` > `Open file...` and point to the file _site/index.html
+This will build the site and put all files needed into the `_site` directory. At this point you can open the index file in a browser and view the site in a browser. In your browser just choose `File` > `Open file...` and point to the file _site/index.html.  Or if you want to view the site running in jekyll with full css/image rendering simply run _jekyll s_ on the command line to start the jekyll server locally and point your browser to localhost:4000
 
 * If you want to develop the site, you can edit it and have it automatically rebuild when it senses changes to any of the files
 
