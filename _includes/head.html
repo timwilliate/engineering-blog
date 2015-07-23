@@ -12,6 +12,9 @@
         {% assign description = site.description %}
     {% endif %}
     <meta name="description" content="{{description}}">
+    {% if page.author %}
+    <meta name="author" content="{{ page.author}}">
+    {% endif %}
 
     <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico">
 
