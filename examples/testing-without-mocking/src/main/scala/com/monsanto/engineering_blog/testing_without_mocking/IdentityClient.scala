@@ -6,15 +6,13 @@ import scala.concurrent.Future
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IdentityClient(jsonClient: JsonClient)  {
+class IdentityClient(howToCheck: String => Future[JsonResponse])  {
 
   def fetchIdentity(accessToken: String) : Future[Option[Identity]] = {
-    jsonClient.getWithoutSession(
-      Path("/identity"),
-      Params("access_token" -> accessToken)
-    ).map {
+    howToCheck(accessToken).map {
       case JsonResponse(OkStatus, json) => Some(Identity.from(json))
       case _ => None
     }
   }
+
 }

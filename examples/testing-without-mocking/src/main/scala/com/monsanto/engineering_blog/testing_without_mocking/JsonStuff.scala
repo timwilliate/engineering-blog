@@ -21,11 +21,10 @@ object JsonStuff {
   case class Path(to: String)
   case class Params(one: (String,String))
 
-  class JsonClient(rootURL: URL = new URL("http://scalamock-needs-default-constructor")){
+  class JsonClient(rootURL: URL){
     def getWithoutSession(path: Path, params: Params) : Future[JsonResponse] = {
       // pretend this makes a real service call
       Future(JsonResponse(OkStatus, Map("identity" -> Map("id" -> "whatever")).toJson))
     }
   }
-
 }

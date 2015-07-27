@@ -13,7 +13,7 @@ class IdentityIntegrationTest extends FunSpec {
   describe("real life") {
     it("can make a call out to the real service") {
 
-      val identityClient = new IdentityClient(new JsonClient(new URL("http://whereisit")))
+      val identityClient = new IdentityClient(RealAccessTokenService.reallyCheckAccessToken(new JsonClient(new URL("http://whereisit"))))
 
       // perform actual test
     }

@@ -8,5 +8,4 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq (
   "org.scalatest"             %% "scalatest"           % "2.2.4"  % "test"
   ,"io.spray"                   %%  "spray-json"         % "1.3.2"
-, "org.scalamock" %% "scalamock-scalatest-support" % "3.2" % "test"
 )
