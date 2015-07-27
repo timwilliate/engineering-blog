@@ -137,7 +137,7 @@ it("returns an Identity when we have it") {
 </code></pre></div>
 
 In the real world, we use the same RealAccessTokenService to gather the input before calling 
-our data-in, data-out function. Instead of passing "how to gather input" we're passing {{"the input" | sc: "pass" }} as data. This is the simplest structure. Sample code [here](https://github.com/MonsantoCo/engineering-blog/blob/testing-without-mocking-example-3/examples/testing-without-mocking/src/test/scala/com/monsanto/engineering_blog/testing_without_mocking/IdentityClientTest.scala)
+our data-in, data-out function. Instead of passing "how to gather input" we're passing {{"the input" | sc: "pass" }} as data. This is the simplest structure. Sample code [here](https://github.com/MonsantoCo/engineering-blog/blob/testing-without-mocking-example-3/examples/testing-without-mocking/src/test/scala/com/monsanto/engineering_blog/testing_without_mocking/IdentityClientTest.scala).
 
 Whenever you see mocking in Scala, look for an opportunity to separate {{"decision-making code"|sc:"logic"}} from {{"interface code"|sc:"interface"}}. Consider these styles instead.
 
