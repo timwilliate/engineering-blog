@@ -32,17 +32,11 @@ cd engineering-blog
 
 * Create a new page
 
-If you're starting with html copy one of the exsting pages, for example `about.html` and make some changes
+Copy one of the exsting pages, for example `about.html` and make some changes
 
 ```
 cp about.html new_page.html
 vi new_page.html
-```
-
-If you're starting with markdown copy an existing page from the _posts directory and make some changes
-```
-cp _posts/2015-07-08-stax.md _posts/xxxx-xx-xx-newpost.md
-vi _posts/xxxx-xx-xx-newpost.md
 ```
 
 Be sure to update the 'frontmatter', that's the code between the `---` marks. Their functions are self-explanitory. After that build the site with Jekyll (see below) to see how it looks.
