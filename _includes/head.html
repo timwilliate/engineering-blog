@@ -1,43 +1,50 @@
 <head>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     {% if page.description %}
         {% assign description = page.description %}
     {% elsif page.subtitle %}
-        {% assign description = page.title | append:' - ' | append:page.subtitle %}
+        {% assign description = page.subtitle %}
     {% else %}
         {% assign description = site.description %}
     {% endif %}
-    <meta name="description" content="{{description}}">
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="{{ page.title }}" />
+    <meta property="og:description" content="{{ description }}" />
+    <meta property="og:url" content="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}" />
+    {% if page.header-img %}
+    <meta property="og:image" content="{{ page.header-img }}" />
+    {% endif %}
+    <meta name="description" content="{{ description }}" />
     {% if page.author %}
-    <meta name="author" content="{{ page.author}}">
+    <meta name="author" content="{{ page.author}}" />
     {% endif %}
 
-    <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico">
+    <link rel="shortcut icon" href="{{ site.baseurl }}/favicon.ico" />
 
     <title>{% if page.title %}{{ page.title }} - {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
 
-    <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+    <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}" />
 
     <!-- Bootstrap Core CSS -->
-    <link rel="stylesheet" href="{{ "/css/bootstrap.min.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="{{ "/css/bootstrap.min.css" | prepend: site.baseurl }}" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ "/css/clean-blog.min.css" | prepend: site.baseurl }}">
-    <link rel="stylesheet" href="{{ "/css/scala-colors.min.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="{{ "/css/clean-blog.min.css" | prepend: site.baseurl }}" />
+    <link rel="stylesheet" href="{{ "/css/scala-colors.min.css" | prepend: site.baseurl }}" />
 
     {% for css_name in page.extra_css %}
-    <link rel="stylesheet" href="/css/{{ css_name }}">
+    <link rel="stylesheet" href="/css/{{ css_name }}" />
     {% endfor %}
 
     <!-- Pygments Github CSS -->
-    <link rel="stylesheet" href="{{ "/css/syntax.css" | prepend: site.baseurl }}">
+    <link rel="stylesheet" href="{{ "/css/syntax.css" | prepend: site.baseurl }}" />
 
     <!-- Custom Fonts -->
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
