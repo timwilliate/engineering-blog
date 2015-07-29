@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Testing without mocking in Scala"
+description: "Mocking works well for testing in Java, but can we do better in Scala?"
 header-img: "img/mon-field_rows.jpg"
 author: Jessica Kerr
 githubProfile : "jessitron"
