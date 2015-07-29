@@ -60,6 +60,8 @@ jekyll build
 
 This will build the site and put all files needed into the `_site` directory. At this point you can open the index file in a browser and view the site in a browser. In your browser just choose `File` > `Open file...` and point to the file _site/index.html
 
+Or if you want to view the site running in jekyll with full css/image rendering simply run _jekyll s_ on the command line to start the jekyll server locally and point your browser to localhost:4000
+
 * If you want to develop the site, you can edit it and have it automatically rebuild when it senses changes to any of the files
 
 ```
