@@ -15,7 +15,7 @@
     <meta property="og:title" content="{{ page.title }}" />
     <meta property="og:description" content="{{ description }}" />
     <meta property="og:url" content="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}" />
-    <meta property="og:image" content="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" />
+    <meta property="og:image" content="{{ site.baseurl | prepend: site.url }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" />
     <meta name="description" content="{{ description }}" />
     {% if page.author %}
     <meta name="author" content="{{ page.author}}" />
