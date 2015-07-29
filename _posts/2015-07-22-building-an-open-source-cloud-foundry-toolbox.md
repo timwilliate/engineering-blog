@@ -15,3 +15,7 @@ The age of cloud computing is already here, and companies who don't adapt are at
 We've been using Cloud Foundry for over a year now, and the core project is fairly comprehensive with extensions and tooling being contributed by the [community](https://github.com/cloudfoundry-community) on a regular basis.  But there are still a few areas which lack open source solutions to address the capabilities seen in the branded CF offerings.  In addition to using some of the existing community [tools](https://github.com/cloudfoundry-incubator/admin-ui) we've also added a few of our own and we'll be opening the first three projects from this toolbox to the community.
 
 Starting with [CF-Portal](https://github.com/MonsantoCo/cf-portal), we will be doing a multi-part blog post over the coming weeks for each tool corresponding with its public release.  We hope these are useful to others using the platform, and we look forward to feedback and contribution to continue growing the Cloud Foundry community toolbox.
+
+* [CF-Portal](https://github.com/MonsantoCo/cf-portal): A Single Pane of Glass for Cloud Foundry Apps
+* CF-Users: Self Service Team Management for Cloud Foundry
+* CF-Metrics: Open Source Monitoring and Alerting for Cloud Foundry
