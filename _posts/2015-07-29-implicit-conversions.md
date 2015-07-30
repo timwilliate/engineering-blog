@@ -2,7 +2,8 @@
 layout: post
 title: "Learn implicits: Views as class extensions"
 subtitle: "You are using them already: Strings"
-header-img: "img/mon-field_rows.jpg"
+description: "Views, also called implicit conversions, are a powerful and dangerous friend. They are useful for avoiding boilerplate, but used improperly they lead to confusion."
+header-img: "img/mon-gothenburg.jpg"
 author: "Jorge Montero"
 tags: [implicits, scala, tutorials]
 extra_css:
@@ -88,7 +89,7 @@ Sounds great, right? We never have to wrap any values anymore! What's the worst 
 Wherever that implicit function is in scope, any syntax error that could be fixed by wrapping anything into an Option will be 
 "fixed" that way, whether it makes sense or not.
 
-    val aList = ("a","b","c")
+    val aList = List("a","b","c")
     val anInt = 42
     val something = Octopus("Angry Bob",7,"(888)-444-3333")
 
