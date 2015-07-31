@@ -66,7 +66,7 @@ Any time we try to call a method that doesn't exist (or when a parameter doesn't
 A view is a single-parameter function or constructor, declared with the {{ "implicit" | sc: "implicitdef" }} keyword in front of it. The  {{ "implicit" | sc: "implicitdef" }}  keyword tells the compiler
 that it can use this function automatically, for as long as it is in scope.
 
-It's almost as if Scala added methods without changing java.lang.String. No manual wrapping: it's almost invisible[1]. Sounds convenient!
+It's almost as if Scala added methods without changing java.lang.String. No manual wrapping: it's almost invisible. Sounds convenient!
 
 All this power comes with downsides. If a programmer is not familiar with all the views in scope, the code is harder to interpret.
 There's also the temptation to define very wide conversions. Everyone does it, and later regrets it.
