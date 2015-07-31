@@ -8,6 +8,7 @@ tags: [implicits, scala, tutorials]
 extra_css:
   - implicits-intro.css
 ---
+This is the third post in our series on implicits. You can find the earlier posts [here](http://engineering.monsanto.com/2015/05/14/implicits-intro/) and [here](http://engineering.monsanto.com/2015/06/15/implicits-futures/)
 
 Views, also called implicit conversions, are a powerful and dangerous friend. 
 They are useful for avoiding boilerplate, but used improperly they lead to confusion.
