@@ -3,7 +3,7 @@ layout: post
 title: "Learn implicits: Views as class extensions"
 subtitle: "You are using them already: Strings"
 description: "Views, also called implicit conversions, are a powerful and dangerous friend. They are useful for avoiding boilerplate, but used improperly they lead to confusion."
-header-img: "img/mon-gothenburg.jpg"
+header-img: "img/mon-hands_grains.jpg"
 author: "Jorge Montero"
 tags: [implicits, scala, tutorials]
 extra_css:
