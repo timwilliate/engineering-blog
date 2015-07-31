@@ -9,9 +9,10 @@ tags: [implicits, scala, tutorials]
 extra_css:
   - implicits-intro.css
 ---
-This is the third post in our series on implicits. You can find the earlier posts [here](http://engineering.monsanto.com/2015/05/14/implicits-intro/) and [here](http://engineering.monsanto.com/2015/06/15/implicits-futures/)
 
-Views, also called implicit conversions, are a powerful and dangerous friend. 
+This is the third post in our series on Scala implicits. The earlier posts cover [implicit type parameters](http://engineering.monsanto.com/2015/05/14/implicits-intro/) and [implicit parameters with futures](http://engineering.monsanto.com/2015/06/15/implicits-futures/). In this post, we discuss implicit conversions.
+
+Implicit conversions, also called views, are a powerful and dangerous friend. 
 They are useful for avoiding boilerplate, but used improperly they lead to confusion.
 
 Even if you didn't know they existed, I bet you've used them already. Let's look at a very simple example, using the scala REPL:
