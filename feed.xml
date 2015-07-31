@@ -7,6 +7,18 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Learn implicits: Views as class extensions</title>
+                
+                
+                    <description>&lt;p&gt;This is the third post in our series on Scala implicits. The earlier posts cover &lt;a href=&quot;http://engineering.monsanto.com/2015/05/14/implicits-intro/&quot;&gt;implicit type parameters&lt;/a&gt; and &lt;a href=&quot;http://engineering.monsanto.com/2015/06/15/implicits-futures/&quot;&gt;implicit parameters with futures&lt;/a&gt;. In this post, we discuss implicit conversions.&lt;/p&gt;
+</description>
+                
+                <pubDate>Fri, 31 Jul 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/07/31/implicit-conversions/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/31/implicit-conversions/</guid>
+            </item>
+        
+            <item>
                 <title>Cloud Foundry Portal</title>
                 
                 
@@ -130,26 +142,6 @@ language when used properly.&lt;/p&gt;
                 <pubDate>Wed, 27 May 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</guid>
-            </item>
-        
-            <item>
-                <title>Modifying JSON on the command line</title>
-                
-                
-                    <description>&lt;style scoped&gt;
-  .projectKey { color: red }
-  .map { color: orange }
-  .plus { color: brown }
-  .newValue { color: blue }
-  .dot { color: hotpink }
-  .toEntries { color: purple }
-  .fromEntries { color: green }
-&lt;/style&gt;
-</description>
-                
-                <pubDate>Fri, 22 May 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/05/22/jq-change-json/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/22/jq-change-json/</guid>
             </item>
         
     </channel>

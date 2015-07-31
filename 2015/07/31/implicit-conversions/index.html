@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+        
+    
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="Learn implicits: Views as class extensions" />
+    <meta property="og:description" content="Views, also called implicit conversions, are a powerful and dangerous friend. They are useful for avoiding boilerplate, but used improperly they lead to confusion." />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/07/31/implicit-conversions/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-gothenburg.jpg" />
+    <meta name="description" content="Views, also called implicit conversions, are a powerful and dangerous friend. They are useful for avoiding boilerplate, but used improperly they lead to confusion." />
+    
+    <meta name="author" content="Jorge Montero" />
+    
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <title>Learn implicits: Views as class extensions - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/07/31/implicit-conversions/" />
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css" />
+    <link rel="stylesheet" href="/css/scala-colors.min.css" />
+
+    
+    <link rel="stylesheet" href="/css/implicits-intro.css" />
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css" />
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-gothenburg.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Learn implicits: Views as class extensions</h1>
+                        
+                        <h2 class="subheading">You are using them already: Strings</h2>
+                        
+                        <span class="meta">Posted by Jorge Montero on July 31, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<p>This is the third post in our series on Scala implicits. The earlier posts cover <a href="http://engineering.monsanto.com/2015/05/14/implicits-intro/">implicit type parameters</a> and <a href="http://engineering.monsanto.com/2015/06/15/implicits-futures/">implicit parameters with futures</a>. In this post, we discuss implicit conversions.</p>
+
+<p>Implicit conversions, also called views, are a powerful and dangerous friend. 
+They are useful for avoiding boilerplate, but used improperly they lead to confusion.</p>
+
+<p>Even if you didn&#39;t know they existed, I bet you&#39;ve used them already. Let&#39;s look at a very simple example, using the scala REPL:</p>
+
+<pre>
+scala> val s = "fluttershy"
+s: String = fluttershy
+
+scala> s.getClass.getName
+res1: String = java.lang.String
+
+scala> val cap = s.<span class="capitalize">capitalize</span>
+cap: String = Fluttershy
+
+scala> cap.getClass.getName
+res2: String = java.lang.String
+</pre>
+
+<style scoped>
+  .capitalize { color: #D907E8 }
+  .implicitdef { color: #1AB955 }
+</style>
+
+<p>so we have a plain Java String, and we <span class="capitalize">capitalize</span>
+ it. Seems simple. I just called a method on an object. 
+Except java.lang.String does not have a <span class="capitalize">capitalize</span>
+ method! What sorcery is this?</p>
+
+<p><img src="/img/capitalize.png" alt="IntelliJ understands capitalize"></p>
+
+<p>As IntelliJ tells us, the <span class="capitalize">capitalize</span>
+ method is a part of <a href="https://github.com/scala/scala/blob/6ca8847eb5891fa610136c2c041cbad1298fb89c/src/library/scala/collection/immutable/StringLike.scala#L141">StringLike</a>.</p>
+
+<p>Somehow our String got converted into a StringLike, to call <span class="capitalize">capitalize</span>
+. But we didn&#39;t do anything!</p>
+
+<p>Scala automatically imports <code>scala.Predef</code> everywhere. Among many other things, Predef contains:</p>
+
+<pre>
+<span class="implicitdef">implicit def</span> augmentString(x : String) : scala.collection.immutable.StringOps
+</pre>
+
+<p>The return type of this method, <a href="https://github.com/scala/scala/blob/6ca8847eb5891fa610136c2c041cbad1298fb89c/src/library/scala/collection/immutable/StringOps.scala#L29">StringOps</a>,
+has the StringLike trait which includes the <span class="capitalize">capitalize</span>
+ method.   </p>
+
+<p>So what does that <span class="implicitdef">implicit def</span> mean?</p>
+
+<p>Any time we try to call a method that doesn&#39;t exist (or when a parameter doesn&#39;t match the expected type),
+ the compiler attempts to use a view to make it match.
+A view is a single-parameter function or constructor, declared with the <span class="implicitdef">implicit</span> keyword in front of it. The  <span class="implicitdef">implicit</span>  keyword tells the compiler
+that it can use this function automatically, for as long as it is in scope.</p>
+
+<p>It&#39;s almost as if Scala added methods without changing java.lang.String. No manual wrapping: it&#39;s almost invisible. Sounds convenient!</p>
+
+<p>All this power comes with downsides. If a programmer is not familiar with all the views in scope, the code is harder to interpret.
+There&#39;s also the temptation to define very wide conversions. Everyone does it, and later regrets it.
+Let&#39;s say that some classes take a lot of Options:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">case class Octopus(name : Option[String], tentacles : Option[Int], phoneNumber : Option[String])
+
+val a = Octopus(Some(name), Some(tentacles), Some(phone))
+</code></pre></div>
+<p>If we always have the data, those Options are just noise, so someone who recently learned views might write something like this:</p>
+
+<pre>
+<span class="implicitdef">implicit def</span> optionify[T](t : T):Option[T] = Option(t)
+</pre>
+
+<p>Which lets this call work:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">val a = Octopus(name, tentacles, phone)
+</code></pre></div>
+<p>Sounds great, right? We never have to wrap any values anymore! What&#39;s the worst that could happen?</p>
+
+<p>Wherever that implicit function is in scope, any syntax error that could be fixed by wrapping anything into an Option will be 
+&quot;fixed&quot; that way, whether it makes sense or not.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">val aList = List(&quot;a&quot;,&quot;b&quot;,&quot;c&quot;)
+val anInt = 42
+val something = Octopus(&quot;Angry Bob&quot;,7,&quot;(888)-444-3333&quot;)
+
+aList.isEmpty
+anInt.isEmpty
+something.isEmpty
+</code></pre></div>
+<p>List and Option define <code>isEmpty</code>. If you think you have a List, but you really have an Octopus, 
+the compiler will use your view, give you an Option[Octopus], and <code>isEmpty</code> will compile! That&#39;s not what we wanted when we defined our view,
+but there it is. Add a few more implicits like that to the same scope, and suddenly you might as well be working in a language without types:
+ the compiler stops being useful.</p>
+
+<p>To use this view responsibly,  add it to the scope very carefully, just for the
+code than needs it:</p>
+
+<pre>
+object AutoOption {
+   <span class="implicitdef">implicit def</span> def optionify[T](t:T):Option[T] = Option(t)
+}
+
+class PutsThingsIntoOptionsAllTheTime{
+  import AutoOption._
+
+  ... put code that uses the implicit conversion here ...
+
+}
+</pre>
+    
+
+<p>In general, views that accept anything at all will be confusing. For example, Scala lets you call + on anything. Predef includes:</p>
+
+<pre>
+<span class="implicitdef">implicit def</span>  final class any2stringadd[A](private val self: A) extends AnyVal {
+  def +(other: String): String = String.valueOf(self) + other
+}
+</pre>
+  
+
+<p>So this gives every class a + method that lets it concatenate to a String.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">scala&gt; Set(&quot;1&quot;,&quot;2&quot;,&quot;3&quot;) + &quot;a gazebo&quot;
+res0: scala.collection.immutable.Set[String] = Set(1, 2, 3, a gazebo)
+
+scala&gt; Set(1,2,3) + &quot;a gazebo&quot;
+res1: String = Set(1, 2, 3)a gazebo
+
+scala&gt; &quot;a gazebo&quot; + Set(1,2,3)
+res2: String = a gazeboSet(1, 2, 3)
+
+scala&gt; Set[Any](1,2,3) + &quot;a gazebo&quot;
+res3: scala.collection.immutable.Set[Any] = Set(1, 2, 3, a gazebo)
+
+scala&gt; Some(&quot;gazebo&quot;) + 3
+&lt;console&gt;:8: error: type mismatch;
+ found   : Int(3)
+ required: String
+</code></pre></div>
+<p>If this isn&#39;t crazy enough for you, check out this <a href="http://scalapuzzlers.com/#pzzlr-040">Scala puzzler</a>.</p>
+
+<p>This has annoyed so many people so much that there are plans to remove it in
+a future version of Scala. If the language authors create troublesome views, the rest of us should take warning.</p>
+
+<p>When creating views, aim to have the seamlessness of <span class="capitalize">capitalize</span>. The view aims to be invisible. Notice that <span class="capitalize">capitalize</span> returns a String; when we benefit from the view, we never see the intermediate StringOps type. Other bonus methods do the same:</p>
+
+<pre>
+trait StringLike {
+  def <span class="capitalize">capitalize</span> : String
+  def stripMargin(marginChar : Char) : String
+  def stripPrefix(prefix : String)
+}
+</pre>  
+
+<p>Calling the method does not surprise us.
+The one way the user can tell that we are using a custom implicit conversion is this subtle underline in IntelliJ:</p>
+
+<p><img src="/img/IntelliJUnderlinesImplicits.png" alt="IntelliJ helps see implicits"></p>
+
+<p><span class="capitalize">capitalize</span> is underlined because the method is added by a view.
+The 42 is underlined because a Scala Int is converted to a Java Integer using another view defined in <a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/Predef.scala#L353">Predef</a>.</p>
+
+<p>While overly wide views in an overly wide scope can lead to confusion,
+views are an invaluable way to extend class functionality with a strong type system, without a bunch of explicit wrapping. </p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="/img/placeholder.jpg">
+                        
+                        <span>
+                            Jorge Montero posted on July 31, 2015
+                        </span>
+
+                            
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/07/29/cf-portal/" data-toggle="tooltip" data-placement="top" title="Cloud Foundry Portal">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
