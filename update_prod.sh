@@ -9,8 +9,8 @@ pages="gh-pages"
 develop="develop"
 self=`basename $0`
 : ${TMPDIR:=/tmp}
-tmp_repo=$(mktemp -d -t $self.XXXXX)
-tmp_site=$(mktemp -d -t $self-site.XXXXX)
+tmp_repo=$(mktemp -d -t $self)
+tmp_site=$(mktemp -d -t $self-site)
 
 echo "---> Updating gh-pages with master generated content"
 ldir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
