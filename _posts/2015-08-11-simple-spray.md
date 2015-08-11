@@ -74,7 +74,7 @@ class SampleServiceActor extends Actor with SampleRoute {
 trait SampleRoute extends HttpService {
     val route = {
         get {
-            complete("I'm stupid!")
+            complete("I exist!")
         }
     }
 }
@@ -123,7 +123,7 @@ subresource called *stuff*.
 ```scala
 val route = {
         get {
-            complete("I'm stupid!")
+            complete("I exist!")
         } ~
           get {
               path("stuff") {
@@ -136,7 +136,7 @@ val route = {
 The *path* operation allows us to name a route, and the tilde operator
 allows you to chain things together (it's a common usage in the Spray
 libraries).  In theory http://localhost:8080/stuff should show us our
-new message.  But instead we still see the *I'm stupid* message.
+new message.  But instead we still see the *I exist!* message.
 
 What's going on is Spray goes down the list one by one until it finds
 a ***complete***.  Since the root has a *get* on it, it resolves that
@@ -149,7 +149,7 @@ val route = {
                 complete("That's my stuff!")
             }
         } ~ get {
-            complete("I'm stupid!")
+            complete("I exist!")
         }
     }
 ```
@@ -173,7 +173,7 @@ val route = {
               }
           } ~
           get {
-              complete("I'm stupid!")
+              complete("I exist!")
           }
     }
 ```
@@ -198,7 +198,7 @@ val route = {
               }
         } ~
           get {
-              complete("I'm stupid!")
+              complete("I exist!")
           }
     }
 ```
@@ -243,7 +243,7 @@ trait SampleRoute extends HttpService {
             }
         } ~
           get {
-              complete("I'm stupid!")
+              complete("I exist!")
           }
     }
 }
@@ -335,7 +335,7 @@ So you can see the optional parameter translates to a Scala Option type.
 
 Now hit the url without any query parameters
 (http://localhost:8080/params).  You'll notice the message is our root
-level get *I'm stupid!*. This is because it didn't match against the
+level get *I exist!*. This is because it didn't match against the
 required parameters so it fell through to our root *get*.  However, if
 you comment out our root *get* you'll see the following message:
 
