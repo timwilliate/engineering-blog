@@ -7,6 +7,24 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Building a simple Spray application</title>
+                
+                
+                    <description>&lt;p&gt;You&amp;#39;ve probably heard people talk about Spray by now; maybe you&amp;#39;re
+even using it for JSON serialization.  Spray also provides a
+lightweight server package to allow you easily create REST services.
+The hardest part of getting started with any new technology is getting
+past that initial contact of setup and concepts.  I&amp;#39;ll try to reduce
+that hurdle by walking you through a simple app that hits most of the
+features you might regularly use.&lt;/p&gt;
+</description>
+                
+                <pubDate>Tue, 11 Aug 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/08/11/simple-spray/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/11/simple-spray/</guid>
+            </item>
+        
+            <item>
                 <title>Learn implicits: Views as class extensions</title>
                 
                 
@@ -126,22 +144,6 @@
                 <pubDate>Fri, 12 Jun 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/06/12/etcd-clustering/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/12/etcd-clustering/</guid>
-            </item>
-        
-            <item>
-                <title>Secret STDIN Slurper</title>
-                
-                
-                    <description>&lt;p&gt;&lt;a href=&quot;http://www.gnu.org/software/bash/&quot;&gt;BASH&lt;/a&gt; may be looked down upon by
-all the programming language hipsters out there, but when you are
-doing system-level tasks it can be quite convenient: it&amp;#39;s on every
-system, it has no dependencies to install, and it can be a powerful
-language when used properly.&lt;/p&gt;
-</description>
-                
-                <pubDate>Wed, 27 May 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/05/27/secret-stdin-slurper/</guid>
             </item>
         
     </channel>

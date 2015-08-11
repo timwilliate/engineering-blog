@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+        
+    
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="Building a simple Spray application" />
+    <meta property="og:description" content="Making first contact with Spray as painless as possible" />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/08/11/simple-spray/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
+    <meta name="description" content="Making first contact with Spray as painless as possible" />
+    
+    <meta name="author" content="Scott MacDonald" />
+    
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <title>Building a simple Spray application - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/08/11/simple-spray/" />
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css" />
+    <link rel="stylesheet" href="/css/scala-colors.min.css" />
+
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css" />
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Building a simple Spray application</h1>
+                        
+                        <h2 class="subheading">Making first contact with Spray as painless as possible</h2>
+                        
+                        <span class="meta">Posted by Scott MacDonald on August 11, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<p>You&#39;ve probably heard people talk about Spray by now; maybe you&#39;re
+even using it for JSON serialization.  Spray also provides a
+lightweight server package to allow you easily create REST services.
+The hardest part of getting started with any new technology is getting
+past that initial contact of setup and concepts.  I&#39;ll try to reduce
+that hurdle by walking you through a simple app that hits most of the
+features you might regularly use.</p>
+
+<p>Because the spray documentation isn&#39;t great about saying what
+dependencies you need, or imports for that matter, I&#39;ll be including
+them so you don&#39;t have to guess.  Also, the final source code is at
+<a href="https://github.com/MonsantoCo/simple-spray">simple-spray</a>.</p>
+
+<h2>Setting up the project&#39;s build.sbt</h2>
+
+<p>Your build.sbt are going to need the following dependencies</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">akka</span> <span class="k">=</span> <span class="s">&quot;2.3.9&quot;</span>
+
+<span class="k">val</span> <span class="n">spray</span> <span class="k">=</span> <span class="s">&quot;1.3.2&quot;</span>
+
+<span class="n">resolvers</span> <span class="o">+=</span> <span class="nc">Resolver</span><span class="o">.</span><span class="n">url</span><span class="o">(</span><span class="s">&quot;TypeSafe Ivy releases&quot;</span><span class="o">,</span> <span class="n">url</span><span class="o">(</span><span class="s">&quot;http://dl.bintray.com/typesafe/ivy-releases/&quot;</span><span class="o">))(</span><span class="nc">Resolver</span><span class="o">.</span><span class="n">ivyStylePatterns</span><span class="o">)</span>
+
+<span class="n">libraryDependencies</span> <span class="o">++=</span>
+    <span class="nc">Seq</span><span class="o">(</span>
+        <span class="c1">// -- Logging --</span>
+        <span class="s">&quot;ch.qos.logback&quot;</span> <span class="o">%</span> <span class="s">&quot;logback-classic&quot;</span> <span class="o">%</span> <span class="s">&quot;1.1.2&quot;</span><span class="o">,</span>
+        <span class="s">&quot;com.typesafe.scala-logging&quot;</span> <span class="o">%%</span> <span class="s">&quot;scala-logging-slf4j&quot;</span> <span class="o">%</span> <span class="s">&quot;2.1.2&quot;</span><span class="o">,</span>
+        <span class="c1">// -- Akka --</span>
+        <span class="s">&quot;com.typesafe.akka&quot;</span> <span class="o">%%</span> <span class="s">&quot;akka-testkit&quot;</span> <span class="o">%</span> <span class="n">akka</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span><span class="o">,</span>
+        <span class="s">&quot;com.typesafe.akka&quot;</span> <span class="o">%%</span> <span class="s">&quot;akka-actor&quot;</span> <span class="o">%</span> <span class="n">akka</span><span class="o">,</span>
+        <span class="s">&quot;com.typesafe.akka&quot;</span> <span class="o">%%</span> <span class="s">&quot;akka-slf4j&quot;</span> <span class="o">%</span> <span class="n">akka</span><span class="o">,</span>
+        <span class="c1">// -- Spray --</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-routing&quot;</span> <span class="o">%</span> <span class="n">spray</span><span class="o">,</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-client&quot;</span> <span class="o">%</span> <span class="n">spray</span><span class="o">,</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-testkit&quot;</span> <span class="o">%</span> <span class="n">spray</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span><span class="o">,</span>
+        <span class="c1">// -- json --</span>
+        <span class="s">&quot;io.spray&quot;</span> <span class="o">%%</span> <span class="s">&quot;spray-json&quot;</span> <span class="o">%</span> <span class="s">&quot;1.3.1&quot;</span><span class="o">,</span>
+        <span class="c1">// -- config --</span>
+        <span class="s">&quot;com.typesafe&quot;</span> <span class="o">%</span> <span class="s">&quot;config&quot;</span> <span class="o">%</span> <span class="s">&quot;1.2.1&quot;</span><span class="o">,</span>
+        <span class="c1">// -- testing --</span>
+        <span class="s">&quot;org.scalatest&quot;</span> <span class="o">%%</span> <span class="s">&quot;scalatest&quot;</span> <span class="o">%</span> <span class="s">&quot;2.2.1&quot;</span> <span class="o">%</span> <span class="s">&quot;test&quot;</span>
+    <span class="o">)</span>
+</code></pre></div>
+<h2>Creating a bare bones service</h2>
+
+<p>Spray utilizes Akka Actors to receive the service calls, a pattern
+that is used to setup the routes is to create Scala Traits.  So a
+framework would look like this:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">akka.actor.Actor</span>
+<span class="k">import</span> <span class="nn">spray.routing.HttpService</span>
+
+<span class="k">class</span> <span class="nc">SampleServiceActor</span> <span class="k">extends</span> <span class="nc">Actor</span> <span class="k">with</span> <span class="nc">SampleRoute</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="n">actorRefFactory</span> <span class="k">=</span> <span class="n">context</span>
+    <span class="k">def</span> <span class="n">receive</span> <span class="k">=</span> <span class="n">runRoute</span><span class="o">(</span><span class="n">route</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">trait</span> <span class="nc">SampleRoute</span> <span class="k">extends</span> <span class="nc">HttpService</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">get</span> <span class="o">{</span>
+            <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>As you can see, the trait contains a <em>route</em> value that get&#39;s passed
+into the runRoute method.  You don&#39;t have to do it this way, but using
+traits can be a good way of organizing your routes.</p>
+
+<p>So we have a service setup, let&#39;s actually run it and try it out.  We
+need one more object, a Main class to bind to the port.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">akka.actor.</span><span class="o">{</span><span class="nc">ActorSystem</span><span class="o">,</span> <span class="nc">Props</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">akka.io.IO</span>
+<span class="k">import</span> <span class="nn">spray.can.Http</span>
+
+<span class="k">object</span> <span class="nc">Main</span> <span class="k">extends</span> <span class="nc">App</span> <span class="o">{</span>
+    <span class="k">implicit</span> <span class="k">val</span> <span class="n">system</span> <span class="k">=</span> <span class="nc">ActorSystem</span><span class="o">(</span><span class="s">&quot;simple-service&quot;</span><span class="o">)</span>
+    <span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="n">system</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="nc">Props</span><span class="o">[</span><span class="kt">SampleServiceActor</span><span class="o">],</span> <span class="s">&quot;simple-service&quot;</span><span class="o">)</span>
+
+    <span class="c1">//If we&#39;re on cloud foundry, get&#39;s the host/port from the env vars</span>
+    <span class="k">lazy</span> <span class="k">val</span> <span class="n">host</span> <span class="k">=</span> <span class="nc">Option</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="n">getenv</span><span class="o">(</span><span class="s">&quot;VCAP_APP_HOST&quot;</span><span class="o">)).</span><span class="n">getOrElse</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">)</span>
+    <span class="k">lazy</span> <span class="k">val</span> <span class="n">port</span> <span class="k">=</span> <span class="nc">Option</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="n">getenv</span><span class="o">(</span><span class="s">&quot;VCAP_APP_PORT&quot;</span><span class="o">)).</span><span class="n">getOrElse</span><span class="o">(</span><span class="s">&quot;8080&quot;</span><span class="o">).</span><span class="n">toInt</span>
+
+    <span class="nc">IO</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span> <span class="o">!</span> <span class="nc">Http</span><span class="o">.</span><span class="nc">Bind</span><span class="o">(</span><span class="n">service</span><span class="o">,</span> <span class="n">host</span><span class="o">,</span> <span class="n">port</span> <span class="k">=</span> <span class="n">port</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Our main class set&#39;s up the Akka ActorSystem, and attaches our
+SampleServiceActor to it.  We then bind the service to the host and
+port (I put in code to show how to get it from Cloud Foundry).</p>
+
+<p>At this point in IntelliJ you should be able to run the Main class.
+It should just take a second to launch, then in your browser you can
+look at http://localhost:8080/ and see the message we returned.</p>
+
+<p>So now we have the basic framework up, let&#39;s make it more interesting
+by....</p>
+
+<h2>Adding paths/routes</h2>
+
+<p>So currently we&#39;re just hitting the root of the service, let&#39;s add a
+subresource called <em>stuff</em>.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">get</span> <span class="o">{</span>
+            <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+        <span class="o">}</span> <span class="o">~</span>
+          <span class="n">get</span> <span class="o">{</span>
+              <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="n">complete</span><span class="o">(</span><span class="s">&quot;That&#39;s my stuff!&quot;</span><span class="o">)</span>
+              <span class="o">}</span>
+          <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div>
+<p>The <em>path</em> operation allows us to name a route, and the tilde operator
+allows you to chain things together (it&#39;s a common usage in the Spray
+libraries).  In theory http://localhost:8080/stuff should show us our
+new message.  But instead we still see the <em>I exist!</em> message.</p>
+
+<p>What&#39;s going on is Spray goes down the list one by one until it finds
+a <strong><em>complete</em></strong>.  Since the root has a <em>get</em> on it, it resolves that
+first.  By reordering we can fix this problem</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">get</span> <span class="o">{</span>
+            <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">complete</span><span class="o">(</span><span class="s">&quot;That&#39;s my stuff!&quot;</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="o">~</span> <span class="n">get</span> <span class="o">{</span>
+            <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div>
+<h2>Doing a POST</h2>
+
+<p>So I&#39;m sure you&#39;ve noticed the <em>get</em> by now that signifies which verb
+we want to use.  The other verbs (post/put/delete/etc) are also
+supported. Let&#39;s do a POST to the <em>stuff</em> resource.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">get</span> <span class="o">{</span>
+            <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">complete</span><span class="o">(</span><span class="s">&quot;That&#39;s my stuff!&quot;</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="o">~</span>
+          <span class="n">post</span> <span class="o">{</span>
+              <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="n">complete</span><span class="o">(</span><span class="s">&quot;stuff posted!&quot;</span><span class="o">)</span>
+              <span class="o">}</span>
+          <span class="o">}</span> <span class="o">~</span>
+          <span class="n">get</span> <span class="o">{</span>
+              <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+          <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div>
+<p>Obviously we&#39;re not really getting any data (that will come in the
+next section), but we can just do a POST and see this message.  There
+is a problem though, we&#39;ve got some repetition since we do a
+<em>path(&quot;stuff&quot;)</em> twice.</p>
+
+<p>It turns out Spray is very flexible about how you nest things!  So we
+can easily do some code reduction by putting the <em>path</em> first and have
+it contain the <em>get</em> and <em>post</em>.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">get</span> <span class="o">{</span>
+                <span class="n">complete</span><span class="o">(</span><span class="s">&quot;That&#39;s my stuff!&quot;</span><span class="o">)</span>
+            <span class="o">}</span> <span class="o">~</span>
+              <span class="n">post</span> <span class="o">{</span>
+                  <span class="n">complete</span><span class="o">(</span><span class="s">&quot;stuff posted!&quot;</span><span class="o">)</span>
+              <span class="o">}</span>
+        <span class="o">}</span> <span class="o">~</span>
+          <span class="n">get</span> <span class="o">{</span>
+              <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+          <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div>
+<p>That&#39;s better!  Note the tilde chaining the get &amp; post together.</p>
+
+<h2>Reading and returning JSON</h2>
+
+<p>So we&#39;re ready to deal with some data, so we&#39;ll change our <em>get</em> and
+<em>post</em> to use JSON objects.</p>
+
+<p>For our purposes, the object is going to be really simple. I&#39;ll also
+create the format to use <em>spray.json</em>&#39;s serialization.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">spray.json.DefaultJsonProtocol</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Stuff</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">data</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+<span class="k">object</span> <span class="nc">Stuff</span> <span class="k">extends</span> <span class="nc">DefaultJsonProtocol</span> <span class="o">{</span>
+    <span class="k">implicit</span> <span class="k">val</span> <span class="n">stuffFormat</span> <span class="k">=</span> <span class="n">jsonFormat2</span><span class="o">(</span><span class="nc">Stuff</span><span class="o">.</span><span class="n">apply</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Now we&#39;ll have our <em>get</em> return some fake data.  I&#39;ll list the whole trait again so there&#39;s no confusion.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">trait</span> <span class="nc">SampleRoute</span> <span class="k">extends</span> <span class="nc">HttpService</span> <span class="o">{</span>
+    <span class="k">import</span> <span class="nn">spray.httpx.SprayJsonSupport._</span>
+    <span class="k">import</span> <span class="nn">Stuff._</span>
+    <span class="k">import</span> <span class="nn">spray.http.MediaTypes</span>
+
+    <span class="k">val</span> <span class="n">route</span> <span class="k">=</span> <span class="o">{</span>
+        <span class="n">path</span><span class="o">(</span><span class="s">&quot;stuff&quot;</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">respondWithMediaType</span><span class="o">(</span><span class="nc">MediaTypes</span><span class="o">.</span><span class="n">`application/json`</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">get</span> <span class="o">{</span>
+                    <span class="n">complete</span><span class="o">(</span><span class="nc">Stuff</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="s">&quot;my stuff&quot;</span><span class="o">))</span>
+                <span class="o">}</span> <span class="o">~</span>
+                  <span class="n">post</span> <span class="o">{</span>
+                      <span class="n">complete</span><span class="o">(</span><span class="s">&quot;stuff posted!&quot;</span><span class="o">)</span>
+                  <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span> <span class="o">~</span>
+          <span class="n">get</span> <span class="o">{</span>
+              <span class="n">complete</span><span class="o">(</span><span class="s">&quot;I exist!&quot;</span><span class="o">)</span>
+          <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The <em>complete</em> call takes the case class <strong>stuff</strong> and automatically takes care of creating the JSON for it.</p>
+
+<p>Please note the function <em>respondWithMediaType</em>. You can use this to
+go a different route if someone wants XML vs JSON.  I recommend that
+you always put this on anything that returns JSON so if browser
+demands that type, your service doesn&#39;t erroneously return that it
+can&#39;t do that.</p>
+
+<p>Now that we&#39;re returning data, let&#39;s modify our <em>post</em> call to read
+data.  We&#39;ll return the data with 100 added to the id, and the text
+<em>posted</em> added to the data.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">post</span> <span class="o">{</span>
+    <span class="n">entity</span><span class="o">(</span><span class="n">as</span><span class="o">[</span><span class="kt">Stuff</span><span class="o">])</span> <span class="o">{</span> <span class="n">stuff</span> <span class="k">=&gt;</span>
+        <span class="n">complete</span><span class="o">(</span><span class="nc">Stuff</span><span class="o">(</span><span class="n">stuff</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="mi">100</span><span class="o">,</span> <span class="n">stuff</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="s">&quot; posted&quot;</span><span class="o">))</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>Note another nesting done here with the <em>entity(as[Stuff])</em> which will
+deserialize the JSON into an object variable provided as a parameter
+to the expression block.</p>
+
+<h2>Routes with a depth of greater than 1</h2>
+
+<p>So you might decided to do a route <em>junk/mine</em> and <em>junk/yours</em>, and
+your first thought would be to do <em>path(&quot;junk/mine&quot;)</em>.  While
+intuitive, that unfortunately will not work.  When you go into more
+complex paths, Spray utilizes the <em>pathPrefix</em> and <em>pathEnd</em>
+directives.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"> <span class="n">pathPrefix</span><span class="o">(</span><span class="s">&quot;junk&quot;</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">pathPrefix</span><span class="o">(</span><span class="s">&quot;mine&quot;</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pathEnd</span> <span class="o">{</span>
+            <span class="n">get</span> <span class="o">{</span>
+                <span class="n">complete</span><span class="o">(</span><span class="s">&quot;MINE!&quot;</span><span class="o">)</span>
+            <span class="o">}</span>
+         <span class="o">}</span>
+    <span class="o">}</span> <span class="o">~</span> <span class="n">pathPrefix</span><span class="o">(</span><span class="s">&quot;yours&quot;</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">pathEnd</span> <span class="o">{</span>
+            <span class="n">get</span> <span class="o">{</span>
+                <span class="n">complete</span><span class="o">(</span><span class="s">&quot;YOURS!&quot;</span><span class="o">)</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>It gets very &#39;nesty&#39; but allows you a lot of flexibility in creating
+your routes.  There&#39;s a great more you can do with this, but we&#39;ll
+leave that for a future blog post or the Spray documentation.  We are
+<strong>trying</strong> to keep this simple.</p>
+
+<h2>Getting query parameters</h2>
+
+<p>At some point, you&#39;re going to want to handle query parameters, both
+required and optional.  We&#39;ll create a route named <em>params</em> that will
+take in a required parameter <em>req</em> and an optional parameter <em>opt</em>.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">path</span><span class="o">(</span><span class="s">&quot;params&quot;</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">get</span> <span class="o">{</span>
+        <span class="n">parameters</span><span class="o">(</span><span class="-Symbol">&#39;req</span><span class="o">,</span> <span class="-Symbol">&#39;opt</span><span class="o">.?)</span> <span class="o">{</span> <span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="n">opt</span><span class="o">)</span> <span class="k">=&gt;</span>
+            <span class="n">complete</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;Req: $req, Opt: $opt&quot;</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span> 
+</code></pre></div>
+<p>Notice the single tick declaration, and for opt the .?. The .?
+signifies the parameter is optional. You can list as many parameters
+as you want, and they will be provided to the expression as variables
+(the variable names don&#39;t need to be named the same as the query
+params).  If you run this and go to
+http://localhost:8080/params?req=hi&amp;opt=bye your response should be</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Req: hi, Opt: Some(bye)
+</code></pre></div>
+<p>So you can see the optional parameter translates to a Scala Option type.</p>
+
+<p>Now hit the url without any query parameters
+(http://localhost:8080/params).  You&#39;ll notice the message is our root
+level get <em>I exist!</em>. This is because it didn&#39;t match against the
+required parameters so it fell through to our root <em>get</em>.  However, if
+you comment out our root <em>get</em> you&#39;ll see the following message:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Request is missing required query parameter &#39;req&#39;
+</code></pre></div>
+<p>Which is much more useful.  The lesson here is to be careful about how
+things can flow through and design your routes appropriately.</p>
+
+<h2>Getting headers</h2>
+
+<p>Similarly to getting parameters, you can retrieve headers through the
+<em>headerValueByName</em> directive.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">path</span><span class="o">(</span><span class="s">&quot;headers&quot;</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">get</span> <span class="o">{</span>
+        <span class="n">headerValueByName</span><span class="o">(</span><span class="s">&quot;ct-remote-user&quot;</span><span class="o">)</span> <span class="o">{</span> <span class="n">userId</span> <span class="k">=&gt;</span>
+            <span class="n">complete</span><span class="o">(</span><span class="n">userId</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>You also can get an optional header through the
+optionalHeaderValueByName directive that will return an Option.</p>
+
+<h2>Returning futures instead of data</h2>
+
+<p>Finally, you might have your service call a reactive framework like
+Slick 3, or your worker might return a Scala Future.  Luckily, the
+<em>complete</em> call handles this without any problems.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">path</span><span class="o">(</span><span class="s">&quot;reactive&quot;</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">get</span> <span class="o">{</span>
+        <span class="n">complete</span><span class="o">(</span><span class="n">future</span> <span class="o">{</span> <span class="s">&quot;I&#39;m reactive!&quot;</span> <span class="o">})</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>So you can make your code as reactive as you want and never have to do
+an Await.result!</p>
+
+<h2>Packaging your app for deployment</h2>
+
+<p>Now we have our services, we&#39;re ready to deploy them.  For this we
+need to instruct SBT on how to package the distribution.  In the
+build.sbt I started with, there was this line</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">lazy</span> <span class="k">val</span> <span class="n">root</span> <span class="k">=</span> <span class="o">(</span><span class="n">project</span> <span class="n">in</span> <span class="n">file</span><span class="o">(</span><span class="s">&quot;.&quot;</span><span class="o">)).</span><span class="n">enablePlugins</span><span class="o">(</span><span class="nc">JavaAppPackaging</span><span class="o">)</span>
+</code></pre></div>
+<p>That uses the sbt-native-packager plugin provided by typesafe.  In
+your project/plugins.sbt, you&#39;ll want to add the following</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">&quot;com.typesafe.sbt&quot;</span> <span class="o">%</span> <span class="s">&quot;sbt-native-packager&quot;</span> <span class="o">%</span> <span class="s">&quot;1.0.0&quot;</span><span class="o">)</span>
+</code></pre></div>
+<p>If you run <strong>sbt dist</strong> you&#39;ll end up with a zip file under
+target/universal which you can send to the deployment mechanism of
+your choice (for instance, Cloud Foundry).</p>
+
+<h2>Finally done</h2>
+
+<p>As I stated above (ok, WAY above), the code is at
+<a href="https://github.com/MonsantoCo/simple-spray">simple-spray</a>.  Feel free
+to fork it into your own repository and experiment with it.  But the
+building blocks I&#39;ve given you should be able to handle a great deal
+of your requests.</p>
+
+<p>I&#39;ll follow up later with more advanced spray features focusing on
+pathing and unit testing your spray services.</p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="https://avatars1.githubusercontent.com/u/1211796?v=3&s=460&s=40">
+                        
+                        <span>
+                            Scott MacDonald posted on August 11, 2015
+                        </span>
+
+                            
+                            
+                            <a  href="https://www.github.com/samus42">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/07/31/implicit-conversions/" data-toggle="tooltip" data-placement="top" title="Learn implicits: Views as class extensions">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
