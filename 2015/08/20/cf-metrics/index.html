@@ -11,20 +11,20 @@
         
     
     <meta property="og:site_name" content="Monsanto Engineering Blog" />
-    <meta property="og:title" content="PaaSify your Apps" />
-    <meta property="og:description" content="Building an Open Source Cloud Foundry Toolbox" />
-    <meta property="og:url" content="http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/" />
-    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
-    <meta name="description" content="Building an Open Source Cloud Foundry Toolbox" />
+    <meta property="og:title" content="Cloud Foundry Metrics" />
+    <meta property="og:description" content="Announcing CF-Metrics, an example of open source monitoring and alerting with Cloud Foundry" />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/08/20/cf-metrics/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-chesterfield.jpg" />
+    <meta name="description" content="Announcing CF-Metrics, an example of open source monitoring and alerting with Cloud Foundry" />
     
     <meta name="author" content="Mark Seidenstricker" />
     
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
-    <title>PaaSify your Apps - Engineering at Monsanto</title>
+    <title>Cloud Foundry Metrics - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/" />
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/08/20/cf-metrics/" />
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -95,17 +95,17 @@
 
 
     <!-- Post Header -->
-<header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
+<header class="intro-header" style="background-image: url('/img/mon-chesterfield.jpg')">
     <div class="heading-underlay">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>PaaSify your Apps</h1>
+                        <h1>Cloud Foundry Metrics</h1>
                         
-                        <h2 class="subheading">Building an Open Source Cloud Foundry Toolbox</h2>
+                        <h2 class="subheading">Open Source Monitoring and Alerting for Cloud Foundry</h2>
                         
-                        <span class="meta">Posted by Mark Seidenstricker on July 22, 2015</span>
+                        <span class="meta">Posted by Mark Seidenstricker on August 20, 2015</span>
                     </div>
                 </div>
             </div>
@@ -119,18 +119,48 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
 
-				<p>The age of cloud computing is already here, and companies who don&#39;t adapt are at serious risk of getting left in the dust.  At Monsanto we have fully embraced the transformation this revolution has brought and are diligently on the path towards a modern IT landscape focused around public cloud, microservices, open source technologies, and <a href="http://12factor.net/">12 factor apps</a>.  Transformations however, rarely happen overnight and like most enterprise companies we were starting the journey with a datacenter full of legacy and not-so-cloudy apps.  So our first step was to adopt
-<a href="https://docs.cloudfoundry.org/concepts/overview.html">Cloud Foundry</a>, an open platform as a service which allowed our dev teams to start learning/adopting cloud designs on top of an agile platform in the safety of our private datacenter.  </p>
+				<p>In the second installation of our open source <a href="http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/">Cloud Foundry (CF) toolbox series</a> we would like to introduce <a href="https://github.com/MonsantoCo/cf-metrics">CF-Metrics</a>, a comprehensive solution for Cloud Foundry monitoring and alerting based solely on open source projects.  In a world of unreliable cloud infrastructure and distributed micro service architectures, monitoring and alerting are as critical now as they&#39;ve ever been.  Even when you learn to expect failure (or better yet <a href="https://github.com/strepsirrhini-army/chaos-lemur">embrace it</a>) and build self healing platforms like Cloud Foundry, you still need monitoring and alerting to analyze why there was a failure and how to make it not happen again in the future.</p>
 
-<p>We&#39;ve been using Cloud Foundry for over a year now, and the core project is fairly comprehensive with extensions and tooling being contributed by the <a href="https://github.com/cloudfoundry-community">community</a> on a regular basis.  But there are still a few areas which lack open source solutions to address the capabilities seen in the branded CF offerings.  In addition to using some of the existing community <a href="https://github.com/cloudfoundry-incubator/admin-ui">tools</a> we&#39;ve also added a few of our own and we&#39;ll be opening the first three projects from this toolbox to the community.</p>
+<h2>Lowering the Cost of Entry</h2>
 
-<p>Starting with <a href="https://github.com/MonsantoCo/cf-portal">CF-Portal</a>, we will be doing a multi-part blog post over the coming weeks for each tool corresponding with its public release.  We hope these are useful to others using the platform, and we look forward to feedback and contribution to continue growing the Cloud Foundry community toolbox.</p>
+<p>When we first started with Cloud Foundry at Monsanto, monitoring was one of the key areas the team needed to tackle to feel comfortable running the platform. Maybe it&#39;s a placebo effect, but knowing I have the ability to graph any metric at will keeps me from loosing sleep at night.  And although this topic remains highly requested in meetups and mailing lists, publicized documentation and more importantly downloadable working implementations are still relatively sparse.</p>
+
+<p>By releasing CF-Metrics, we hope to provide a solution which will help new community users get off the ground quicker by:</p>
 
 <ul>
-<li><a href="https://github.com/MonsantoCo/cf-portal">CF-Portal</a>: A Single Pane of Glass for Cloud Foundry Apps</li>
-<li>CF-Users: Self Service Team Management for Cloud Foundry</li>
-<li><a href="https://github.com/MonsantoCo/cf-metrics">CF-Metrics</a>: Open Source Monitoring and Alerting for Cloud Foundry</li>
+<li>Being one of the quickest and most painless ways to get up and running with a functional CF monitoring solution </li>
+<li>Re-using existing components to eliminate the need to run custom plugins and/or forked releases</li>
 </ul>
+
+<h2>The Setup</h2>
+
+<p>CF-Metrics is a combination of open source tools (Heka, InfluxDB, and Grafana) running as a docker compose application.  Packaging the tools via docker makes it compact and highly portable to a variety of hosting solutions.  We purposefully elected not to package the application as a BOSH release since it&#39;s best practice not to run your monitoring solution on the platform that it is monitoring.
+<img src=/img/cf-metrics-arch.png  width=700 height=400/></p>
+
+<h2>Gathering the metrics</h2>
+
+<p>To gather metrics we are utilizing two components that have been a part of BOSH and Cloud Foundry for a long time time: CF collector and BOSH monitor.  CF collector is in charge of grabbing metrics from two built-in endpoints (/varz and /healthz) published by every job in the Cloud Foundry release.  By default it does this every thirty seconds and returns a wealth of statistics about the performance, utilization, and health of each job.  BOSH monitor talks to the BOSH agent installed on every VM in the releases it deploys and gathers OS related metrics such as CPU, swap, and disk utilization.</p>
+
+<p>These components have the capability to forward their consolidated metric streams to a number of 3rd party tools via configuration in their release ymls.  For the purposes of our project, we are choosing to forward BOSH and CF metrics via the common graphite protocol and BOSH events via the new BOSH monitor consul plugin.</p>
+
+<h2>Processing</h2>
+
+<p>To process the metric and event stream, we chose Mozilla&#39;s open source stream processing system <a href="http://hekad.readthedocs.org/en/latest/index.html">Heka</a>.  Heka is lightweight and its lua sandbox functionality gives it the ability to perform a large variety of functions.  Once the metric and event data is sent to Heka, it is decoded from graphite to Heka format and then streamed through a variety of filters to accomplish our specific tasks.  </p>
+
+<h2>Alerting</h2>
+
+<p>Alerting through Heka is done through configuration of sandbox filters.  There are filters which trigger on specific message types flowing through the system and perform logic to determine if an alert is required.  It then uses the built-in alert module to inject an alert message into the Heka stream and set a timer to throttle additional alerts of that type for the specified time.  Alert messages are then picked up by a separate sandbox and sent to a Heka output such as an email address or a slack channel.</p>
+
+<p>We&#39;ve included some alert filters we find useful such as swap utilization and DEA memory ratios, but creating your own is as easy as creating a new Heka filter with your custom logic.  Heka also has built in anomaly detection modules so if you&#39;re adventurous you can go beyond traditional threshold based alerting.</p>
+
+<h2>Storing and Trending</h2>
+
+<p>Once the metric and event data has flowed through the filters a heka encoder and output are used to dump the metrics we want to persist to a InfluxDB database.  This data is then accessible via Grafana to create ad-hoc graphs or custom dashboards like the one below
+<img src="/img/cf-metrics-dea.png" alt="DEA Stats "></p>
+
+<h2>Ready, Set, Go!</h2>
+
+<p>For a deeper look at CF-Metrics head over to the <a href="https://github.com/MonsantoCo/cf-metrics">github page</a> to try it out for yourself.  If you make a feature enhancement or useful dashboard we&#39;d love a PR to include it in the project.  Or if you have your own solution for Cloud Foundry monitoring and alerting, hopefully we&#39;ve encouraged you to pay it forward and share it with the community.</p>
 
                 
 
@@ -139,7 +169,7 @@
                             <img src="https://avatars2.githubusercontent.com/u/4573660?v=3&s=40">
                         
                         <span>
-                            Mark Seidenstricker posted on July 22, 2015
+                            Mark Seidenstricker posted on August 20, 2015
                         </span>
 
                             
@@ -158,13 +188,9 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2015/07/10/cloudformation-template-generator/" data-toggle="tooltip" data-placement="top" title="CloudFormation Template Generator">&larr; Previous Post</a>
+                        <a href="/2015/08/11/simple-spray/" data-toggle="tooltip" data-placement="top" title="Building a simple Spray application">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2015/07/28/avoiding-mocks/" data-toggle="tooltip" data-placement="top" title="Testing without mocking in Scala">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

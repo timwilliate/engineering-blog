@@ -7,6 +7,18 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Cloud Foundry Metrics</title>
+                
+                
+                    <description>&lt;p&gt;In the second installation of our open source &lt;a href=&quot;http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/&quot;&gt;Cloud Foundry (CF) toolbox series&lt;/a&gt; we would like to introduce &lt;a href=&quot;https://github.com/MonsantoCo/cf-metrics&quot;&gt;CF-Metrics&lt;/a&gt;, a comprehensive solution for Cloud Foundry monitoring and alerting based solely on open source projects.  In a world of unreliable cloud infrastructure and distributed micro service architectures, monitoring and alerting are as critical now as they&amp;#39;ve ever been.  Even when you learn to expect failure (or better yet &lt;a href=&quot;https://github.com/strepsirrhini-army/chaos-lemur&quot;&gt;embrace it&lt;/a&gt;) and build self healing platforms like Cloud Foundry, you still need monitoring and alerting to analyze why there was a failure and how to make it not happen again in the future.&lt;/p&gt;
+</description>
+                
+                <pubDate>Thu, 20 Aug 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/08/20/cf-metrics/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/20/cf-metrics/</guid>
+            </item>
+        
+            <item>
                 <title>Building a simple Spray application</title>
                 
                 
@@ -132,18 +144,6 @@ features you might regularly use.&lt;/p&gt;
                 <pubDate>Mon, 15 Jun 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/06/15/implicits-futures/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/15/implicits-futures/</guid>
-            </item>
-        
-            <item>
-                <title>etcd Clustering in AWS</title>
-                
-                
-                    <description>&lt;h2&gt;Overview&lt;/h2&gt;
-</description>
-                
-                <pubDate>Fri, 12 Jun 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/06/12/etcd-clustering/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/12/etcd-clustering/</guid>
             </item>
         
     </channel>
