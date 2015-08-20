@@ -18,4 +18,4 @@ Starting with [CF-Portal](https://github.com/MonsantoCo/cf-portal), we will be d
 
 * [CF-Portal](https://github.com/MonsantoCo/cf-portal): A Single Pane of Glass for Cloud Foundry Apps
 * CF-Users: Self Service Team Management for Cloud Foundry
-* CF-Metrics: Open Source Monitoring and Alerting for Cloud Foundry
+* [CF-Metrics](https://github.com/MonsantoCo/cf-metrics): Open Source Monitoring and Alerting for Cloud Foundry
