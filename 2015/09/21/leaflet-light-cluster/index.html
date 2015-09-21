@@ -11,18 +11,20 @@
         
     
     <meta property="og:site_name" content="Monsanto Engineering Blog" />
-    <meta property="og:title" content="" />
-    <meta property="og:description" content="We produce code that powers agricultural products that support farmers all around the world." />
-    <meta property="og:url" content="http://engineering.monsanto.com/page2/" />
-    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
-    <meta name="description" content="We produce code that powers agricultural products that support farmers all around the world." />
+    <meta property="og:title" content="Cluster Lightly" />
+    <meta property="og:description" content="Organizing Geospatial Data Without Overwhelming Your Browser" />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/light-cluster-view.png" />
+    <meta name="description" content="Organizing Geospatial Data Without Overwhelming Your Browser" />
+    
+    <meta name="author" content="Caleb Courier" />
     
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
-    <title>Engineering at Monsanto</title>
+    <title>Cluster Lightly - Engineering at Monsanto</title>
 
-    <link rel="canonical" href="http://engineering.monsanto.com/page2/" />
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/" />
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -92,16 +94,18 @@
 </nav>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/mon-field_rows.jpg')">
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/light-cluster-view.png')">
     <div class="heading-underlay">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <div class="site-heading">
-                        <h1>Engineering at Monsanto</h1>
-                        <hr class="small">
-                        <span class="subheading">We produce code that powers agricultural products that support farmers all around the world.</span>
+                    <div class="post-heading">
+                        <h1>Cluster Lightly</h1>
+                        
+                        <h2 class="subheading">Organizing Geospatial Data Without Overwhelming Your Browser</h2>
+                        
+                        <span class="meta">Posted by Caleb Courier on September 21, 2015</span>
                     </div>
                 </div>
             </div>
@@ -109,112 +113,101 @@
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			
-<div class="post-preview">
-    <a href="/2015/07/28/avoiding-mocks/">
-        <h2 class="post-title">            Testing without mocking in Scala
-        </h2>
-        
-    </a>
-    <p class="post-meta">Posted by Jessica Kerr on July 28, 2015</p>
-</div>
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
 
+				<p>As the amount of available technology increases so does the amount of available data.  Of this newly available data,
+much of it is concerned with two major questions:</p>
 
-<hr>
-
-
-<div class="post-preview">
-    <a href="/2015/07/22/building-an-open-source-cloud-foundry-toolbox/">
-        <h2 class="post-title">            PaaSify your Apps
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Building an Open Source Cloud Foundry Toolbox
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Mark Seidenstricker on July 22, 2015</p>
-</div>
-
-
-<hr>
-
-
-<div class="post-preview">
-    <a href="/2015/07/10/cloudformation-template-generator/">
-        <h2 class="post-title">            CloudFormation Template Generator
-        </h2>
-        
-        <h3 class="post-subtitle">
-            or A Tour of Scala Type System Features
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Ryan Richt on July 10, 2015</p>
-</div>
-
-
-<hr>
-
-
-<div class="post-preview">
-    <a href="/2015/07/08/stax/">
-        <h2 class="post-title">            Stax
-        </h2>
-        
-        <h3 class="post-subtitle">
-            Create and manage CloudFormation stacks in AWS
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Phil Cryer on July 8, 2015</p>
-</div>
-
-
-<hr>
-
-
-<div class="post-preview">
-    <a href="/2015/06/17/docker-metrics/">
-        <h2 class="post-title">            Doing Docker Metrics
-        </h2>
-        
-        <h3 class="post-subtitle">
-            How To Do Production Ready Docker Metrics
-        </h3>
-        
-    </a>
-    <p class="post-meta">Posted by Stuart Wong on June 17, 2015</p>
-</div>
-
-
-<hr>
-
-
-
-<!-- Pager -->
-
-<ul class="pager">
-    
-    <li class="previous">
-        <a href="/">&larr; Newer Posts</a>
-    </li>
-    
-    
-    <li class="next">
-        <a href="/page3/">Older Posts &rarr;</a>
-    </li>
-    
+<ul>
+<li>When?</li>
 </ul>
 
+<p>and</p>
 
-		</div>
-	</div>
-</div>
+<ul>
+<li>Where?</li>
+</ul>
+
+<p>The ability to associate data throughout time and space has allowed the development of applications that can make
+informed decisions based on someone&#39;s position at a particular time.
+These machine-made suggestions can be as commonplace as what route to take home during rush hour from applications such
+as Waze or Google Maps, or as seemingly complex as deciding where to get brunch by typing something ridiculous like
+&quot;open breakfast diners with really big omelets near me&quot; into a search engine on your smartphone. Machine made decisions
+like this are made possible by the growing amount of geospatial data, i.e., information that is related to a specific
+location.  The problem that we face now is not where to get the data or even how to store it necessarily, but rather
+how to visually represent this large amount of data in a meaningful way.  This is where clustering comes into play.</p>
+
+<p>Clustering geospatial data is not a new concept. It has been used in GIS related fields for centuries for reasons
+such as Dr. John Snow&#39;s method to track cholera outbreaks in the mid 1800&#39;s to modern day classification algorithms
+used in image analysis.  However, as developers, one of the challenges we face is when and how to actually cluster the
+data we have.  Plenty of libraries and modules exist that will take your data into a black box and spit out some
+clustered objects, and these work phenomenally under certain conditions.  For example, if you don&#39;t have a terrible
+amount of data, say just a few thousand objects, or if you don&#39;t mind handing your data over to a third party via a
+webservice then these are great options.  On the other hand, if you&#39;re dealing with millions of objects or points you
+probably won&#39;t be able to, and won&#39;t want to, do heavy processing with them on the client.  This is where LightCluster
+comes in.</p>
+
+<p>In short, LightCluster is an extension for the Leaflet.js mapping library that allows you to use a server side
+clustering solution for geospatial data.  Unlike other javascript clustering libraries, LightCluster doesn&#39;t want all
+the data up front in order to run clustering algorithms on the client; instead it expects a minimized cluster object
+consisting of a lat-long pair to know where to place it, a bounding box to show the area of the data it represents, and
+a count of how many objects it&#39;s representing.  You may be thinking &quot;Hold on now, what exactly does it do then?&quot;. The
+answer to that is: Whatever you tell it to.  Upon initialization this simple extension will take in an anonymous
+function which you define for updating the data and, depending on the options you pass in, it will use your update
+function when handling all of the click, drag, and zoom events on the map.  It also keeps track of how many
+points/objects are in the cluster and will reduce the cluster to a standard leaflet marker if the count is only one.
+Because of this simplification on the client you can define and execute all the intense processing on the server side
+where it should be.  Granted, this requires you to develop your own clustering solution in order to generate these
+light weight cluster objects.  The good news is it&#39;s not as hard as it sounds.  One extremely simple solution is to use
+<a href="http://www.movable-type.co.uk/scripts/geohash.html">geohash</a>.  Since geohash already represents points/areas in a
+unique way that can be directly related at various amounts of precision, most of the work of correlating your data into
+related geospatial regions is already done.  Since this method is so simple it&#39;s actually what I used to generate the
+sample data used in the <a href="https://github.com/CalebCourier/Leaflet.LightCluster">demo project</a>. Of course if you would
+rather use something more traditional or statistical feel free.  Some of the more commonly used clustering algorithms
+include DBSCAN and K-means both of which you can find code implementations with a simple Google search. No matter what
+you do, LightCluster will take it and perform its simple task of rendering and updating keeping your client code light
+and your map performant.</p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="/img/placeholder.jpg">
+                        
+                        <span>
+                            Caleb Courier posted on September 21, 2015
+                        </span>
+
+                            
+                            
+                            <a  href="https://www.github.com/CalebCourier">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/08/20/cf-metrics/" data-toggle="tooltip" data-placement="top" title="Cloud Foundry Metrics">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
 
 <hr>
 
