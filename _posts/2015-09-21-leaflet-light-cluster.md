@@ -53,6 +53,6 @@ unique way that can be directly related at various amounts of precision most of 
 related geospatial regions is already done.  Since this method is so simple it's actually what I used to generate the
 sample data used in the [demo project](https://github.com/CalebCourier/Leaflet.LightCluster). Of course if you would
 rather use something more traditional or statistical feel free.  Some of the more commonly used clustering algorithms
-include DBSCAN and K-means both of which you can find code implementations with a simple google search. No matter what
+include DBSCAN and K-means both of which you can find code implementations with a simple Google search. No matter what
 you do, LightCluster will take it and perform its simple task of rendering and updating keeping your client code light
 and your map performant.
