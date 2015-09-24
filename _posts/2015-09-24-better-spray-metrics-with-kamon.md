@@ -2,6 +2,7 @@
 layout: post
 title: "Better Spray metrics with Kamon"
 subtitle: "Introducing spray-kamon-metrics"
+description: "The Open Source spray-kamon-metrics library improves Spray-Kamon integration by providing better response metrics, detects timeouts, and reports Spray can server statistics."
 header-img: "img/mon-monmouth.jpg"
 author: "Daniel Solano Gómez"
 githubProfile: "sattvik"
@@ -67,7 +68,7 @@ is being measured.  In particular:
 
 While we could have resolved these issues to some extent by [providing a name
 generator][pang], the core problem was that, even with more meaningful names,
-there is no way to add tags to trace that has already been established.  As a
+there is no way to add tags to a trace that has already been established.  As a
 result, the dimensionality of the metrics that are produced are restricted to
 trace name and response status code.  We want more, including:
 
@@ -99,7 +100,7 @@ class ServiceActor extends HttpServiceActor {
 ```
 
 This works most of the time, but if the request results in an error or a
-rejection it fails.  The reason for this is that in the case of rejections and
+rejection, it fails.  The reason for this is that in the case of rejections and
 errors not handled explicitly by the route, the route does not produce the
 resulting `HttpResponse`.  As shown in [figure 1][fig1], when you use
 `runRoute`, it *seals* your route with implicitly given rejection and exception
@@ -119,7 +120,7 @@ but that departs from the norm and also does not solve the problem with
 managing state.
 
 In the end, what we decided to do is to replace `HttpService` with
-`TracingHttpService`, which is largely identical to `HttpService` the biggest
+`TracingHttpService`, which is largely identical to `HttpService`, the biggest
 difference being in how it seals routes:
 
 ```scala
@@ -152,7 +153,7 @@ def sealRoute(route: Route)(implicit eh: ExceptionHandler, rh: RejectionHandler)
 }
 ```
 
-As we can, `HttpService.sealRoute` is simply a higher order function that wraps
+As we can see, `HttpService.sealRoute` is simply a higher order function that wraps
 a route with exception and rejection handlers.  In the case of
 `TracingHttpService`, `sealRoute` just adds another wrap to the mix.  It still
 wraps the route with the handlers, but it adds its own wrapper around that.
@@ -207,7 +208,7 @@ We want to measure both cases:
    requests are timing out and with what status code (is the timeout too short
    for what we need to do, or is hanging due to an error?).
 2. We also want to know about the timeout responses, as they should be
-   aggregated to hour response time and error count metrics.
+   aggregated to response time and error count metrics.
 
 To help us account for timeouts, we modify our `sealRoute` implementation:
 
@@ -392,26 +393,26 @@ def bound(address: InetSocketAddress): Receive = {
 
 When we become `bound`, a few things take place:
 
-1. We capture the reference to the sender of the `Http.Bound` message.  This is
-   the _HTTP listener_ actor which handles all connections to that particular
-   server.
-2. We start watching the listener.  When it dies, that means the server has
-   died, so we should stop monitoring and shut down.
-3. We schedule a task that will send the listener a `Http.GetStats` every 15
-   seconds (this is configurable in the real code).  Keep in mind that when we
-   create this task, it uses the `self` implicit value as the sender, meaning
-   that as far as the listener is concerned, it is the monitor that is sending
-   these messages.
-4. We instantiate a Kamon entity we created specifically for recording the
-   Spray server metrics.  Its name is generated from the host name and port
-   where the server is listening.
-5. Finally we have the partial function that handles the two types of messages
-   that our actor will receive from this point forward:
-    a. When we get a `Terminated` message, that means the server has stopped.
-       As a result, we clean up by cancelling the recurring task, removing the
-       Kamon entity, and finally stopping ourselves.
-    b. In the case where we get new `Stats`, we update the Kamon entity with
-       the new values.
+1.  We capture the reference to the sender of the `Http.Bound` message.  This is
+    the _HTTP listener_ actor which handles all connections to that particular
+    server.
+2.  We start watching the listener.  When it dies, that means the server has
+    died, so we should stop monitoring and shut down.
+3.  We schedule a task that will send the listener a `Http.GetStats` every 15
+    seconds (this is configurable in the real code).  Keep in mind that when we
+    create this task, it uses the `self` implicit value as the sender, meaning
+    that as far as the listener is concerned, it is the monitor that is sending
+    these messages.
+4.  We instantiate a Kamon entity we created specifically for recording the
+    Spray server metrics.  Its name is generated from the host name and port
+    where the server is listening.
+5.  Finally we have the partial function that handles the two types of messages
+    that our actor will receive from this point forward:
+    -   When we get a `Terminated` message, that means the server has stopped.
+        As a result, we clean up by cancelling the recurring task, removing the
+        Kamon entity, and finally stopping ourselves.
+    -   In the case where we get new `Stats`, we update the Kamon entity with
+        the new values.
 
 All in all, this code is relatively straightforward.  However, we are not quite
 done, yet.  Updating the Kamon entity’s metrics was not as straightforward as
@@ -457,13 +458,14 @@ own entity recorder][dyoer].  However, it does contains a couple of twists
 worth sharing:
 
 ```scala
-class SprayServerMetrics(instrumentFactory: InstrumentFactory) extends GenericEntityRecorder(instrumentFactory) {
+class SprayServerMetrics(instrumentFactory: InstrumentFactory)
+  extends GenericEntityRecorder(instrumentFactory) {
   private val stats = new AtomicReference[Stats](new Stats(0.nanoseconds, 0, 0, 0, 0, 0, 0, 0))
-  private val connections = counter(“connections”)
-  private val openConnections = histogram(“open-connections”)
-  private val requests = counter(“requests”)
-  private val openRequests = histogram(“open-requests”)
-  private val requestTimeouts = counter(“request-timeouts”)
+  private val connections = counter("connections")
+  private val openConnections = histogram("open-connections")
+  private val requests = counter("requests")
+  private val openRequests = histogram("open-requests")
+  private val requestTimeouts = counter("request-timeouts")
 
   override def collect(collectionContext: CollectionContext): EntitySnapshot
 
@@ -480,9 +482,9 @@ that.
 override def collect(collectionContext: CollectionContext): EntitySnapshot = {
   val parentSnapshot = super.collect(collectionContext)
   val metrics = parentSnapshot.metrics ++ Map(
-    counterKey(“uptime”, Time.Nanoseconds) → CounterSnapshot(stats.uptime.toNanos),
-    counterKey(“max-open-connections”) → CounterSnapshot(stats.maxOpenConnections),
-    counterKey(“max-open-requests”) → CounterSnapshot(stats.maxOpenRequests)
+    counterKey("uptime", Time.Nanoseconds) → CounterSnapshot(stats.uptime.toNanos),
+    counterKey("max-open-connections") → CounterSnapshot(stats.maxOpenConnections),
+    counterKey("max-open-requests") → CounterSnapshot(stats.maxOpenRequests)
   )
   new DefaultEntitySnapshot(metrics)
 }
@@ -503,7 +505,7 @@ for those that are not.  Luckily this was not too difficult:
 
 Last, we just need to be sure to deal with the updates:
 
-```
+```scala
 def updateStats(newStats: Stats): Unit = {
   openConnections.record(newStats.openConnections)
   openRequests.record(newStats.openRequests)
