@@ -129,7 +129,7 @@ Here's the trick: instead of an {{"implicit val"| sc: "implicitparam"}} for Json
 
 What is this doing? First, we have to understand some new syntax: inside the {{"type parameter, there is a colon, followed by a type class"| sc: "contextbound"}}. 
 This is called [Context Bounds](http://docs.scala-lang.org/tutorials/FAQ/context-and-view-bounds.html) (good luck finding the documentation without knowing this special name).
-This is shorthand for "{{"a type T such that there exists in the magic hat a JsonFormat[T]"| sc: "contextbound"}}]".
+This is shorthand for "{{"a type T such that there exists in the magic hat a JsonFormat[T]"| sc: "contextbound"}}".
 The context-bounds notation above expands to:
 
 <pre>
@@ -139,10 +139,10 @@ The context-bounds notation above expands to:
     }
 </pre>
 
-The implicit parameter that the write function inside listFormat will be able to call {{".toJson"| sc: "toJson""}} on the elements in the List.
+The implicit parameter ensures that the write function inside listFormat will be able to call {{".toJson"| sc: "toJson""}} on the elements in the List.
 
 This {{"implicit def"|sc: "implicitdef"}} does not work the same way as a [view](http://engineering.monsanto.com/2015/07/31/implicit-conversions/), which converts a single type to another.
-Instead, it is is a supplier of implicit values. It can give the compiler a JsonFormat[List[T]],as long as the compiler supplies a JsonFormat[T]. 
+Instead, it is a supplier of implicit values. It can give the compiler a JsonFormat[List[T]],as long as the compiler supplies a JsonFormat[T]. 
 
 <img src="/img/typeclass-magic-hat-2.png" style="max-height: 400px;margin: 0 auto" 
 alt = "the magic hat: JsonDefaultProtocol puts in a function that turns an implicit JsonFormat of T into a JsonFormat of Seq of T"/>
