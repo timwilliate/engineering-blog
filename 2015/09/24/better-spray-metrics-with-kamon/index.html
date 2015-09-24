@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+        
+    
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="Better Spray metrics with Kamon" />
+    <meta property="og:description" content="The Open Source spray-kamon-metrics library improves Spray-Kamon integration by providing better response metrics, detects timeouts, and reports Spray can server statistics." />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-monmouth.jpg" />
+    <meta name="description" content="The Open Source spray-kamon-metrics library improves Spray-Kamon integration by providing better response metrics, detects timeouts, and reports Spray can server statistics." />
+    
+    <meta name="author" content="Daniel Solano Gómez" />
+    
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <title>Better Spray metrics with Kamon - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/" />
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css" />
+    <link rel="stylesheet" href="/css/scala-colors.min.css" />
+
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css" />
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-monmouth.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Better Spray metrics with Kamon</h1>
+                        
+                        <h2 class="subheading">Introducing spray-kamon-metrics</h2>
+                        
+                        <span class="meta">Posted by Daniel Solano Gómez on September 24, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<p>At Monsanto, we have adopted <a href="http://www.kamon.io" title="The Open Source tool for monitoring applications running on the JVM">Kamon</a> for monitoring our microservices
+implemented in Scala with <a href="http://spray.io/" title="Elegant, high-performance HTTP for your Akka Actors">Spray</a>.  Kamon provides an
+<a href="http://kamon.io/integrations/web-and-http-toolkits/spray/" title="Kamon Spray integration">integration</a> that will automatically instrument our services to
+generate traces for each incoming request.  This is great, but we wanted more.
+Some of the things we wanted to improve included:</p>
+
+<ul>
+<li>Providing better response metrics</li>
+<li>Detecting requests that time out</li>
+<li>Reporting Spray can server statistic through Kamon</li>
+</ul>
+
+<p>To accomplish this, we have created and open sourced the
+<a href="https://github.com/MonsantoCo/spray-kamon-metrics" title="Better metrics for Spray services">spray-kamon-metrics</a> library.  This library contains two independent pieces
+of functionality:</p>
+
+<ol>
+<li><code>TracingHttpService</code>, a drop-in replacement for spray-routing’s
+<code>HttpService</code> class.  <code>TracingHttpService</code>  provides better trace metrics
+and handles timed out requests.</li>
+<li><code>KamonHttp</code>, a drop-in replacement for spray-can’s <code>Http</code> Akka I/O
+extension.  It will transparently collect Spray can’s server metrics.</li>
+</ol>
+
+<p>For the rest of the post, we will explore in greater detail what the library
+does and how it works.  Finally, we will wrap up by presenting some ideas for
+future development.  If you like, you can visit <a href="https://github.com/MonsantoCo/spray-kamon-metrics" title="Better metrics for Spray services">the project’s page on
+GitHub</a> for more details about how to integrate the
+library into your application.</p>
+
+<h2>Improving service metrics with <code>TracingHttpService</code></h2>
+
+<p>The <code>TracingHttpService</code> fulfils the first two of our goals:</p>
+
+<ol>
+<li>Providing better response metrics</li>
+<li>Detection and tracing of request timeouts</li>
+</ol>
+
+<h3>Providing better response metrics</h3>
+
+<p>Kamon’s Spray integration is immensely useful.  However, we felt like the
+default behaviour makes it difficult to really understand the application that
+is being measured.  In particular:</p>
+
+<ol>
+<li>It creates traces for each response, but they all have a default name of
+<em>UnnamedTrace</em>.  The intention is for application developers to give
+meaningful names to each response.  However, it would be nice if the library
+provided a more meaningful default.</li>
+<li>There are metrics collected under the <code>http-server</code> category, but they only
+contain the trace name and resulting status code, and it is not easily to
+correlate the <code>http-server</code> metrics with corresponding traces, especially if
+we have not given the traces meaningful names.</li>
+</ol>
+
+<p>While we could have resolved these issues to some extent by <a href="http://kamon.io/integrations/web-and-http-toolkits/spray/#providing-a-name-generator" title="Kamon Spray integration: Providing a Name Generator">providing a name
+generator</a>, the core problem was that, even with more meaningful names,
+there is no way to add tags to a trace that has already been established.  As a
+result, the dimensionality of the metrics that are produced are restricted to
+trace name and response status code.  We want more, including:</p>
+
+<ul>
+<li>What was the method of the request, e.g. <code>GET</code> or <code>POST</code>?</li>
+<li>What was the path of the request?</li>
+<li>Did the request time out?</li>
+</ul>
+
+<p>At first we considered modifying the kamon-spray library, but it works by using
+AspectJ.  That’s great because it means we can use it without making any
+changes to our application.  Unfortunately, it also means that in order to be
+able to use it, you need to have knowledge of both AspectJ and a very deep
+understanding of the code you are trying to instrument (in this case, Spray
+routing).  We had neither, so we opted to try something else.  However, in the
+long run, moving spray-kamon-metrics’ functionality into kamon-spray seems like
+a good idea.</p>
+
+<p>Next, we looked to see if we could just create a new directive that captures
+the information we wanted.  Thus, we could theoretically just do something like:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">class</span> <span class="nc">ServiceActor</span> <span class="k">extends</span> <span class="nc">HttpServiceActor</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">receive</span> <span class="k">=</span>
+    <span class="n">runRoute</span> <span class="o">{</span>
+      <span class="n">withKamonMetrics</span> <span class="o">{</span>
+        <span class="n">serviceRoute</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This works most of the time, but if the request results in an error or a
+rejection, it fails.  The reason for this is that in the case of rejections and
+errors not handled explicitly by the route, the route does not produce the
+resulting <code>HttpResponse</code>.  As shown in <a href="#fig1" title="How HttpService handles rejections and exceptions">figure 1</a>, when you use
+<code>runRoute</code>, it <em>seals</em> your route with implicitly given rejection and exception
+handlers.  It is these handlers that actually generate the <code>HttpResponse</code>
+object that is sent to the client.</p>
+
+<figure>
+  <figcaption><a name="fig1">Figure 1</a>: How <code>HttpService</code> handles rejections and exceptions</figcaption>
+  <img src="/img/spray-kamon-http-service-base.png"
+       alt="How HttpService handles rejections and exceptions">
+</figure>
+
+<p>While it is possible to provide custom handlers, it becomes very difficult to
+manage state (in particular, start time) across all of these different places.
+We could make the directive itself provide rejection and exception handling,
+but that departs from the norm and also does not solve the problem with
+managing state.</p>
+
+<p>In the end, what we decided to do is to replace <code>HttpService</code> with
+<code>TracingHttpService</code>, which is largely identical to <code>HttpService</code>, the biggest
+difference being in how it seals routes:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="c1">// from HttpService</span>
+<span class="k">def</span> <span class="n">sealRoute</span><span class="o">(</span><span class="n">route</span><span class="k">:</span> <span class="kt">Route</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">eh</span><span class="k">:</span> <span class="kt">ExceptionHandler</span><span class="o">,</span> <span class="n">rh</span><span class="k">:</span> <span class="kt">RejectionHandler</span><span class="o">)</span><span class="k">:</span> <span class="kt">Route</span> <span class="o">=</span>
+  <span class="o">(</span><span class="n">handleExceptions</span><span class="o">(</span><span class="n">eh</span><span class="o">)</span> <span class="o">&amp;</span> <span class="n">handleRejections</span><span class="o">(</span><span class="n">sealRejectionHandler</span><span class="o">(</span><span class="n">rh</span><span class="o">)))(</span><span class="n">route</span><span class="o">)</span>
+
+<span class="c1">// from TracingHttpService (simplified, no timeout handling included)</span>
+<span class="k">def</span> <span class="n">sealRoute</span><span class="o">(</span><span class="n">route</span><span class="k">:</span> <span class="kt">Route</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">eh</span><span class="k">:</span> <span class="kt">ExceptionHandler</span><span class="o">,</span> <span class="n">rh</span><span class="k">:</span> <span class="kt">RejectionHandler</span><span class="o">)</span><span class="k">:</span> <span class="kt">Route</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">mapRequestContext</span> <span class="o">{</span> <span class="n">ctx</span><span class="k">:</span> <span class="kt">RequestContext</span> <span class="o">=</span><span class="n">r</span>
+    <span class="k">val</span> <span class="n">path</span> <span class="k">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">toString</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">method</span> <span class="k">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">val</span> <span class="n">start</span> <span class="k">=</span> <span class="nc">System</span><span class="o">.</span><span class="n">nanoTime</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">tagBuilder</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">.</span><span class="n">newBuilder</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+    <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;path&quot;</span> <span class="o">-&gt;</span> <span class="n">path</span>
+    <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;method&quot;</span> <span class="o">-&gt;</span> <span class="n">method</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">withHttpResponseMapped</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="n">duration</span> <span class="k">=</span> <span class="nc">System</span><span class="o">.</span><span class="n">nanoTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span>
+      <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;status-code&quot;</span> <span class="o">-&gt;</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">intValue</span><span class="o">.</span><span class="n">toString</span>
+      <span class="nc">Kamon</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">histogram</span><span class="o">(</span>
+           <span class="s">&quot;spray-service-response-duration&quot;</span><span class="o">,</span>
+           <span class="n">tagBuilder</span><span class="o">.</span><span class="n">result</span><span class="o">(),</span>
+           <span class="nc">Time</span><span class="o">.</span><span class="nc">Nanoseconds</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">record</span><span class="o">(</span><span class="n">duration</span><span class="o">)</span>
+      <span class="n">response</span>
+    <span class="o">}</span>
+  <span class="o">}</span> <span class="o">{</span>
+    <span class="o">(</span><span class="n">handleExceptions</span><span class="o">(</span><span class="n">eh</span><span class="o">)</span> <span class="o">&amp;</span> <span class="n">handleRejections</span><span class="o">(</span><span class="n">sealRejectionHandler</span><span class="o">(</span><span class="n">rh</span><span class="o">)))(</span><span class="n">route</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>As we can see, <code>HttpService.sealRoute</code> is simply a higher order function that wraps
+a route with exception and rejection handlers.  In the case of
+<code>TracingHttpService</code>, <code>sealRoute</code> just adds another wrap to the mix.  It still
+wraps the route with the handlers, but it adds its own wrapper around that.
+Before the internally sealed route runs, it records the start time and starts
+building a set of tags.  Once the internal route completes, it records the
+timing to a Kamon histogram.</p>
+
+<p>Because we include these various tags, the metrics we collect are now much
+richer.  It is now possible to filter and analyse the metrics based on the
+tags, allowing us to answer questions such as ‘which types of request
+(method/path) are resulting in errors?’ and ‘What is the average response time
+for a particular type of request?’.</p>
+
+<p>Additionally, creating our own version of <code>HttpService</code> allowed us to tackle
+the next issue we had:  How do we know when a request times out?</p>
+
+<h3>Detecting requests that time out</h3>
+
+<p>Due to the asynchronous nature of the Spray server, <a href="http://spray.io/documentation/1.2.3/spray-can/http-server/#request-timeouts" title="Spray can: HTTP server: request timeouts">the way it handles request
+timeouts</a> may be surprising to newcomers.</p>
+
+<figure>
+  <figcaption><a name="fig2">Figure 2</a>: How Spray times out routes</figcaption>
+  <img src="/img/spray-kamon-timeouts.png"
+       alt="How Spray times out routes">
+</figure>
+
+<p><a href="#fig2" title="How Spray times out routes">Figure 2</a> presents an overview of how Spray works (in particular, the
+timeout route itself can time out, resulting in an invocation of a last ditch
+timed out timeout route).  In particular there are couple of things to note:</p>
+
+<ol>
+<li>A route will continue running until it completes, regardless of how long it
+is taking.  This may have an impact performance and resource utilisation.
+Unfortunately, Spray does not include any sort of mechanism for cooperative
+cancellation.</li>
+<li>Spray invokes the timeout handler via a different mechanism than a standard
+request.</li>
+</ol>
+
+<p>As a result of this, the instrumentation built into kamon-spray is completely
+blind to the timeout mechanism.  It will record a requested that timed out as
+if it completed normally, and it will not generate a trace.  In fact, that is a
+reason for <code>EmptyTraceContext present while closing the trace with token</code>
+showing up in your logs.</p>
+
+<p>We want to measure both cases:</p>
+
+<ol>
+<li>If a request times out, we want to make a note of it so we can see which
+requests are timing out and with what status code (is the timeout too short
+for what we need to do, or is hanging due to an error?).</li>
+<li>We also want to know about the timeout responses, as they should be
+aggregated to response time and error count metrics.</li>
+</ol>
+
+<p>To help us account for timeouts, we modify our <code>sealRoute</code> implementation:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">sealRoute</span><span class="o">(</span><span class="n">route</span><span class="k">:</span> <span class="kt">Route</span><span class="o">,</span> <span class="n">timeoutNanos</span><span class="k">:</span> <span class="kt">Long</span><span class="o">,</span> <span class="n">isTimeout</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+             <span class="o">(</span><span class="k">implicit</span> <span class="n">eh</span><span class="k">:</span> <span class="kt">ExceptionHandler</span><span class="o">,</span> <span class="n">rh</span><span class="k">:</span> <span class="kt">RejectionHandler</span><span class="o">)</span><span class="k">:</span> <span class="kt">Route</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">mapRequestContext</span> <span class="o">{</span> <span class="n">ctx</span><span class="k">:</span> <span class="kt">RequestContext</span> <span class="o">=&gt;</span>
+    <span class="k">val</span> <span class="n">path</span> <span class="k">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">uri</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">toString</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">method</span> <span class="k">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">val</span> <span class="n">start</span> <span class="k">=</span> <span class="nc">System</span><span class="o">.</span><span class="n">nanoTime</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">tagBuilder</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">.</span><span class="n">newBuilder</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+    <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;path&quot;</span> <span class="o">-&gt;</span> <span class="n">path</span>
+    <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;method&quot;</span> <span class="o">-&gt;</span> <span class="n">method</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">withHttpResponseMapped</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="n">duration</span> <span class="k">=</span> <span class="nc">System</span><span class="o">.</span><span class="n">nanoTime</span><span class="o">()</span> <span class="o">-</span> <span class="n">start</span>
+      <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;status-code&quot;</span> <span class="o">-&gt;</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">intValue</span><span class="o">.</span><span class="n">toString</span>
+      <span class="k">val</span> <span class="n">timedOut</span> <span class="k">=</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="n">timeoutNanos</span>
+      <span class="n">tagBuilder</span> <span class="o">+=</span> <span class="s">&quot;timed-out&quot;</span> <span class="o">-&gt;</span> <span class="n">timedOut</span><span class="o">.</span><span class="n">toString</span>
+      <span class="k">val</span> <span class="n">realDuration</span> <span class="k">=</span> <span class="k">if</span> <span class="o">(</span><span class="n">isTimeout</span><span class="o">)</span> <span class="n">duration</span> <span class="o">+</span> <span class="n">timeoutNanos</span> <span class="k">else</span> <span class="n">duration</span>
+      <span class="nc">Kamon</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">histogram</span><span class="o">(</span>
+          <span class="s">&quot;spray-service-response-duration&quot;</span><span class="o">,</span>
+          <span class="n">tagBuilder</span><span class="o">.</span><span class="n">result</span><span class="o">(),</span>
+          <span class="nc">Time</span><span class="o">.</span><span class="nc">Nanoseconds</span><span class="o">)</span>
+        <span class="o">.</span><span class="n">record</span><span class="o">(</span><span class="n">realDuration</span><span class="o">)</span>
+      <span class="n">response</span>
+    <span class="o">}</span>
+  <span class="o">}</span> <span class="o">{</span>
+    <span class="o">(</span><span class="n">handleExceptions</span><span class="o">(</span><span class="n">eh</span><span class="o">)</span> <span class="o">&amp;</span> <span class="n">handleRejections</span><span class="o">(</span><span class="n">sealRejectionHandler</span><span class="o">(</span><span class="n">rh</span><span class="o">)))(</span><span class="n">route</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>A couple of notes about this method:</p>
+
+<ol>
+<li>This method is called both when handling the regular route and when handling
+the timeout route.  The <code>isTimeout</code> flag lets us know which if the two we
+are handling.</li>
+<li>We do not know for a fact that a non-timeout response timed out.  We use the
+heuristic that if the duration is greater than the request timeout, the
+request probably timed out.</li>
+<li>Measuring an accurate duration for a timeout route is similarly tricky.  The
+duration we calculate is only for the timeout route and does <em>not</em> include
+the time that elapsed between when the request arrived and the timeout route
+was invoked.  As an approximation, we simply add the configured request
+timeout length to the measured duration.</li>
+</ol>
+
+<p>With this code in place, now our <code>TracingHttpService</code> implementation will
+now measure:</p>
+
+<ul>
+<li>Durations for all regular and timeout responses</li>
+<li>For each response:
+
+<ul>
+<li>The request method and path</li>
+<li>The response status code</li>
+<li>Did the response time out?</li>
+</ul></li>
+</ul>
+
+<p>This data gives us a much better picture of what clients are experiencing and
+helps us identify problematic routes within our services.  Now, we just want to
+know a little more about the metrics the Spray can server itself is collecting.</p>
+
+<h2>Getting Spray can server metrics with <code>KamonHttp</code></h2>
+
+<p>The Spray can server automatically collects some statistic about its operation
+and <a href="http://spray.io/documentation/1.2.3/spray-can/http-server/#server-statistics" title="Spray can: HTTP server: server statistics">provides a method for retrieving them</a>.  Hooking up these
+metrics to Kamon  essentially requires two steps:</p>
+
+<ol>
+<li>When a server socket is established, set up a job that periodically asks the
+server for its latest statistics.</li>
+<li>Each time those statistics are collected, update a Kamon entity with their
+values.</li>
+</ol>
+
+<p>This is not difficult to do, but neither is it a one-liner that can be
+trivially done.  Arguably, the trickiest bit is setting up the job that will
+monitor the server.  To review, you set up a new server by sending an
+<code>Http.Bind</code> message the Spray can’s <code>Http</code> Akka I/O extension.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="nc">IO</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span> <span class="o">!</span> <span class="nc">Http</span><span class="o">.</span><span class="nc">Bind</span><span class="o">(</span><span class="n">myServiceActor</span><span class="o">,</span> <span class="n">interface</span> <span class="k">=</span> <span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="n">port</span> <span class="k">=</span> <span class="mi">80</span><span class="o">)</span>
+</code></pre></div>
+<p>The tricky bit is that we need to capture the reference to the actor that
+replies to this message, which the application may never do.  Furthermore, if
+the application does want to get a reference to the responder, the library
+should not interfere with that.  What is the solution?</p>
+
+<h3>Proxying Spray</h3>
+
+<p>The solution we settled on was to create a new Akka I/O extension that proxies
+the Spray extension, which sounds much more complex than it actually is.  To do
+this,  there is a little bit of boilerplate to ensure that Akka will find the
+extension, but, beyond that, an Akka extension is just an actor.  For
+<code>KamonHttp</code>, this actor is called <code>SprayProxy</code>, a slightly simplified version
+of which is listed below:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">class</span> <span class="nc">SprayProxy</span> <span class="k">extends</span> <span class="nc">Actor</span> <span class="o">{</span>
+  <span class="k">import</span> <span class="nn">constext.system</span>
+
+  <span class="k">private</span> <span class="k">val</span> <span class="n">ioActor</span> <span class="k">=</span> <span class="nc">IO</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span>
+
+  <span class="k">override</span> <span class="k">def</span> <span class="n">receive</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Http.Bind</span> <span class="o">=&gt;</span>
+      <span class="k">val</span> <span class="n">proxied</span> <span class="k">=</span> <span class="n">sender</span><span class="o">()</span>
+      <span class="k">val</span> <span class="n">monitor</span> <span class="k">=</span> <span class="n">context</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="nc">SprayMonitor</span><span class="o">.</span><span class="n">props</span><span class="o">(</span><span class="n">proxied</span><span class="o">))</span>
+      <span class="n">ioActor</span><span class="o">.</span><span class="n">tell</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">monitor</span><span class="o">)</span>
+    <span class="k">case</span> <span class="n">x</span> <span class="k">=&gt;</span> <span class="n">ioActor</span><span class="o">.</span><span class="n">forward</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>This class instantiates an instance of Spray’s extension and stores it in
+<code>ioActor</code>.  From that point forward, this actor does one of two things:</p>
+
+<ol>
+<li>If a <code>Http.Bind</code> message arrives, instantiate a <code>SprayMonitor</code> actor, which
+we will cover next.  As part of this, we pass in a reference to the actor
+that sent the original message.  Finally, we send the <code>Http.Bind</code> message to
+Spray, but do so in a matter so that Spray believes that the monitor actor
+we just created was the original sender.</li>
+<li>For any other message, we simply forward it to Spray without changing the
+sender, rendering our extension invisible.</li>
+</ol>
+
+<h3>Monitoring Spray</h3>
+
+<p>Next, let us review what this Spray monitor does.  This actor is slightly more
+complex.  It exists in one of two states:</p>
+
+<ol>
+<li>The initial state is <em>binding</em>, which means we have sent the <code>Http.Bind</code>
+message to Spray and we are waiting to hear the result of the operation.</li>
+<li>In the <em>bound</em> state, the server is up and running and we periodically poll
+it for its statistics.</li>
+</ol>
+
+<p>These two states exist as methods on the actor, each of which returns a
+<code>Receive</code>.  Let’s take a look at <code>binding</code> first.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">bindind</span><span class="k">:</span> <span class="kt">Receive</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="n">x</span><span class="k">:</span> <span class="kt">Http.CommandFailed</span> <span class="o">=&gt;</span>
+    <span class="n">proxied</span><span class="o">.</span><span class="n">forward</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">stop</span><span class="o">(</span><span class="n">self</span><span class="o">)</span>
+  <span class="k">case</span> <span class="n">x</span> <span class="k">@</span> <span class="nc">Http</span><span class="o">.</span><span class="nc">Bound</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="k">=&gt;</span>
+    <span class="n">proxied</span><span class="o">.</span><span class="n">forward</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">become</span><span class="o">(</span><span class="n">bound</span><span class="o">(</span><span class="n">address</span><span class="o">))</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>In this state, we have handle two possible messages: <code>Http.Bound</code> and
+<code>Http.CommandFailed</code>.  These indicate whether Spray succeeded in binding a new
+server.  In both cases, we forward the message to the original sender of the
+<code>Http.Bind</code> message, rendering our proxy effectively invisible.  In the case
+were the bind fails, we simply shut down.  In the case where the bind
+succeeded, we <code>become</code> into the bound state, which we will examine next.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">bound</span><span class="o">(</span><span class="n">address</span><span class="k">:</span> <span class="kt">InetSocketAddress</span><span class="o">)</span><span class="k">:</span> <span class="kt">Receive</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">import</span> <span class="nn">context.dispatcher</span>
+
+  <span class="k">val</span> <span class="n">httpListener</span> <span class="k">=</span> <span class="n">sender</span><span class="o">()</span>
+  <span class="n">context</span><span class="o">.</span><span class="n">watch</span><span class="o">(</span><span class="n">httpListener</span><span class="o">)</span>
+
+  <span class="k">val</span> <span class="n">updateTask</span> <span class="k">=</span> <span class="n">context</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule</span><span class="o">(</span>
+    <span class="mi">15</span> <span class="n">seconds</span><span class="o">,</span> <span class="mi">15</span> <span class="n">seconds</span><span class="o">,</span> <span class="n">httpListener</span><span class="o">,</span> <span class="nc">Http</span><span class="o">.</span><span class="nc">Getstats</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">metricsName</span> <span class="k">=</span> <span class="n">s</span><span class="s">&quot;${address.getHostName}:${address.getPort}&quot;</span>
+  <span class="k">val</span> <span class="n">metrics</span> <span class="k">=</span> <span class="nc">Kamon</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">entity</span><span class="o">(</span><span class="nc">SprayServerMetrics</span><span class="o">,</span> <span class="n">metricsName</span><span class="o">)</span>
+
+  <span class="o">{</span>
+    <span class="k">case</span> <span class="k">_:</span> <span class="kt">Terminated</span> <span class="o">=&gt;</span>
+      <span class="n">updateTask</span><span class="o">.</span><span class="n">cancel</span><span class="o">()</span>
+      <span class="nc">Kamon</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">removeEntity</span><span class="o">(</span><span class="n">metricsName</span><span class="o">,</span> <span class="nc">SprayServerMetrics</span><span class="o">.</span><span class="n">category</span><span class="o">)</span>
+      <span class="n">context</span><span class="o">.</span><span class="n">stop</span><span class="o">(</span><span class="n">self</span><span class="o">)</span>
+    <span class="k">case</span> <span class="n">s</span><span class="k">:</span> <span class="kt">Stats</span> <span class="o">=&gt;</span>
+      <span class="n">metrics</span><span class="o">.</span><span class="n">updateStats</span><span class="o">(</span><span class="n">s</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>When we become <code>bound</code>, a few things take place:</p>
+
+<ol>
+<li> We capture the reference to the sender of the <code>Http.Bound</code> message.  This is
+the <em>HTTP listener</em> actor which handles all connections to that particular
+server.</li>
+<li> We start watching the listener.  When it dies, that means the server has
+died, so we should stop monitoring and shut down.</li>
+<li> We schedule a task that will send the listener a <code>Http.GetStats</code> every 15
+seconds (this is configurable in the real code).  Keep in mind that when we
+create this task, it uses the <code>self</code> implicit value as the sender, meaning
+that as far as the listener is concerned, it is the monitor that is sending
+these messages.</li>
+<li> We instantiate a Kamon entity we created specifically for recording the
+Spray server metrics.  Its name is generated from the host name and port
+where the server is listening.</li>
+<li> Finally we have the partial function that handles the two types of messages
+that our actor will receive from this point forward:
+
+<ul>
+<li>  When we get a <code>Terminated</code> message, that means the server has stopped.
+As a result, we clean up by cancelling the recurring task, removing the
+Kamon entity, and finally stopping ourselves.</li>
+<li>  In the case where we get new <code>Stats</code>, we update the Kamon entity with
+the new values.</li>
+</ul></li>
+</ol>
+
+<p>All in all, this code is relatively straightforward.  However, we are not quite
+done, yet.  Updating the Kamon entity’s metrics was not as straightforward as
+we initially thought.</p>
+
+<h3>Reporting the statistics to Kamon</h3>
+
+<p>It might seem like having dealt with all of the Akka bits, we would be out of
+the woods.  However, it turned out that what Spray is reporting is not entirely
+in line with how Kamon’s instruments behave.  Spray reports the following
+statistics:</p>
+
+<ul>
+<li><code>connections</code>, the total number of connections over time</li>
+<li><code>open-connections</code>, the number of currently open connections</li>
+<li><code>max-open-connections</code>, the maximum number of open connections ever</li>
+<li><code>requests</code>, the total number of requests over time</li>
+<li><code>open-requests</code>, the number of currently open requests</li>
+<li><code>max-open-requests</code>, the maximum number of open requests ever</li>
+<li><code>request-timeouts</code>, the total number of request timeouts over time</li>
+<li><code>uptime</code>, the current uptime of the server, in nanoseconds</li>
+</ul>
+
+<p>Most of these fit nicely into one of Kamon’s instrument types:</p>
+
+<ul>
+<li><code>connections</code>, <code>requests</code>, and <code>request-timeouts</code> all work will as Kamon
+counters, which must be strictly increasing, and are reported as time-series
+data</li>
+<li><code>open-connections</code> and <code>open-requests</code> are conceptually gauges, but given
+that we are already dealing with sampled data, we decide to map these to
+Kamon histograms.</li>
+</ul>
+
+<p>This leaves:</p>
+
+<ul>
+<li>We could have treated <code>max-open-connections</code> and <code>max-open-requests</code> like
+their non-max counterparts, but given that these values rarely change, we
+really only want to report the latest value.</li>
+<li><code>uptime</code>, which is conceptually a type of counter, but we do not want that to
+be reported as time-series data, i.e.  the server was up 15 seconds in the
+last 15 seconds.  We really want to report the latest value.</li>
+</ul>
+
+<p>So how, did we deal with this?  Well, for the most part, we just <a href="http://kamon.io/core/metrics/core-concepts/#defining-your-own-entity-recorder" title="Kamon metrics, core concepts: Defining your entity recorder">defined our
+own entity recorder</a>.  However, it does contains a couple of twists
+worth sharing:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">class</span> <span class="nc">SprayServerMetrics</span><span class="o">(</span><span class="n">instrumentFactory</span><span class="k">:</span> <span class="kt">InstrumentFactory</span><span class="o">)</span>
+  <span class="k">extends</span> <span class="nc">GenericEntityRecorder</span><span class="o">(</span><span class="n">instrumentFactory</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">stats</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">AtomicReference</span><span class="o">[</span><span class="kt">Stats</span><span class="o">](</span><span class="k">new</span> <span class="nc">Stats</span><span class="o">(</span><span class="mf">0.</span><span class="n">nanoseconds</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">))</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">connections</span> <span class="k">=</span> <span class="n">counter</span><span class="o">(</span><span class="s">&quot;connections&quot;</span><span class="o">)</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">openConnections</span> <span class="k">=</span> <span class="n">histogram</span><span class="o">(</span><span class="s">&quot;open-connections&quot;</span><span class="o">)</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">requests</span> <span class="k">=</span> <span class="n">counter</span><span class="o">(</span><span class="s">&quot;requests&quot;</span><span class="o">)</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">openRequests</span> <span class="k">=</span> <span class="n">histogram</span><span class="o">(</span><span class="s">&quot;open-requests&quot;</span><span class="o">)</span>
+  <span class="k">private</span> <span class="k">val</span> <span class="n">requestTimeouts</span> <span class="k">=</span> <span class="n">counter</span><span class="o">(</span><span class="s">&quot;request-timeouts&quot;</span><span class="o">)</span>
+
+  <span class="k">override</span> <span class="k">def</span> <span class="n">collect</span><span class="o">(</span><span class="n">collectionContext</span><span class="k">:</span> <span class="kt">CollectionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">EntitySnapshot</span>
+
+  <span class="k">def</span> <span class="n">updateStats</span><span class="o">(</span><span class="n">newStats</span><span class="k">:</span> <span class="kt">Stats</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>We keep a copy of the most recent statistics, starting with a value of all
+zeroes.  Next, for the metrics that map nicely to Kamon’s instruments, we do
+that.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">override</span> <span class="k">def</span> <span class="n">collect</span><span class="o">(</span><span class="n">collectionContext</span><span class="k">:</span> <span class="kt">CollectionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">EntitySnapshot</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">parentSnapshot</span> <span class="k">=</span> <span class="k">super</span><span class="o">.</span><span class="n">collect</span><span class="o">(</span><span class="n">collectionContext</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">metrics</span> <span class="k">=</span> <span class="n">parentSnapshot</span><span class="o">.</span><span class="n">metrics</span> <span class="o">++</span> <span class="nc">Map</span><span class="o">(</span>
+    <span class="n">counterKey</span><span class="o">(</span><span class="s">&quot;uptime&quot;</span><span class="o">,</span> <span class="nc">Time</span><span class="o">.</span><span class="nc">Nanoseconds</span><span class="o">)</span> <span class="o">→</span> <span class="nc">CounterSnapshot</span><span class="o">(</span><span class="n">stats</span><span class="o">.</span><span class="n">uptime</span><span class="o">.</span><span class="n">toNanos</span><span class="o">),</span>
+    <span class="n">counterKey</span><span class="o">(</span><span class="s">&quot;max-open-connections&quot;</span><span class="o">)</span> <span class="o">→</span> <span class="nc">CounterSnapshot</span><span class="o">(</span><span class="n">stats</span><span class="o">.</span><span class="n">maxOpenConnections</span><span class="o">),</span>
+    <span class="n">counterKey</span><span class="o">(</span><span class="s">&quot;max-open-requests&quot;</span><span class="o">)</span> <span class="o">→</span> <span class="nc">CounterSnapshot</span><span class="o">(</span><span class="n">stats</span><span class="o">.</span><span class="n">maxOpenRequests</span><span class="o">)</span>
+  <span class="o">)</span>
+  <span class="k">new</span> <span class="nc">DefaultEntitySnapshot</span><span class="o">(</span><span class="n">metrics</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>When it is time for Kamon to <code>collect</code> the values for our entity, that is were
+things get a little tricky.  We need to do a combination of both the default
+behaviour for the Kamon-friendly statistics along with some custom behaviour
+for those that are not.  Luckily this was not too difficult:</p>
+
+<ol>
+<li>We invoke the parent class’s <code>collect</code> method to get a snapshot that
+includes all of the Kamon-friendly statistics.</li>
+<li>From that snapshot, we can get the recorded instrument snapshot and append
+to it fabricated instrument snapshots with the values that we want.  We use
+report <code>uptime</code>, <code>max-open-connections</code>, and <code>max-open-requests</code> as
+counters.</li>
+<li>Finally, we construct a new snapshot with our custom metrics.</li>
+</ol>
+
+<p>Last, we just need to be sure to deal with the updates:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">updateStats</span><span class="o">(</span><span class="n">newStats</span><span class="k">:</span> <span class="kt">Stats</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">openConnections</span><span class="o">.</span><span class="n">record</span><span class="o">(</span><span class="n">newStats</span><span class="o">.</span><span class="n">openConnections</span><span class="o">)</span>
+  <span class="n">openRequests</span><span class="o">.</span><span class="n">record</span><span class="o">(</span><span class="n">newStats</span><span class="o">.</span><span class="n">openRequests</span><span class="o">)</span>
+  <span class="n">connections</span><span class="o">.</span><span class="n">increment</span><span class="o">(</span><span class="n">newStats</span><span class="o">.</span><span class="n">totalConnections</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">totalConnections</span><span class="o">)</span>
+  <span class="n">requests</span><span class="o">.</span><span class="n">increment</span><span class="o">(</span><span class="n">newStats</span><span class="o">.</span><span class="n">totalRequests</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">totalRequests</span><span class="o">)</span>
+  <span class="n">requestTimeouts</span><span class="o">.</span><span class="n">increment</span><span class="o">(</span><span class="n">newStats</span><span class="o">.</span><span class="n">requestTimeouts</span> <span class="o">-</span> <span class="n">stats</span><span class="o">.</span><span class="n">requestTimeouts</span><span class="o">)</span>
+  <span class="n">stats</span> <span class="k">=</span> <span class="n">newStats</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>The implementation here should not come as a surprise.</p>
+
+<ol>
+<li>Both <code>open-connections</code> and <code>open-requests</code> are histograms, so we just
+record their new values.</li>
+<li>For <code>connections</code>, <code>requests</code>, and <code>request-timeouts</code>, we simply record how
+much each of these has increased since the last time.</li>
+<li>Finally, we keep a copy of the statistics.  Note that we do not have to do
+anything for the other values as those metrics are generated during
+<code>collect</code>.</li>
+</ol>
+
+<p>And that is how we take the statistics from Spray to report them from a custom
+Kamon entity recorder.</p>
+
+<h2>Moving forward</h2>
+
+<p>We are generally pretty happy with our work in spray-kamon-metrics, but that is
+not to say there is not room for improvement.  A few of ideas come to mind:</p>
+
+<ol>
+<li>Figure out if there is a better way to handle request timeouts.</li>
+<li>See if it is possible to implement any of this using AspectJ, making it as
+simple to use as kamon-spray.</li>
+<li>Especially if we can acheive the last goal, perhaps it would be good to
+merge this into <code>kamon-spray</code> itself.</li>
+</ol>
+
+<p>Can you think of anything else you like the library to do?</p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="https://avatars1.githubusercontent.com/u/152491?v=3&s=460&s=40">
+                        
+                        <span>
+                            Daniel Solano Gómez posted on September 24, 2015
+                        </span>
+
+                            
+                            <a  href="https://twitter.com/deepbluelambda">
+                                <i class="fa fa-twitter fa-1x "></i>
+                            </a>
+                            
+                            
+                            <a  href="https://www.github.com/sattvik">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/09/23/implicits-typeclasses/" data-toggle="tooltip" data-placement="top" title="Learn implicits: Type classes">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>

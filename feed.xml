@@ -7,6 +7,41 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Better Spray metrics with Kamon</title>
+                
+                
+                    <description>&lt;p&gt;At Monsanto, we have adopted &lt;a href=&quot;http://www.kamon.io&quot; title=&quot;The Open Source tool for monitoring applications running on the JVM&quot;&gt;Kamon&lt;/a&gt; for monitoring our microservices
+implemented in Scala with &lt;a href=&quot;http://spray.io/&quot; title=&quot;Elegant, high-performance HTTP for your Akka Actors&quot;&gt;Spray&lt;/a&gt;.  Kamon provides an
+&lt;a href=&quot;http://kamon.io/integrations/web-and-http-toolkits/spray/&quot; title=&quot;Kamon Spray integration&quot;&gt;integration&lt;/a&gt; that will automatically instrument our services to
+generate traces for each incoming request.  This is great, but we wanted more.
+Some of the things we wanted to improve included:&lt;/p&gt;
+</description>
+                
+                <pubDate>Thu, 24 Sep 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</guid>
+            </item>
+        
+            <item>
+                <title>Learn implicits: Type classes</title>
+                
+                
+                    <description>&lt;style scoped&gt;
+  .pimpedAny { color: #D907E8 }
+  .implicitdef { color: #1AB955 }
+  .implicitparam { color: #FF9C00 }
+  .toJson {color: #BA182F }
+  .jsValue {color: #08B9D1 }
+  .contextbound {color: #D15308 }
+&lt;/style&gt;
+</description>
+                
+                <pubDate>Wed, 23 Sep 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</guid>
+            </item>
+        
+            <item>
                 <title>Cluster Lightly</title>
                 
                 
@@ -115,30 +150,6 @@ features you might regularly use.&lt;/p&gt;
                 <pubDate>Fri, 10 Jul 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</guid>
-            </item>
-        
-            <item>
-                <title>Stax</title>
-                
-                
-                    <description>&lt;p&gt;When we were looking to build out an infrastructure in AWS (&lt;a href=&quot;https://aws.amazon.com&quot;&gt;Amazon Web Services&lt;/a&gt;), we took some time to understand how the &lt;a href=&quot;https://github.com/aws/aws-cli&quot;&gt;aws-cli&lt;/a&gt; (Universal Command Line Interface for Amazon Web Services) worked. With ideas from other projects found on &lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt;, we started wrapping commands in simple BASH scripts, and pointed it to CloudFormation templates written in JSON. From there &lt;a href=&quot;https://github.com/monsantoco/stax&quot;&gt;stax&lt;/a&gt; was born, and we have released it as open source under the &lt;a href=&quot;http://opensource.org/licenses/BSD-3-Clause&quot;&gt;BSD 3-clause license&lt;/a&gt;.&lt;/p&gt;
-</description>
-                
-                <pubDate>Wed, 08 Jul 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/07/08/stax/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/08/stax/</guid>
-            </item>
-        
-            <item>
-                <title>Doing Docker Metrics</title>
-                
-                
-                    <description>&lt;p&gt;As our usage of &lt;a href=&quot;http://www.docker.com&quot;&gt;Docker&lt;/a&gt; grows and we provision more container hosts, collecting metrics and monitoring containers and hosts has become a necessity. This post will walk you through how to glue together a few components to deploy a monitoring solution for Docker. All components are intentionally plug-and-play, so if things need to be changed any component can be (relatively) easily swapped out for an alternative.&lt;/p&gt;
-</description>
-                
-                <pubDate>Wed, 17 Jun 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/06/17/docker-metrics/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/06/17/docker-metrics/</guid>
             </item>
         
     </channel>

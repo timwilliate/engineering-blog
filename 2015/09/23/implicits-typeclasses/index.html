@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+        
+    
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="Learn implicits: Type classes" />
+    <meta property="og:description" content="Type classes are an important pattern used in many Scala libraries. We dive into how the pattern is implemented in spray-json, a popular serialization library" />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-chesterfield.jpg" />
+    <meta name="description" content="Type classes are an important pattern used in many Scala libraries. We dive into how the pattern is implemented in spray-json, a popular serialization library" />
+    
+    <meta name="author" content="Jorge Montero/Jessica Kerr" />
+    
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <title>Learn implicits: Type classes - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/" />
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css" />
+    <link rel="stylesheet" href="/css/scala-colors.min.css" />
+
+    
+    <link rel="stylesheet" href="/css/implicits-intro.css" />
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css" />
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-chesterfield.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Learn implicits: Type classes</h1>
+                        
+                        <h2 class="subheading">Spray-json as an example of how type classes work</h2>
+                        
+                        <span class="meta">Posted by Jorge Montero/Jessica Kerr on September 23, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<style scoped>
+  .pimpedAny { color: #D907E8 }
+  .implicitdef { color: #1AB955 }
+  .implicitparam { color: #FF9C00 }
+  .toJson {color: #BA182F }
+  .jsValue {color: #08B9D1 }
+  .contextbound {color: #D15308 }
+</style>
+
+<p>In this series on Scala implicits, we have seen 
+<a href="http://engineering.monsanto.com/2015/05/14/implicits-intro/">some</a>, 
+<a href="http://engineering.monsanto.com/2015/06/15/implicits-futures/">everyday</a>, 
+<a href="http://engineering.monsanto.com/2015/07/31/implicit-conversions/">uses</a> of implicits. 
+One crucial pattern combines these techniques: Type classes.</p>
+
+<p><strong>Caution</strong>: please excuse the name. &quot;Type classes&quot; resembles neither types nor classes in a way useful for understanding.
+ The pattern is called &quot;type classes&quot; for historical reasons.</p>
+
+<p>Type classes extend functionality of classes without actually changing them, and with full type safety.
+This pattern is often used to add functionality to classes that we do not control. It&#39;s also useful for cross-cutting concerns.
+ Serialization is a cross-cutting concern, and <a href="https://github.com/spray/spray-json">spray-json</a> provides a practical example of the type class pattern.
+ Let&#39;s see how it implements JSON serialization/deserialization for built-in classes.</p>
+
+<p><a href="https://github.com/spray/spray-json#usage">The documentation says</a> that any object can have the .toJson method 
+if we add a couple of imports.
+<pre>
+import spray.json._
+import DefaultJsonProtocol._
+</pre>
+The two imports add some implicits to the compiler&#39;s magic hat. </p>
+
+<p><img src="/img/typeclass-magic-hat-0.png" alt="the magic hat: implicit declarations go in, implicit parameter values come out"></p>
+
+<p><code>import spray.json._</code> brings in everything in the 
+<a href="https://github.com/spray/spray-json/blob/master/src/main/scala/spray/json/package.scala">spray json package object</a>, including:</p>
+
+<pre>
+<span class="implicitdef">implicit def pimpAny[T](any: T)</span> = new <span class="pimpedAny">PimpedAny</span>(any) 
+private[json] class <span class="pimpedAny">PimpedAny[T]</span>(any: T) {
+    def <span class="toJson">toJson</span>(implicit writer: JsonWriter[T]): <span class="jsValue">JsValue</span> = writer.write(any)
+}
+</pre>
+
+<p>After the last few articles, we are ready for this. The first line is a <span class="implicitdef">view</span> that turns anything
+ into a <span class="pimpedAny">PimpedAny</span>. Now every object in the world implements <span class="toJson">toJson</span>.
+ We <a href="http://engineering.monsanto.com/2015/07/31/implicit-conversions/">warned</a> against this kind of breadth in views,
+ but here we are safe from surprises: the only way to activate this view is by calling <span class="toJson">.toJson</span>. The intermediate class is invisible; you never even have to see its terrible name. The useful type is the <span class="jsValue">return value</span> of <span class="toJson">.toJson</span>.</p>
+
+<p>Calling <span class="toJson">toJson</span> transforms an object into a <span class="jsValue">JsValue</span>, a representation of JSON data.
+ Two methods on <span class="jsValue">JsValue</span>, prettyPrint and compactPrint, return a String we can transmit or save.</p>
+
+<p>Can we now serialize every single object, just like that? No. Not that easy. Here&#39;s the declaration again:
+<pre>
+def <span class="toJson">toJson</span>(<span class="implicitparam">implicit writer: JsonWriter[T]</span>): <span class="jsValue">JsValue</span>
+</pre>
+This <span class="toJson">toJson</span> method takes an <span class="implicitparam">implicit parameter</span>, a JsonWriter of T.
+So for any type T we want to convert to Json, there must be a JsonWriter[T], 
+and it must be in the magic hat, in scope where <span class="toJson">toJson</span> is called. </p>
+
+<p>What is a JsonWriter[T], and where would the compiler find one?</p>
+
+<p>JsonWriter is a trait with a single method, write.
+<pre>
+trait JsonWriter[T] {
+  def write(obj: T): <span class="jsValue">JsValue</span>
+}
+</pre>
+spray-json defines this trait, along with JsonReader for deserialization, and JsonFormat for both together. JsonFormat is the one we create, typically.
+Spray-json has built-in JsonFormat implementations for many common types; these lurk in DefaultJsonProtocol. 
+We bring all of them into implicit scope when we <code>import DefaultJsonProtocol._</code>. It&#39;s those JsonFormats that know how to serialize
+and deserialize JSON.</p>
+
+<p>For instance, there is an implicit JsonFormat[String]. In type class parlance, &quot;There is an instance of the JsonFormat type class for String.&quot; We can use it like this:
+<pre>
+import spray.json._
+import DefaultJsonProtocol._ 
+val pony = &quot;Fluttershy&quot;
+val json = pony.<span class="toJson">toJson</span>
+</pre>
+ The implicits resolve to:
+<pre> 
+val pony = &quot;Fluttershy&quot;
+val json = new <span class="pimpedAny">PimpedAny</span>[String](pony).<span class="toJson">toJson</span>(<span class="implicitparam">DefaultJsonProtocol.StringJsonFormat</span>)
+</pre></p>
+
+<p>This desugared syntax looks like serialization in a language without implicits.</p>
+
+<p>This use of the type class pattern adds a whole feature (serialization) to any class we want, in a generic way,
+without changing the classes. All the usual types (String, Int, Seq, Map, Option, etc) have serialization code in DefaultJsonFormat.</p>
+
+<p><img src="/img/typeclass-magic-hat-1.png" style="max-height: 400px;margin: 0 auto" alt = "the magic hat: importing DefaultJsonProtocol puts a JsonFormat of String in the hat"/></p>
+
+<p>For our own class T, we make <span class="toJson">.toJson</span> work when we define an <span class="implicitparam">implicit val of type JsonFormat[T]</span>.
+This is called &quot;providing an instance of the JsonFormat type class for T.&quot; We can write these by hand, or use <a href="https://github.com/spray/spray-json#providing-jsonformats-for-case-classes">helper methods</a> from spray-json.
+There&#39;s even a <a href="https://github.com/fommil/spray-json-shapeless">project</a> that makes the compiler generate it all for case classes;
+ the details are way outside the scope of this post.</p>
+
+<p>Here&#39;s the kicker: when we make a JsonFormat[MyClass], we get more than serialization/deserialization for MyClass.
+We can now call <span class="toJson">toJson</span> on MyClass, Seq[MyClass], on Map[String,MyClass], on Option[Map[MyClass,List[MyClass]]] -- without writing any extra code!</p>
+
+<p>This is the killer feature of the type class pattern: it composes.
+One <span class="implicitdef">generic definition of JsonFormat[List[T]]</span> means a List of any JsonFormat-able T is also JsonFormat-able. T could be String, Int, Long, MyClass -- you name it, if we can format it, we can also format Lists of it.
+Here&#39;s the trick: instead of an <span class="implicitparam">implicit val</span> for JsonFormat of List, there is an <span class="implicitdef">implicit def</span> in DefaultJsonFormat:</p>
+
+<pre>
+    <span class="implicitdef">implicit def</span> listFormat[<span class="contextbound">T : JsonFormat</span>] = new RootJsonFormat[List[T]] {
+      def write(list: List[T]) = ..
+      def read(value: <span class="jsValue">JsValue</span>): List[T] = ..
+    }
+</pre>
+
+<p>What is this doing? First, we have to understand some new syntax: inside the <span class="contextbound">type parameter, there is a colon, followed by a type class</span>. 
+This is called <a href="http://docs.scala-lang.org/tutorials/FAQ/context-and-view-bounds.html">Context Bounds</a> (good luck finding the documentation without knowing this special name).
+This is shorthand for &quot;<span class="contextbound">a type T such that there exists in the magic hat a JsonFormat[T]</span>&quot;.
+The context-bounds notation above expands to:</p>
+
+<pre>
+    implicit def listFormat[<span class="contextbound">T</span>](<span class="contextbound">implicit _ : JsonFormat[T]</span>) = new RootJsonFormat[List[T]] {
+      def write(list: List[T]) = ..
+      def read(value: <span class="jsValue">JsValue</span>): List[T] = ..
+    }
+</pre>
+
+<p>The implicit parameter ensures that the write function inside listFormat will be able to call <span class="toJson">.toJson</span> on the elements in the List.</p>
+
+<p>This <span class="implicitdef">implicit def</span> does not work the same way as a <a href="http://engineering.monsanto.com/2015/07/31/implicit-conversions/">view</a>, which converts a single type to another.
+Instead, it is a supplier of implicit values. It can give the compiler a JsonFormat[List[T]],as long as the compiler supplies a JsonFormat[T]. </p>
+
+<p><img src="/img/typeclass-magic-hat-2.png" style="max-height: 400px;margin: 0 auto" 
+alt = "the magic hat: JsonDefaultProtocol puts in a function that turns an implicit JsonFormat of T into a JsonFormat of Seq of T"/></p>
+
+<p>One definition composes with any other JsonFormats in the magic hat. 
+The compiler calls as many of these implicit functions, as many times as needed, to produce the implicit parameter it desperately desires. </p>
+
+<p><img src="/img/typeclass-magic-hat-3.png" style="max-height: 400px;margin: 0 auto" 
+alt = "the magic hat: to satisfy the implicit parameter of type JsonFormat of Seq of T, the magic hat uses both these values"/></p>
+
+<p>This works on types as complicated as we want. Let&#39;s say we want to serialize an Option[Map[String,List[Int]]]:</p>
+
+<pre>
+import spray.json._
+import DefaultJsonProtocol._
+val a:Option[Map[String,List[Int]]] = Some(Map("Applejack" -> List(1,2,3,4),
+                                               "Fluttershy" -> List(2,4,6,8))) 
+val json = a.<span class="toJson">toJson</span>
+println(json.prettyPrint)
+</pre>
+
+<p>The compiler uses implicit functions for Option, Map, and List, along with implicit vals for String and Int,
+to compose a JsonFormat[Option[Map[String,List[Int]]]]. 
+That gets passed into <span class="toJson">.toJson</span>, and only then does serialization occur.
+If we use the JsonFormats explicitly, the code above becomes:
+<pre>
+import spray.json._
+import spray.json.{DefaultJsonProtocol =&gt; Djp}
+val a:Option[Map[String,List[Int]]] = Some(Map(&quot;Applejack&quot; -&gt; List(1,2,3,4),
+                                               &quot;Fluttershy&quot; -&gt; List(2,4,6,8)))
+val json = new PimpedAny[Option[Map[String,List[Int]]]](a).<span class="toJson">toJson</span>(Djp.optionFormat(
+            Djp.mapFormat(
+                Djp.StringJsonFormat,
+                Djp.listFormat(
+                    Djp.IntJsonFormat
+                )
+            )))
+println(json.prettyPrint)
+</pre></p>
+
+<p>Whew, that&#39;s a lot of magic. The compiler does all that composition for us. This property of implicit parameters makes the type class pattern very useful.</p>
+
+<p>That much magic also means it&#39;s hard to understand. 
+ While you&#39;ll rarely need to create your own types in the style of JsonFormat,
+you&#39;ll often want to create new type class instances, such as JsonFormat[MyClass]. Other times you need to find the right ones to import.
+Either way, familiarity with the pattern is essential when using spray-json and many other libraries.</p>
+
+<p>Spray-routing, a library for writing RESTful services, uses this pattern for a lot of things, including returning data, and to avoid some pitfalls of method overloading.
+They call it the &#39;magnet pattern&#39; and try to get you to read <a href="http://spray.io/blog/2012-12-13-the-magnet-pattern/">a post much, much longer than this one</a>.
+Ultimately it&#39;s the same pattern, used for different properties.</p>
+
+<p>In some ways, the type class pattern is the culmination of Scala&#39;s implicit feature. If this post makes sense, then you&#39;re well on your way to Scala mastery.</p>
+
+                
+
+                    <div class="post-signature">
+                        
+                            <img src="https://avatars2.githubusercontent.com/u/7410363?v=3&s=40">
+                        
+                        <span>
+                            Jorge Montero/Jessica Kerr posted on September 23, 2015
+                        </span>
+
+                            
+                            <a  href="https://twitter.com/hibikir1">
+                                <i class="fa fa-twitter fa-1x "></i>
+                            </a>
+                            
+                            
+                            <a  href="https://www.github.com/hibikir">
+                                <i class="fa fa-github fa-1x"></i>
+                            </a>
+                            
+
+
+                    </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/09/21/leaflet-light-cluster/" data-toggle="tooltip" data-placement="top" title="Cluster Lightly">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2015/09/24/better-spray-metrics-with-kamon/" data-toggle="tooltip" data-placement="top" title="Better Spray metrics with Kamon">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
