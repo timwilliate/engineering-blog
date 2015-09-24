@@ -3,9 +3,11 @@ layout: post
 title: "PaaSify your Apps"
 subtitle: "Building an Open Source Cloud Foundry Toolbox"
 header-img: "img/mon-field_rows.jpg"
-author: Mark Seidenstricker 
-githubProfile : "mjseid"
-avatarUrl : "https://avatars2.githubusercontent.com/u/4573660?v=3"
+authors:
+    -
+        name: Mark Seidenstricker 
+        githubProfile : "mjseid"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/4573660?v=3"
 tags: [open source, cloudfoundry, cf-portal]
 ---
 

@@ -3,10 +3,12 @@ layout: post
 title: "Using Big Data for Good"
 subtitle: "Big Data, it's not just for selling ads anymore"
 header-img: "img/mon-ankeny.jpg"
-author: "David Dooling"
-githubProfile : "ddgenome"
-twitterHandle : "ddgenome"
-avatarUrl : "https://avatars1.githubusercontent.com/u/57881?v=3"
+authors: 
+    -
+        name: "David Dooling"
+        githubProfile : "ddgenome"
+        twitterHandle : "ddgenome"
+        avatarUrl : "https://avatars1.githubusercontent.com/u/57881?v=3"
 tags: [big data, genomics, IoT, precision farming]
 ---
 

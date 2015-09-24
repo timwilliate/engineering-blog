@@ -4,9 +4,11 @@ title: "Cloud Foundry Metrics"
 subtitle: "Open Source Monitoring and Alerting for Cloud Foundry"
 description: "Announcing CF-Metrics, an example of open source monitoring and alerting with Cloud Foundry"
 header-img: "img/mon-chesterfield.jpg"
-author: Mark Seidenstricker 
-githubProfile : "mjseid"
-avatarUrl : "https://avatars2.githubusercontent.com/u/4573660?v=3"
+authors:
+    -
+        name: Mark Seidenstricker 
+        githubProfile : "mjseid"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/4573660?v=3"
 tags: [cloudfoundry, cf-metrics, monitoring]
 ---
 In the second installation of our open source [Cloud Foundry (CF) toolbox series](http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/) we would like to introduce [CF-Metrics](https://github.com/MonsantoCo/cf-metrics), a comprehensive solution for Cloud Foundry monitoring and alerting based solely on open source projects.  In a world of unreliable cloud infrastructure and distributed micro service architectures, monitoring and alerting are as critical now as they've ever been.  Even when you learn to expect failure (or better yet [embrace it](https://github.com/strepsirrhini-army/chaos-lemur)) and build self healing platforms like Cloud Foundry, you still need monitoring and alerting to analyze why there was a failure and how to make it not happen again in the future.

@@ -3,10 +3,12 @@ layout: post
 title: "Doing Docker Metrics"
 subtitle: "How To Do Production Ready Docker Metrics"
 header-img: "img/mon-city_garden.jpg"
-author: "Stuart Wong"
-githubProfile : "cgswong"
-twitterHandle : "cgswong"
-avatarUrl : "https://avatars2.githubusercontent.com/u/6033436?v=3"
+authors: 
+    -
+        name: "Stuart Wong"
+        githubProfile : "cgswong"
+        twitterHandle : "cgswong"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/6033436?v=3"
 tags: [docker, sysadmin, metrics, devops, tutorial]
 ---
 

@@ -3,10 +3,12 @@ layout: post
 title: "Better Spray metrics with Kamon"
 subtitle: "Introducing spray-kamon-metrics"
 header-img: "img/mon-monmouth.jpg"
-author: "Daniel Solano Gómez"
-githubProfile: "sattvik"
-twitterHandle: "deepbluelambda"
-avatarUrl: "https://avatars1.githubusercontent.com/u/152491?v=3&s=460"
+authors: 
+    -
+        name: "Daniel Solano Gómez"
+        githubProfile: "sattvik"
+        twitterHandle: "deepbluelambda"
+        avatarUrl: "https://avatars1.githubusercontent.com/u/152491?v=3&s=460"
 tags: [open source, spray, scala, kamon]
 ---
 
