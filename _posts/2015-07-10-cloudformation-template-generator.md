@@ -3,11 +3,13 @@ layout: post
 title: "CloudFormation Template Generator"
 subtitle: "or A Tour of Scala Type System Features"
 header-img: "img/mon-hands_grains.jpg"
-author: "Ryan Richt"
+authors: 
+    -
+        name: "Ryan Richt"
+        githubProfile : "ryan-richt"
+        twitterHandle : "ryan_richt"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/541228?v=3"
 tags: [types, scala, aws, tutorials]
-githubProfile : "ryan-richt"
-twitterHandle : "ryan_richt"
-avatarUrl : "https://avatars2.githubusercontent.com/u/541228?v=3"
 extra_css:
   - implicits-intro.css
 ---

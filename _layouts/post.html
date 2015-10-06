@@ -28,31 +28,37 @@ layout: default
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
 
 				{{ content }}
-                {% if page.author %}
 
-                    <div class="post-signature">
-                        {% if page.avatarUrl %}
-                            <img src="{{ page.avatarUrl }}&s=40">
-                        {% else %}
-                            <img src="/img/placeholder.jpg">
-                        {% endif %}
-                        <span>
-                            {{ page.author }} posted on {{ page.date | date: "%B %-d, %Y" }}
-                        </span>
+                {% if page.authors %}
 
-                            {% if page.twitterHandle %}
-                            <a  href="https://twitter.com/{{ page.twitterHandle }}">
-                                <i class="fa fa-twitter fa-1x "></i>
-                            </a>
-                            {% endif %}
-                            {% if page.githubProfile %}
-                            <a  href="https://www.github.com/{{ page.githubProfile }}">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            {% endif %}
+                        <div class="post-signature multiple">
+                            posted on {{ page.date | date: "%B %-d, %Y" }} by <br>
+                        {% for author in page.authors %}
 
 
-                    </div>
+                            <div class="author">
+                                {% if author.avatarUrl %}
+                                <img src="{{ author.avatarUrl }}&s=40">
+                                {% else %}
+                                <img src="/img/placeholder.jpg">
+                                {% endif %}
+                                    <span>
+                                        {{ author.name }}
+                                    </span>
+
+                                {% if author.twitterHandle %}
+                                <a  href="https://twitter.com/{{ page.twitterHandle }}">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                {% endif %}
+                                {% if author.githubProfile %}
+                                <a  href="https://www.github.com/{{ page.githubProfile }}">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        </div>
                 {% endif %}
 
                 <hr>

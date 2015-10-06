@@ -4,13 +4,18 @@ title: "Learn implicits: Type classes"
 subtitle: "Spray-json as an example of how type classes work"
 description: "Type classes are an important pattern used in many Scala libraries. We dive into how the pattern is implemented in spray-json, a popular serialization library"
 header-img: "img/mon-chesterfield.jpg"
-author: "Jorge Montero/Jessica Kerr"
-githubProfile : "hibikir"
-twitterHandle : "hibikir1"
-avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
---githubProfile : "jessitron"
---twitterHandle : "jessitron"
---avatarUrl : "https://avatars3.githubusercontent.com/u/1149737?v=3"
+authors: 
+    -
+        name: "Jorge Montero"
+        githubProfile : "hibikir"
+        twitterHandle : "hibikir1"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
+    -
+        name: "Jessica Kerr"
+        githubProfile : "jessitron"
+        twitterHandle : "jessitron"
+        avatarUrl : "https://avatars3.githubusercontent.com/u/1149737?v=3"
+        
 tags: [implicits, scala, tutorials]
 extra_css:
   - implicits-intro.css

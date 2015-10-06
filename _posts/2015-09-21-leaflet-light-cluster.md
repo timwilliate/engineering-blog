@@ -3,8 +3,11 @@ layout: post
 title: "Cluster Lightly"
 subtitle: "Organizing Geospatial Data Without Overwhelming Your Browser"
 header-img: "img/light-cluster-view.jpg"
-author: "Caleb Courier"
-githubProfile : "CalebCourier"
+authors: 
+    -
+        name: "Caleb Courier"
+        githubProfile : "CalebCourier"
+
 tags: [leaflet, geospatial, clustering, map]
 ---
 
