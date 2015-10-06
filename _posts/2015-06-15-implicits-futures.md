@@ -3,10 +3,12 @@ layout: post
 title: "Learn implicits: Scala Futures"
 subtitle: "Exploring implicit parameters using Scala Futures"
 header-img: "img/mon-field_rows.jpg"
-author: "Jorge Montero"
-githubProfile : "hibikir"
-twitterHandle : "hibikir1"
-avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
+authors: 
+    -
+        name: "Jorge Montero"
+        githubProfile : "hibikir"
+        twitterHandle : "hibikir1"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
 tags: [implicits, scala, tutorials, futures]
 extra_css:
   - implicits-intro.css

@@ -3,9 +3,11 @@ layout: post
 title: "Building a simple Spray application"
 subtitle: "Making first contact with Spray as painless as possible"
 header-img: "img/mon-field_rows.jpg"
-author: Scott MacDonald 
-githubProfile : "samus42"
-avatarUrl : "https://avatars1.githubusercontent.com/u/1211796?v=3&s=460"
+authors: 
+    -
+        name: Scott MacDonald 
+        githubProfile : "samus42"
+        avatarUrl : "https://avatars1.githubusercontent.com/u/1211796?v=3&s=460"
 tags: [open source, spray, scala]
 ---
 

@@ -3,10 +3,12 @@ layout: post
 title: "Learn implicits: Scala reflection"
 subtitle: "An intro to implicit parameters using Scala Reflection as an example"
 header-img: "img/mon-field_rows.jpg"
-author: "Jorge Montero"
-githubProfile : "hibikir"
-twitterHandle : "hibikir1"
-avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
+authors: 
+    -
+        name: "Jorge Montero"
+        githubProfile : "hibikir"
+        twitterHandle : "hibikir1"
+        avatarUrl : "https://avatars2.githubusercontent.com/u/7410363?v=3"
 tags: [implicits, scala, tutorials]
 extra_css:
   - implicits-intro.css

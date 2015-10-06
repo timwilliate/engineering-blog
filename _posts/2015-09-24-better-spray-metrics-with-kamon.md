@@ -4,10 +4,12 @@ title: "Better Spray metrics with Kamon"
 subtitle: "Introducing spray-kamon-metrics"
 description: "The Open Source spray-kamon-metrics library improves Spray-Kamon integration by providing better response metrics, detects timeouts, and reports Spray can server statistics."
 header-img: "img/mon-monmouth.jpg"
-author: "Daniel Solano Gómez"
-githubProfile: "sattvik"
-twitterHandle: "deepbluelambda"
-avatarUrl: "https://avatars1.githubusercontent.com/u/152491?v=3&s=460"
+authors: 
+    -
+        name: "Daniel Solano Gómez"
+        githubProfile: "sattvik"
+        twitterHandle: "deepbluelambda"
+        avatarUrl: "https://avatars1.githubusercontent.com/u/152491?v=3&s=460"
 tags: [open source, spray, scala, kamon]
 ---
 
