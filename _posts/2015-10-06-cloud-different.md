@@ -94,7 +94,7 @@ To learn more about how to architect "cloud first" solutions, learn
 about our journey to the cloud, and see how we use some of the tools
 and libraries we have open sourced, be sure to attend our talk at AWS
 re:Invent,
-[Cloud First: New Architecture for a New Platform][reinvent], this
+[Cloud First: New Architecture for New Infrastructure][reinvent], this
 Thursday 8 October 2015 at 2:45 p.m. PT in Palazzo N.
 
 [reinvent]: https://www.portal.reinvent.awsevents.com/connect/sessionDetail.ww?SESSION_ID=2547 (AWS re:Invent Cloud First talk)
