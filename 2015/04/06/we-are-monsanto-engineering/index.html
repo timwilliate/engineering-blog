@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
     <meta name="description" content="Our Diversity of IT Innovation" />
     
-    <meta name="author" content="Ryan Richt" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">Our Diversity of IT Innovation</h2>
                         
-                        <span class="meta">Posted by Ryan Richt on April 6, 2015</span>
+                        <span class="meta">Posted  by Ryan Richt on April 6, 2015</span>
                     </div>
                 </div>
             </div>
@@ -151,29 +149,35 @@
 
 <p>IT at Monsanto is characterized by its amazing diversity. With modern tools, we are tackling exciting problems in domains as diverse as genomics and computer vision. Now we are opening up these tools and experiences to the community. We hope you’ll join us back here for our next post on automation in AWS.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on April 6, 2015 by <br>
                         
-                            <img src="https://avatars2.githubusercontent.com/u/541228?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars2.githubusercontent.com/u/541228?v=3&s=40">
+                                
+                                    <span>
+                                        Ryan Richt
+                                    </span>
+
+                                
+                                <a  href="https://twitter.com/">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Ryan Richt posted on April 6, 2015
-                        </span>
-
-                            
-                            <a  href="https://twitter.com/ryan_richt">
-                                <i class="fa fa-twitter fa-1x "></i>
-                            </a>
-                            
-                            
-                            <a  href="https://www.github.com/ryan-richt">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -277,6 +281,7 @@
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -285,6 +290,14 @@
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

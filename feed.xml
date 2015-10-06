@@ -7,6 +7,30 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>Cloud Different</title>
+                
+                
+                    <description>&lt;p&gt;Over the past several years, cloud computing of all types has gained a
+lot of momentum. Because of the massive increase in mobile computing,
+i.e., phones and tablets, more and more people are consuming cloud
+services like GMail, DropBox, Instagram, and Office365. These Software
+as a Service (SaaS) solutions are convenient for people on the go
+because the information they need is always easily accessible through
+a web browser or mobile app. This is possible because the user&amp;#39;s data
+and preferences are stored &amp;quot;in the cloud&amp;quot;, using servers and services
+managed by someone else, typically the operator of the SaaS
+solution. While these SaaS solutions are convenient for end users,
+they do not allow for much customization. To develop custom
+capabilities in the cloud, you must turn to Infrastructure as a
+Service (IaaS).&lt;/p&gt;
+</description>
+                
+                <pubDate>Tue, 06 Oct 2015 00:00:00 -0700</pubDate>
+                <link>http://engineering.monsanto.com/2015/10/06/cloud-different/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/10/06/cloud-different/</guid>
+            </item>
+        
+            <item>
                 <title>Better Spray metrics with Kamon</title>
                 
                 
@@ -17,7 +41,7 @@ generate traces for each incoming request.  This is great, but we wanted more.
 Some of the things we wanted to improve included:&lt;/p&gt;
 </description>
                 
-                <pubDate>Thu, 24 Sep 2015 00:00:00 -0500</pubDate>
+                <pubDate>Thu, 24 Sep 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</guid>
             </item>
@@ -36,7 +60,7 @@ Some of the things we wanted to improve included:&lt;/p&gt;
 &lt;/style&gt;
 </description>
                 
-                <pubDate>Wed, 23 Sep 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 23 Sep 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</guid>
             </item>
@@ -49,7 +73,7 @@ Some of the things we wanted to improve included:&lt;/p&gt;
 much of it is concerned with two major questions:&lt;/p&gt;
 </description>
                 
-                <pubDate>Mon, 21 Sep 2015 00:00:00 -0500</pubDate>
+                <pubDate>Mon, 21 Sep 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/</guid>
             </item>
@@ -61,7 +85,7 @@ much of it is concerned with two major questions:&lt;/p&gt;
                     <description>&lt;p&gt;In the second installation of our open source &lt;a href=&quot;http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/&quot;&gt;Cloud Foundry (CF) toolbox series&lt;/a&gt; we would like to introduce &lt;a href=&quot;https://github.com/MonsantoCo/cf-metrics&quot;&gt;CF-Metrics&lt;/a&gt;, a comprehensive solution for Cloud Foundry monitoring and alerting based solely on open source projects.  In a world of unreliable cloud infrastructure and distributed micro service architectures, monitoring and alerting are as critical now as they&amp;#39;ve ever been.  Even when you learn to expect failure (or better yet &lt;a href=&quot;https://github.com/strepsirrhini-army/chaos-lemur&quot;&gt;embrace it&lt;/a&gt;) and build self healing platforms like Cloud Foundry, you still need monitoring and alerting to analyze why there was a failure and how to make it not happen again in the future.&lt;/p&gt;
 </description>
                 
-                <pubDate>Thu, 20 Aug 2015 00:00:00 -0500</pubDate>
+                <pubDate>Thu, 20 Aug 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/08/20/cf-metrics/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/20/cf-metrics/</guid>
             </item>
@@ -79,7 +103,7 @@ that hurdle by walking you through a simple app that hits most of the
 features you might regularly use.&lt;/p&gt;
 </description>
                 
-                <pubDate>Tue, 11 Aug 2015 00:00:00 -0500</pubDate>
+                <pubDate>Tue, 11 Aug 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/08/11/simple-spray/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/11/simple-spray/</guid>
             </item>
@@ -91,7 +115,7 @@ features you might regularly use.&lt;/p&gt;
                     <description>&lt;p&gt;This is the third post in our series on Scala implicits. The earlier posts cover &lt;a href=&quot;http://engineering.monsanto.com/2015/05/14/implicits-intro/&quot;&gt;implicit type parameters&lt;/a&gt; and &lt;a href=&quot;http://engineering.monsanto.com/2015/06/15/implicits-futures/&quot;&gt;implicit parameters with futures&lt;/a&gt;. In this post, we discuss implicit conversions.&lt;/p&gt;
 </description>
                 
-                <pubDate>Fri, 31 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Fri, 31 Jul 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/31/implicit-conversions/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/31/implicit-conversions/</guid>
             </item>
@@ -103,7 +127,7 @@ features you might regularly use.&lt;/p&gt;
                     <description>&lt;p&gt;This segment of our open source Cloud Foundry (CF) toolbox series introduces &lt;a href=&quot;https://github.com/MonsantoCo/cf-portal&quot;&gt;CF-Portal&lt;/a&gt;, a basic read-only view into your Cloud Foundry application landscape.  CF-Portal was one of the first applications we made for our CF toolbox, since unlike the branded CF offerings, the community project lacks any pre-packaged UI.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 29 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 29 Jul 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/29/cf-portal/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/29/cf-portal/</guid>
             </item>
@@ -122,7 +146,7 @@ features you might regularly use.&lt;/p&gt;
 &lt;/style&gt;
 </description>
                 
-                <pubDate>Tue, 28 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Tue, 28 Jul 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/28/avoiding-mocks/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/28/avoiding-mocks/</guid>
             </item>
@@ -135,21 +159,9 @@ features you might regularly use.&lt;/p&gt;
 &lt;a href=&quot;https://docs.cloudfoundry.org/concepts/overview.html&quot;&gt;Cloud Foundry&lt;/a&gt;, an open platform as a service which allowed our dev teams to start learning/adopting cloud designs on top of an agile platform in the safety of our private datacenter.  &lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 22 Jul 2015 00:00:00 -0500</pubDate>
+                <pubDate>Wed, 22 Jul 2015 00:00:00 -0700</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/</guid>
-            </item>
-        
-            <item>
-                <title>CloudFormation Template Generator</title>
-                
-                
-                    <description>&lt;h2&gt;TL;DR&lt;/h2&gt;
-</description>
-                
-                <pubDate>Fri, 10 Jul 2015 00:00:00 -0500</pubDate>
-                <link>http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/</guid>
             </item>
         
     </channel>

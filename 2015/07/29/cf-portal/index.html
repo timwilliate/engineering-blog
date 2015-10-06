@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-maui.jpg" />
     <meta name="description" content="Announcing CF-Portal, a non-admin UI for open source Cloud Foundry" />
     
-    <meta name="author" content="Mark Seidenstricker" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">A Single Pane of Glass for Cloud Foundry Applications</h2>
                         
-                        <span class="meta">Posted by Mark Seidenstricker on July 29, 2015</span>
+                        <span class="meta">Posted  by Mark Seidenstricker on July 29, 2015</span>
                     </div>
                 </div>
             </div>
@@ -151,25 +149,31 @@
 
 <p>If you&#39;re using Cloud Foundry and you have the need for an intuitive UI, please jump over to the project repo and give <a href="https://github.com/MonsantoCo/cf-portal">CF-Portal</a> a try.  And as always we encourage comments and pull requests to continue making our tools better.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on July 29, 2015 by <br>
                         
-                            <img src="https://avatars2.githubusercontent.com/u/4573660?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars2.githubusercontent.com/u/4573660?v=3&s=40">
+                                
+                                    <span>
+                                        Mark Seidenstricker
+                                    </span>
+
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Mark Seidenstricker posted on July 29, 2015
-                        </span>
-
-                            
-                            
-                            <a  href="https://www.github.com/mjseid">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -273,6 +277,7 @@
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -281,6 +286,14 @@
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

@@ -115,6 +115,23 @@
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 			
 <div class="post-preview">
+    <a href="/2015/10/06/cloud-different/">
+        <h2 class="post-title">            Cloud Different
+        </h2>
+        
+        <h3 class="post-subtitle">
+            A new architecture for a new platform
+        </h3>
+        
+    </a>
+    <p class="post-meta">Posted  by David Dooling on October 6, 2015</p>
+</div>
+
+
+<hr>
+
+
+<div class="post-preview">
     <a href="/2015/09/24/better-spray-metrics-with-kamon/">
         <h2 class="post-title">            Better Spray metrics with Kamon
         </h2>
@@ -124,7 +141,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Daniel Solano Gómez on September 24, 2015</p>
+    <p class="post-meta">Posted  by Daniel Solano Gómez on September 24, 2015</p>
 </div>
 
 
@@ -141,7 +158,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Jorge Montero/Jessica Kerr on September 23, 2015</p>
+    <p class="post-meta">Posted  by Jorge Montero, Jessica Kerr on September 23, 2015</p>
 </div>
 
 
@@ -158,7 +175,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Caleb Courier on September 21, 2015</p>
+    <p class="post-meta">Posted  by Caleb Courier on September 21, 2015</p>
 </div>
 
 
@@ -175,7 +192,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Mark Seidenstricker on August 20, 2015</p>
+    <p class="post-meta">Posted  by Mark Seidenstricker on August 20, 2015</p>
 </div>
 
 
@@ -192,7 +209,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Scott MacDonald on August 11, 2015</p>
+    <p class="post-meta">Posted  by Scott MacDonald on August 11, 2015</p>
 </div>
 
 
@@ -209,7 +226,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Jorge Montero on July 31, 2015</p>
+    <p class="post-meta">Posted  by Jorge Montero on July 31, 2015</p>
 </div>
 
 
@@ -226,20 +243,7 @@
         </h3>
         
     </a>
-    <p class="post-meta">Posted by Mark Seidenstricker on July 29, 2015</p>
-</div>
-
-
-<hr>
-
-
-<div class="post-preview">
-    <a href="/2015/07/28/avoiding-mocks/">
-        <h2 class="post-title">            Testing without mocking in Scala
-        </h2>
-        
-    </a>
-    <p class="post-meta">Posted by Jessica Kerr on July 28, 2015</p>
+    <p class="post-meta">Posted  by Mark Seidenstricker on July 29, 2015</p>
 </div>
 
 
@@ -344,6 +348,7 @@
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -352,6 +357,14 @@
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

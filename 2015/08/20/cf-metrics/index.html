@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-chesterfield.jpg" />
     <meta name="description" content="Announcing CF-Metrics, an example of open source monitoring and alerting with Cloud Foundry" />
     
-    <meta name="author" content="Mark Seidenstricker" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">Open Source Monitoring and Alerting for Cloud Foundry</h2>
                         
-                        <span class="meta">Posted by Mark Seidenstricker on August 20, 2015</span>
+                        <span class="meta">Posted  by Mark Seidenstricker on August 20, 2015</span>
                     </div>
                 </div>
             </div>
@@ -162,25 +160,31 @@
 
 <p>For a deeper look at CF-Metrics head over to the <a href="https://github.com/MonsantoCo/cf-metrics">github page</a> to try it out for yourself.  If you make a feature enhancement or useful dashboard we&#39;d love a PR to include it in the project.  Or if you have your own solution for Cloud Foundry monitoring and alerting, hopefully we&#39;ve encouraged you to pay it forward and share it with the community.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on August 20, 2015 by <br>
                         
-                            <img src="https://avatars2.githubusercontent.com/u/4573660?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars2.githubusercontent.com/u/4573660?v=3&s=40">
+                                
+                                    <span>
+                                        Mark Seidenstricker
+                                    </span>
+
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Mark Seidenstricker posted on August 20, 2015
-                        </span>
-
-                            
-                            
-                            <a  href="https://www.github.com/mjseid">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -284,6 +288,7 @@
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -292,6 +297,14 @@
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
     <meta name="description" content="Making first contact with Spray as painless as possible" />
     
-    <meta name="author" content="Scott MacDonald" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">Making first contact with Spray as painless as possible</h2>
                         
-                        <span class="meta">Posted by Scott MacDonald on August 11, 2015</span>
+                        <span class="meta">Posted  by Scott MacDonald on August 11, 2015</span>
                     </div>
                 </div>
             </div>
@@ -468,25 +466,31 @@ of your requests.</p>
 <p>I&#39;ll follow up later with more advanced spray features focusing on
 pathing and unit testing your spray services.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on August 11, 2015 by <br>
                         
-                            <img src="https://avatars1.githubusercontent.com/u/1211796?v=3&s=460&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars1.githubusercontent.com/u/1211796?v=3&s=460&s=40">
+                                
+                                    <span>
+                                        Scott MacDonald
+                                    </span>
+
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Scott MacDonald posted on August 11, 2015
-                        </span>
-
-                            
-                            
-                            <a  href="https://www.github.com/samus42">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -590,6 +594,7 @@ pathing and unit testing your spray services.</p>
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -598,6 +603,14 @@ pathing and unit testing your spray services.</p>
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

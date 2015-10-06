@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
     <meta name="description" content="Exploring implicit parameters using Scala Futures" />
     
-    <meta name="author" content="Jorge Montero" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -107,7 +105,7 @@
                         
                         <h2 class="subheading">Exploring implicit parameters using Scala Futures</h2>
                         
-                        <span class="meta">Posted by Jorge Montero on June 15, 2015</span>
+                        <span class="meta">Posted  by Jorge Montero on June 15, 2015</span>
                     </div>
                 </div>
             </div>
@@ -318,29 +316,35 @@ it&#39;s common to repeat the same value, common to pass it down through various
 and essential that it be explicitly passed sometimes, at the caller&#39;s discretion.
 In this way, Scala lets library designers keep the interface clean and flexible at the same time. </p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on June 15, 2015 by <br>
                         
-                            <img src="https://avatars2.githubusercontent.com/u/7410363?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars2.githubusercontent.com/u/7410363?v=3&s=40">
+                                
+                                    <span>
+                                        Jorge Montero
+                                    </span>
+
+                                
+                                <a  href="https://twitter.com/">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Jorge Montero posted on June 15, 2015
-                        </span>
-
-                            
-                            <a  href="https://twitter.com/hibikir1">
-                                <i class="fa fa-twitter fa-1x "></i>
-                            </a>
-                            
-                            
-                            <a  href="https://www.github.com/hibikir">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -444,6 +448,7 @@ In this way, Scala lets library designers keep the interface clean and flexible 
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -452,6 +457,14 @@ In this way, Scala lets library designers keep the interface clean and flexible 
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-field_rows.jpg" />
     <meta name="description" content="Create and manage CloudFormation stacks in AWS" />
     
-    <meta name="author" content="Phil Cryer" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">Create and manage CloudFormation stacks in AWS</h2>
                         
-                        <span class="meta">Posted by Phil Cryer on July 8, 2015</span>
+                        <span class="meta">Posted  by Phil Cryer on July 8, 2015</span>
                     </div>
                 </div>
             </div>
@@ -231,29 +229,35 @@ more stax/README.md
 </code></pre></div>
 <p>We hope that this tool will be useful to the community and look forward to feedback on what people think of it. We’re open to issues you might create or pull requests to make stax better.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on July 8, 2015 by <br>
                         
-                            <img src="https://avatars0.githubusercontent.com/u/43070?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars0.githubusercontent.com/u/43070?v=3&s=40">
+                                
+                                    <span>
+                                        Phil Cryer
+                                    </span>
+
+                                
+                                <a  href="https://twitter.com/">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Phil Cryer posted on July 8, 2015
-                        </span>
-
-                            
-                            <a  href="https://twitter.com/fak3r">
-                                <i class="fa fa-twitter fa-1x "></i>
-                            </a>
-                            
-                            
-                            <a  href="https://www.github.com/philcryer">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -357,6 +361,7 @@ more stax/README.md
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -365,6 +370,14 @@ more stax/README.md
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/light-cluster-view.jpg" />
     <meta name="description" content="Organizing Geospatial Data Without Overwhelming Your Browser" />
     
-    <meta name="author" content="Caleb Courier" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -105,7 +103,7 @@
                         
                         <h2 class="subheading">Organizing Geospatial Data Without Overwhelming Your Browser</h2>
                         
-                        <span class="meta">Posted by Caleb Courier on September 21, 2015</span>
+                        <span class="meta">Posted  by Caleb Courier on September 21, 2015</span>
                     </div>
                 </div>
             </div>
@@ -172,25 +170,31 @@ include DBSCAN and K-means both of which you can find code implementations with 
 you do, LightCluster will take it and perform its simple task of rendering and updating keeping your client code light
 and your map performant.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on September 21, 2015 by <br>
                         
-                            <img src="/img/placeholder.jpg">
+
+
+                            <div class="author">
+                                
+                                <img src="/img/placeholder.jpg">
+                                
+                                    <span>
+                                        Caleb Courier
+                                    </span>
+
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Caleb Courier posted on September 21, 2015
-                        </span>
-
-                            
-                            
-                            <a  href="https://www.github.com/CalebCourier">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -294,6 +298,7 @@ and your map performant.</p>
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -302,6 +307,14 @@ and your map performant.</p>
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 

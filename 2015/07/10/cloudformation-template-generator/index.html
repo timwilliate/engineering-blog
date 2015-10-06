@@ -17,8 +17,6 @@
     <meta property="og:image" content="http://engineering.monsanto.com/img/mon-hands_grains.jpg" />
     <meta name="description" content="or A Tour of Scala Type System Features" />
     
-    <meta name="author" content="Ryan Richt" />
-    
 
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -107,7 +105,7 @@
                         
                         <h2 class="subheading">or A Tour of Scala Type System Features</h2>
                         
-                        <span class="meta">Posted by Ryan Richt on July 10, 2015</span>
+                        <span class="meta">Posted  by Ryan Richt on July 10, 2015</span>
                     </div>
                 </div>
             </div>
@@ -528,29 +526,35 @@ Required: Conditional. <strong>You must specify only one of the following proper
 
 <p>We hope though that CFTG is sufficiently advanced that you can use it in your work. We certainly use it to generate our complex Microservice environment templates at Monsanto, and are delighted to share it with all of you.</p>
 
+
                 
 
-                    <div class="post-signature">
+                        <div class="post-signature multiple">
+                            posted on July 10, 2015 by <br>
                         
-                            <img src="https://avatars2.githubusercontent.com/u/541228?v=3&s=40">
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars2.githubusercontent.com/u/541228?v=3&s=40">
+                                
+                                    <span>
+                                        Ryan Richt
+                                    </span>
+
+                                
+                                <a  href="https://twitter.com/">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                
+                                
+                                <a  href="https://www.github.com/">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
                         
-                        <span>
-                            Ryan Richt posted on July 10, 2015
-                        </span>
-
-                            
-                            <a  href="https://twitter.com/ryan_richt">
-                                <i class="fa fa-twitter fa-1x "></i>
-                            </a>
-                            
-                            
-                            <a  href="https://www.github.com/ryan-richt">
-                                <i class="fa fa-github fa-1x"></i>
-                            </a>
-                            
-
-
-                    </div>
+                        </div>
                 
 
                 <hr>
@@ -654,6 +658,7 @@ Required: Conditional. <strong>You must specify only one of the following proper
 <script src="/js/clean-blog.min.js "></script>
 
 <!-- Google Analytics JavaScript -->
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -662,6 +667,14 @@ Required: Conditional. <strong>You must specify only one of the following proper
     ga('create', 'UA-43186905-16', 'auto');
     ga('require', 'displayfeatures');
     ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
 </script>
 <script src="/js/main.js"></script>
 
