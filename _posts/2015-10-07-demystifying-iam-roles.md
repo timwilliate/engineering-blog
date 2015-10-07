@@ -31,8 +31,8 @@ with EC2 Instances in CloudFormation.
 ## Managing EC2 Instance Privileges
 
 If you have used [AWS EC2][ec2] for any length of time you have come
-across the need for an EC2 instance you create to be able to do
-something on your behalf.  For example, perhaps you have needed an EC2
+across the need for an EC2 instance to create or access another AWS
+resource on your behalf.  For example, perhaps you have needed an EC2
 instance to be able to publish notifications on an SNS topic, get a
 script or configuration from a private S3 bucket, or even spin up or
 terminate another EC2 instance it was monitoring.
@@ -65,9 +65,9 @@ that best practice.
 [iam-user]: https://aws.amazon.com/iam/details/manage-users/ (AWS IAM User Documentation)
 
 An even better approach for securely granting privileges to your EC2
-instances is to use [IAM Roles][iam-roles].  With IAM Roles, you
-create a role with the permission your EC2 instance needs and assign
-that role to your instance.  AWS, through the
+instances is to use [IAM Roles for EC2][iam-roles].  With IAM Roles,
+you create a role with the permission your EC2 instance needs and
+assign that role to your instance.  AWS, through the
 [instance metadata][metadata], provides an API key and secret to your
 instance that has the desired permissions.  AWS automatically manages
 the API key rotation and all the AWS SDKs and CLI know to look in the
