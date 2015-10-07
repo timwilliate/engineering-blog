@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+        
+    
+    <meta property="og:site_name" content="Monsanto Engineering Blog" />
+    <meta property="og:title" content="Demystifying IAM Roles" />
+    <meta property="og:description" content="AWS IAM Roles provide a powerful and secure way to assign privileges to your resources, but figuring out how to create and configure them, especially in CloudFormation, can be tricky." />
+    <meta property="og:url" content="http://engineering.monsanto.com/2015/10/07/demystifying-iam-roles/" />
+    <meta property="og:image" content="http://engineering.monsanto.com/img/mon-hello-1.jpg" />
+    <meta name="description" content="AWS IAM Roles provide a powerful and secure way to assign privileges to your resources, but figuring out how to create and configure them, especially in CloudFormation, can be tricky." />
+    
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <title>Demystifying IAM Roles - Engineering at Monsanto</title>
+
+    <link rel="canonical" href="http://engineering.monsanto.com/2015/10/07/demystifying-iam-roles/" />
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.min.css" />
+    <link rel="stylesheet" href="/css/scala-colors.min.css" />
+
+    
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css" />
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Engineering at Monsanto</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/code/">Code</a>
+                </li>
+                
+                <li>
+                    <a href="/contact/">Contact</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<header class="intro-header" style="background-image: url('/img/mon-hello-1.jpg')">
+    <div class="heading-underlay">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Demystifying IAM Roles</h1>
+                        
+                        <h2 class="subheading">Navigating the AWS IAM Role CloudFormation Labyrinth</h2>
+                        
+                        <span class="meta">Posted  by David Dooling on October 7, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-body">
+
+				<h2>TL;DR</h2>
+
+<p>The step-by-step process for creating IAM Roles and associating them
+with EC2 Instances in CloudFormation.</p>
+
+<ol>
+<li> Create the assumeRolePolicyStatement and assumeRolePolicyDocument</li>
+<li> Create an AWS::IAM::Role for your EC2 instance, associating that role with the assumeRolePolicyDocument</li>
+<li> Create an AWS::IAM::InstanceProfile associated with your AWS::IAM::Role</li>
+<li> Create a PolicyStatement that defines the allowed action</li>
+<li> Put that PolicyStatement in a PolicyDocument</li>
+<li> Create an AWS::IAM::Policy for your PolicyDocument and associate it with all the AWS::IAM::Role, i.e.,
+instances, that need that role</li>
+<li> Finally, when you create your instance resource, associate your AWS::IAM::InstanceProfile with your instance
+using the IamInstanceProfile property</li>
+</ol>
+
+<h2>Managing EC2 Instance Privileges</h2>
+
+<p>If you have used <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html" title="CloudFormation EC2 Instance">AWS EC2</a> for any length of time you have come
+across the need for an EC2 instance to create or access another AWS
+resource on your behalf.  For example, perhaps you have needed an EC2
+instance to be able to publish notifications on an SNS topic, get a
+script or configuration from a private S3 bucket, or even spin up or
+terminate another EC2 instance it was monitoring.</p>
+
+<p>When first encountering this problem, you may have decided to put your
+API key and secret somewhere on the instance and then point the CLI or
+SDK to those credentials.  While this is expedient, it is not very
+safe.  As the name implies, your API secret is not something you
+really want getting out.  If you choose this pattern and hard code
+your API key and secret everywhere, if one of the instances gets
+compromised you are going to have a lot of cleaning up to do&hellip;
+and probably a lot of explaining too.</p>
+
+<p>A more secure approach would be to create an <a href="https://aws.amazon.com/iam/details/manage-users/" title="AWS IAM User Documentation">IAM User</a> for
+each task that needs to be accomplished.  This user would then only be
+assigned the permissions it needed to accomplish its task.  An API key
+and secret could be generated for that user and then used on the
+instances that needed that permission.  Then, should an instance be
+compromised, anyone who got a hold of that key would only be able to
+do a specific task and you would only need to deactivate one key and
+clean up and reconfigure a hopefully smaller list of instances.  This
+approach still has its disadvantages.  First, there is more overhead
+and management of IAM Users.  Second, best practices dictate that you
+should rotate your API keys regularly.  If you need lots of users for
+lots of different tasks, it can be quite a bit of work to adhere to
+that best practice.</p>
+
+<p>An even better approach for securely granting privileges to your EC2
+instances is to use <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html" title="AWS IAM Roles for EC2">IAM Roles for EC2</a>.  With IAM Roles,
+you create a role with the permission your EC2 instance needs and
+assign that role to your instance.  AWS, through the
+<a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html" title="AWS EC2 Instance Metadata Documentation">instance metadata</a>, provides an API key and secret to your
+instance that has the desired permissions.  AWS automatically manages
+the API key rotation and all the AWS SDKs and CLI know to look in the
+instance metadata for the API key and secret.  Sounds great, right?
+Well, it is great, but creating roles and assigning them to instances
+is a bit more complicated than it sounds, especially when using
+<a href="https://aws.amazon.com/cloudformation/" title="AWS CloudFormation Documentation">AWS CloudFormation</a>.</p>
+
+<p>Since at Monsanto we use <a href="http://engineering.monsanto.com/2015/07/10/cloudformation-template-generator/" title="CloudFormation Template Generator blog post">CloudFormation extensively</a>,
+we&#39;ve thought a lot about how best to leverage IAM Roles when we
+create templates using our
+<a href="https://github.com/MonsantoCo/cloudformation-template-generator" title="CloudFormation Template Generator GitHub">CloudFormation Template Generator (CFTG)</a>.  We think we&#39;ve come
+up with a straightforward, easy to comprehend way to create IAM Roles
+and assign them to EC2 instances in CloudFormation templates.  So how
+do we do it?</p>
+
+<h3>Boilerplate</h3>
+
+<p>The first thing you want to do when dealing with IAM Roles and EC2
+instances in CloudFormation is get some boilerplate code out of the
+way.  Specifically, you need to create a PolicyStatement with a
+PolicyDocument that allows EC2 instances to assume IAM Roles.  Using
+CFTG, that looks like this:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">allow</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">&quot;Allow&quot;</span>
+
+<span class="c1">// 0. Common Policy Statments and Documents</span>
+<span class="k">val</span> <span class="n">assumeRolePolicyStatement</span> <span class="k">=</span> <span class="nc">PolicyStatement</span><span class="o">(</span>
+  <span class="nc">Effect</span>    <span class="k">=</span> <span class="n">allow</span><span class="o">,</span>
+  <span class="nc">Principal</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">DefinedPrincipal</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="s">&quot;Service&quot;</span> <span class="o">-&gt;</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;ec2.amazonaws.com&quot;</span><span class="o">)))),</span>
+  <span class="nc">Action</span>    <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;sts:AssumeRole&quot;</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">assumeRolePolicyDocument</span> <span class="k">=</span> <span class="nc">PolicyDocument</span><span class="o">(</span>
+  <span class="nc">Statement</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="n">assumeRolePolicyStatement</span><span class="o">)</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>The first thing we do is create a <code>val</code> for the string <code>&quot;Allow&quot;</code> since
+we are going to use that string so often.  Then we create our
+<code>assumeRolePolicyStatement</code> with EC2 as the principal and AssumeRole
+as the action.  We then create the associated PolicyDocument,
+<code>assumeRolePolicyDocument</code>, that holds the PolicyStatement.  You will
+see this pattern when dealing with IAM roles in CloudFormation over
+and over: creating standalone PolicyStatements that then get added to
+PolicyDocuments.  It is the PolicyDocument that is referenced by other
+resources.</p>
+
+<h3>Roles for each instance type</h3>
+
+<p>The next thing you do is to create an &quot;empty&quot; role for each type of
+instance you need, associating the role with the
+<code>assumeRolePolicyDocument</code> just created.  This association tells AWS
+what kind of role this is.  In this case, a role that allows EC2
+instances to assume roles.  See how it starts to get confusing?  Below
+is the CFTG code for two different instance types, a NAT instance role
+and a bastion instance role.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">natRoleResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::Role`</span><span class="o">(</span>
+  <span class="n">name</span>                     <span class="k">=</span> <span class="s">&quot;NATRole&quot;</span><span class="o">,</span>
+  <span class="nc">AssumeRolePolicyDocument</span> <span class="k">=</span> <span class="n">assumeRolePolicyDocument</span><span class="o">,</span>
+  <span class="nc">Path</span>                     <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">&quot;/&quot;</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">bastionRoleResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::Role`</span><span class="o">(</span>
+  <span class="n">name</span>                     <span class="k">=</span> <span class="s">&quot;BastionRole&quot;</span><span class="o">,</span>
+  <span class="nc">AssumeRolePolicyDocument</span> <span class="k">=</span> <span class="n">assumeRolePolicyDocument</span><span class="o">,</span>
+  <span class="nc">Path</span>                     <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">&quot;/&quot;</span><span class="o">)</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>You can see that there is not much in these roles as currently
+defined.  Other than giving them a name and associating them with the
+<code>assumeRolePolicyDocument</code>, we only specify a path.  Here, we give the
+root path, <code>/</code>, but you could use the <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-friendly-names" title="AWS IAM Path Documentation">path</a> to restrict where this
+policy an be applied.</p>
+
+<h3>Instance profiles for each instance role</h3>
+
+<p>For each instance role you created above, you next need to create an
+InstanceProfile. There is a one-to-one mapping between instance roles
+and InstanceProfiles.  Using CFTG, that looks like:</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">natInstanceProfileResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::InstanceProfile`</span><span class="o">(</span>
+  <span class="n">name</span>  <span class="k">=</span> <span class="s">&quot;NATProfile&quot;</span><span class="o">,</span>
+  <span class="nc">Path</span>  <span class="k">=</span> <span class="s">&quot;/&quot;</span><span class="o">,</span>
+  <span class="nc">Roles</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">ResourceRef</span><span class="o">(</span><span class="n">natRoleResource</span><span class="o">))</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">bastionInstanceProfileResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::InstanceProfile`</span><span class="o">(</span>
+  <span class="n">name</span>  <span class="k">=</span> <span class="s">&quot;BastionProfile&quot;</span><span class="o">,</span>
+  <span class="nc">Path</span>  <span class="k">=</span> <span class="s">&quot;/&quot;</span><span class="o">,</span>
+  <span class="nc">Roles</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">ResourceRef</span><span class="o">(</span><span class="n">bastionRoleResource</span><span class="o">))</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>Again, not much to see here.  Other than setting the name and the
+association with the role, we set a non-restrictive path.</p>
+
+<h3>Policy statements for each action</h3>
+
+<p>Now we finally get to actually defining what actions we want the
+instances to be able to assume.  In doing this, we change our point of
+view.  Rather than thinking about the instance types, we think about
+the actions we want any instance to take.  A single instance type
+could need more than one type of action.  Example CFTG code is below.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">natTakeOverPolicyStatement</span> <span class="k">=</span> <span class="nc">PolicyStatement</span><span class="o">(</span>
+  <span class="nc">Effect</span> <span class="k">=</span> <span class="n">allow</span><span class="o">,</span>
+  <span class="nc">Action</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span>
+    <span class="s">&quot;ec2:DescribeInstances&quot;</span><span class="o">,</span>
+    <span class="s">&quot;ec2:DescribeRouteTables&quot;</span><span class="o">,</span>
+    <span class="s">&quot;ec2:CreateRoute&quot;</span><span class="o">,</span>
+    <span class="s">&quot;ec2:ReplaceRoute&quot;</span><span class="o">,</span>
+    <span class="s">&quot;ec2:StartInstances&quot;</span><span class="o">,</span>
+    <span class="s">&quot;ec2:StopInstances&quot;</span>
+  <span class="o">),</span>
+  <span class="nc">Resource</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">&quot;*&quot;</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">staxS3PolicyStatement</span> <span class="k">=</span> <span class="nc">PolicyStatement</span><span class="o">(</span>
+  <span class="nc">Effect</span>   <span class="k">=</span> <span class="n">allow</span><span class="o">,</span>
+  <span class="nc">Action</span>   <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;s3:GetObject&quot;</span><span class="o">),</span>
+  <span class="nc">Resource</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">`Fn::Join`</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">,</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;arn:aws:s3:::&quot;</span><span class="o">,</span> <span class="n">`AWS::StackName`</span><span class="o">,</span> <span class="s">&quot;/*&quot;</span><span class="o">)))</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>Above we define two different sets of actions using two
+PolicyStatements.  The first PolicyStatement,
+<code>natTakeOverPolicyStatement</code>, defines the types of actions a NAT box
+would need to terminate and recreate it high-availability (HA) NAT
+partner and take over its route while it is down.  Unfortunately, it
+does not restrict the application of these policies to only its HA NAT
+partner.  Those actions can be executed on any EC2 instance (<code>Resource
+= Some(&quot;*&quot;)</code>) in your account.  It would be better to restrict these
+actions to the <a href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_IAM.html#subnet-ami-example-iam" title="Scope IAM to a VPC">VPC in which the NAT instances reside</a>.  The
+second PolicyStatement allows read-only access to the S3 bucket with
+the same name as the CloudFormation stack.</p>
+
+<h3>Policy documents to hold the statements</h3>
+
+<p>Remember near the beginning when we said you will often see
+PolicyStatements associated with PolicyDocuments?  Well, that is all
+we are doing here.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">natTakeOverPolicyDocument</span> <span class="k">=</span> <span class="nc">PolicyDocument</span><span class="o">(</span><span class="nc">Statement</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="n">natTakeOverPolicyStatement</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">staxS3PolicyDocument</span>      <span class="k">=</span> <span class="nc">PolicyDocument</span><span class="o">(</span><span class="nc">Statement</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="n">staxS3PolicyStatement</span><span class="o">))</span>
+</code></pre></div>
+<p>It is worth noting that a PolicyDocument can hold more than one
+PolicyStatement, as implied by the value being a <code>Seq()</code>, should that
+be useful to you.</p>
+
+<h3>Creating IAM Policies</h3>
+
+<p>The next step is to create IAM Policies.  The role of an IAM Policy is
+to associate a PolicyDocument with one or more of the instance roles.
+In other words, there is a one-to-one mapping of an IAM Policy to a
+PolicyDocument but the IAM Policy can hold more than one instance
+role.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">natTakeoverPolicyResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::Policy`</span><span class="o">.</span><span class="n">from</span><span class="o">(</span>
+  <span class="n">name</span>           <span class="k">=</span> <span class="s">&quot;NatTakeoverPolicy&quot;</span><span class="o">,</span>
+  <span class="nc">PolicyDocument</span> <span class="k">=</span> <span class="n">natTakeOverPolicyDocument</span><span class="o">,</span>
+  <span class="nc">PolicyName</span>     <span class="k">=</span> <span class="s">&quot;NatTakeover&quot;</span><span class="o">,</span>
+  <span class="nc">Groups</span>         <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+  <span class="nc">Roles</span>          <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="nc">ResourceRef</span><span class="o">(</span><span class="n">natRoleResource</span><span class="o">))),</span>
+  <span class="nc">Users</span>          <span class="k">=</span> <span class="nc">None</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">staxS3PolicyResource</span> <span class="k">=</span> <span class="n">`AWS::IAM::Policy`</span><span class="o">.</span><span class="n">from</span><span class="o">(</span>
+  <span class="n">name</span>           <span class="k">=</span> <span class="s">&quot;StaxS3Policy&quot;</span><span class="o">,</span>
+  <span class="nc">PolicyDocument</span> <span class="k">=</span> <span class="n">staxS3PolicyDocument</span><span class="o">,</span>
+  <span class="nc">PolicyName</span>     <span class="k">=</span> <span class="s">&quot;StaxS3&quot;</span><span class="o">,</span>
+  <span class="nc">Groups</span>         <span class="k">=</span> <span class="nc">None</span><span class="o">,</span>
+  <span class="nc">Roles</span>          <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">Seq</span><span class="o">(</span><span class="nc">ResourceRef</span><span class="o">(</span><span class="n">natRoleResource</span><span class="o">),</span> <span class="nc">ResourceRef</span><span class="o">(</span><span class="n">bastionRoleResource</span><span class="o">))),</span>
+  <span class="nc">Users</span>          <span class="k">=</span> <span class="nc">None</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>Above we are using the <code>AWS::IAM::Policy</code> helper method <code>from</code> to
+create the IAM Policy resource.  You can see in each case we give the
+IAM::Policy resource a name, associate it with a single
+PolicyDocument, and give the policy a name.  We do not associate the
+policy to any groups or users.  In the case of
+<code>natTakeoverPolicyResource</code>, we associate it with a single instance
+role, <code>natRoleResource</code>.  For the <code>staxS3PolicyResource</code>, we associate
+it with two instance roles, both the <code>natRoleResource</code> and the
+<code>bastionRoleResource</code>.</p>
+
+<h3>Putting it all together</h3>
+
+<p>We now have several IAM Policies that associate a set of actions as
+contained within the PolicyDocument with instance roles.  Those
+instance roles, in turn, are associated with InstanceProfiles.  It is
+those InstanceProfiles that are used when creating EC2 instances.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">def</span> <span class="n">natInstance</span><span class="o">(</span><span class="n">number</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">subnet</span><span class="k">:</span> <span class="kt">`AWS::EC2::Subnet`</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">name</span> <span class="k">=</span> <span class="s">&quot;NAT&quot;</span> <span class="o">+</span> <span class="n">number</span> <span class="o">+</span> <span class="s">&quot;Instance&quot;</span>
+  <span class="nc">Builders</span><span class="o">.</span><span class="n">ec2</span><span class="o">(</span>
+    <span class="n">name</span>               <span class="k">=</span> <span class="n">name</span><span class="o">,</span>
+    <span class="nc">InstanceType</span>       <span class="k">=</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">natInstanceTypeParameter</span><span class="o">),</span>
+    <span class="nc">KeyName</span>            <span class="k">=</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">keyNameParameter</span><span class="o">),</span>
+    <span class="nc">ImageId</span>            <span class="k">=</span> <span class="n">`Fn::FindInMap`</span><span class="o">[</span><span class="kt">AMIId</span><span class="o">](</span><span class="nc">MappingRef</span><span class="o">(</span><span class="n">awsNATAMIMapping</span><span class="o">),</span> <span class="n">`AWS::Region`</span><span class="o">,</span> <span class="s">&quot;AMI&quot;</span><span class="o">),</span>
+    <span class="nc">SecurityGroupIds</span>   <span class="k">=</span> <span class="nc">Seq</span><span class="o">(),</span>
+    <span class="nc">SubnetId</span>           <span class="k">=</span> <span class="n">subnet</span><span class="o">,</span>
+    <span class="nc">Tags</span>               <span class="k">=</span> <span class="nc">AmazonTag</span><span class="o">.</span><span class="n">fromName</span><span class="o">(</span><span class="n">name</span><span class="o">),</span>
+    <span class="nc">Metadata</span>           <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">Map</span><span class="o">(</span><span class="s">&quot;Comment1&quot;</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">s</span><span class="s">&quot;Create NAT $nat1&quot;</span><span class="o">))),</span>
+    <span class="nc">IamInstanceProfile</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">natInstanceProfileResource</span><span class="o">),</span>
+    <span class="nc">SourceDestCheck</span>    <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">&quot;false&quot;</span><span class="o">),</span>
+    <span class="nc">UserData</span>           <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">`Fn::Base64`</span><span class="o">(</span><span class="n">`Fn::Join`</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">,</span> <span class="nc">Seq</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]](...))))</span>
+  <span class="o">)</span>
+<span class="k">val</span> <span class="n">nat1Instance</span> <span class="k">=</span> <span class="n">natInstance</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">pubSubnet1</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">nat2Instance</span> <span class="k">=</span> <span class="n">natInstance</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">pubSubnet2</span><span class="o">)</span>
+</code></pre></div>
+<p>Here, since we are creating two NAT instances, we have defined a
+simple method to create them using the CFTG EC2 builder method, <code>ec2</code>,
+and I have removed the UserData. Ignoring the unimportant bits, you
+see that the <code>IamInstanceProfile</code> is set to
+<code>natInstanceProfileResource</code>, the InstanceProfile we created above
+and, using the IAM Policy, associated with the
+<code>natTakeOverPolicyDocument</code> and the <code>staxS3PolicyDocument</code> through the
+<code>natRoleResource</code>.</p>
+
+<p>Similarly the bastion instance uses the
+<code>bastionInstanceProfileResource</code> as its IamInstanceProfile.</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">val</span> <span class="n">bastion</span> <span class="k">=</span> <span class="s">&quot;BastionInstance&quot;</span>
+<span class="k">val</span> <span class="n">bastionInstance</span> <span class="k">=</span> <span class="nc">Builder</span><span class="o">.</span><span class="n">ec2</span><span class="o">(</span>
+  <span class="n">name</span>               <span class="k">=</span> <span class="n">bastion</span><span class="o">,</span>
+  <span class="nc">InstanceType</span>       <span class="k">=</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">bastionInstanceTypeParameter</span><span class="o">),</span>
+  <span class="nc">KeyName</span>            <span class="k">=</span> <span class="nc">ParameterRef</span><span class="o">(</span><span class="n">keyNameParameter</span><span class="o">),</span>
+  <span class="nc">ImageId</span>            <span class="k">=</span> <span class="n">`Fn::FindInMap`</span><span class="o">[</span><span class="kt">AMIId</span><span class="o">](</span><span class="nc">MappingRef</span><span class="o">(</span><span class="n">amazonLinuxAMIMapping</span><span class="o">),</span> <span class="n">`AWS::Region`</span><span class="o">,</span> <span class="s">&quot;AMI&quot;</span><span class="o">),</span>
+  <span class="nc">IamInstanceProfile</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">bastionInstanceProfileResource</span><span class="o">),</span>
+  <span class="nc">SecurityGroupIds</span>   <span class="k">=</span> <span class="nc">Seq</span><span class="o">(),</span>
+  <span class="nc">SubnetId</span>           <span class="k">=</span> <span class="n">pubSubnet1</span><span class="o">,</span>
+  <span class="nc">Tags</span>               <span class="k">=</span> <span class="nc">AmazonTag</span><span class="o">.</span><span class="n">fromName</span><span class="o">(</span><span class="n">bastion</span><span class="o">),</span>
+  <span class="nc">UserData</span>           <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="n">`Fn::Base64`</span><span class="o">(</span><span class="n">`Fn::Join`</span><span class="o">(</span><span class="s">&quot;&quot;</span><span class="o">,</span><span class="nc">Seq</span><span class="o">[</span><span class="kt">Token</span><span class="o">[</span><span class="kt">String</span><span class="o">]](...))))</span>
+<span class="o">)</span>
+</code></pre></div>
+<h3>JSON</h3>
+
+<p>The JSON created by all that CFTG code is shown below.</p>
+<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="s2">&quot;NATRole&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;AssumeRolePolicyDocument&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Statement&quot;</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="nt">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;Principal&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;Service&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ec2.amazonaws.com&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sts:AssumeRole&quot;</span><span class="p">]</span>
+      <span class="p">}]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;Path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::Role&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;BastionRole&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;AssumeRolePolicyDocument&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Statement&quot;</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="nt">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;Principal&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;Service&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ec2.amazonaws.com&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sts:AssumeRole&quot;</span><span class="p">]</span>
+      <span class="p">}]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;Path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::Role&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;BastionProfile&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;Path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;Roles&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;BastionRole&quot;</span>
+    <span class="p">}]</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::InstanceProfile&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;NATProfile&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;Path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;Roles&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATRole&quot;</span>
+    <span class="p">}]</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::InstanceProfile&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;StaxS3Policy&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;PolicyDocument&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Statement&quot;</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="nt">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;s3:GetObject&quot;</span><span class="p">],</span>
+        <span class="nt">&quot;Resource&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;arn:aws:s3:::&quot;</span><span class="p">,</span> <span class="p">{</span>
+            <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::StackName&quot;</span>
+          <span class="p">},</span> <span class="s2">&quot;/*&quot;</span><span class="p">]]</span>
+        <span class="p">}</span>
+      <span class="p">}]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;PolicyName&quot;</span><span class="p">:</span> <span class="s2">&quot;BastionRoleStaxS3&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;Roles&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATRole&quot;</span>
+    <span class="p">},</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;BastionRole&quot;</span>
+    <span class="p">}]</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::Policy&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;NatTakeoverPolicy&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;PolicyDocument&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Statement&quot;</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="nt">&quot;Effect&quot;</span><span class="p">:</span> <span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;Action&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ec2:DescribeInstances&quot;</span><span class="p">,</span> <span class="s2">&quot;ec2:DescribeRouteTables&quot;</span><span class="p">,</span> <span class="s2">&quot;ec2:CreateRoute&quot;</span><span class="p">,</span> <span class="s2">&quot;ec2:ReplaceRoute&quot;</span><span class="p">,</span> <span class="s2">&quot;ec2:StartInstances&quot;</span><span class="p">,</span> <span class="s2">&quot;ec2:StopInstances&quot;</span><span class="p">],</span>
+        <span class="nt">&quot;Resource&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span>
+      <span class="p">}]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;PolicyName&quot;</span><span class="p">:</span> <span class="s2">&quot;NatRoleNatTakeover&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;Roles&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATRole&quot;</span>
+    <span class="p">}]</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::IAM::Policy&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;NAT1Instance&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;ImageId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::FindInMap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AWSNATAMI&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::Region&quot;</span>
+      <span class="p">},</span> <span class="s2">&quot;AMI&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;UserData&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::Base64&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="err">...</span><span class="p">]]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;KeyName&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;KeyName&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;InstanceType&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATInstanceType&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;Tags&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Key&quot;</span><span class="p">:</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Value&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;NAT1Instance&quot;</span><span class="p">,</span> <span class="p">{</span>
+          <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::StackName&quot;</span>
+        <span class="p">}]]</span>
+      <span class="p">}</span>
+    <span class="p">}],</span>
+    <span class="nt">&quot;SourceDestCheck&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;IamInstanceProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATProfile&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;SubnetId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;PublicSubnet1&quot;</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;Comment1&quot;</span><span class="p">:</span> <span class="s2">&quot;Create NAT #1&quot;</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::EC2::Instance&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;NAT2Instance&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;ImageId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::FindInMap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AWSNATAMI&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::Region&quot;</span>
+      <span class="p">},</span> <span class="s2">&quot;AMI&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;UserData&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::Base64&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="err">...</span><span class="p">]]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;KeyName&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;KeyName&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;InstanceType&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATInstanceType&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;Tags&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Key&quot;</span><span class="p">:</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Value&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;NAT2Instance&quot;</span><span class="p">,</span> <span class="p">{</span>
+          <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::StackName&quot;</span>
+        <span class="p">}]]</span>
+      <span class="p">}</span>
+    <span class="p">}],</span>
+    <span class="nt">&quot;SourceDestCheck&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;IamInstanceProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;NATProfile&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;SubnetId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;PublicSubnet2&quot;</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;Comment1&quot;</span><span class="p">:</span> <span class="s2">&quot;Create NAT #2&quot;</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::EC2::Instance&quot;</span>
+<span class="p">}</span><span class="err">,</span>
+<span class="s2">&quot;BastionInstance&quot;</span><span class="err">:</span> <span class="p">{</span>
+  <span class="nt">&quot;Properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;ImageId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::FindInMap&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AmazonLinuxAMI&quot;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::Region&quot;</span>
+      <span class="p">},</span> <span class="s2">&quot;AMI&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;UserData&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Fn::Base64&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="err">...</span><span class="p">]]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;KeyName&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;KeyName&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;InstanceType&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;BastionInstanceType&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;Tags&quot;</span><span class="p">:</span> <span class="p">[{</span>
+      <span class="nt">&quot;Key&quot;</span><span class="p">:</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+      <span class="nt">&quot;Value&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Fn::Join&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;BastionInstance&quot;</span><span class="p">,</span> <span class="p">{</span>
+          <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::StackName&quot;</span>
+        <span class="p">}]]</span>
+      <span class="p">}</span>
+    <span class="p">}],</span>
+    <span class="nt">&quot;IamInstanceProfile&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;BastionProfile&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;SubnetId&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;Ref&quot;</span><span class="p">:</span> <span class="s2">&quot;PublicSubnet1&quot;</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="nt">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS::EC2::Instance&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Note that some of those variables we defined ended up being serialized
+into JSON several times in the resulting template.  Using CFTG, you
+can avoid this duplication and possible future error by only have one
+place to update when changes need to be made.</p>
+
+<h2>Wrapping Up</h2>
+
+<p>We hope this walk through of how we create and assign IAM Roles in
+CloudFormation is helpful.  If you have a different approach or ideas
+on how to improve our approach, <a href="http://engineering.monsanto.com/contact/" title="Contact Us">we&#39;d love to hear them</a>.</p>
+
+
+                
+
+                        <div class="post-signature multiple">
+                            posted on October 7, 2015 by <br>
+                        
+
+
+                            <div class="author">
+                                
+                                <img src="https://avatars1.githubusercontent.com/u/57881?v=3&s=40">
+                                
+                                    <span>
+                                        David Dooling
+                                    </span>
+
+                                
+                                <a  href="https://twitter.com/ddgenome">
+                                    <i class="fa fa-twitter fa-1x "></i>
+                                </a>
+                                
+                                
+                                <a  href="https://github.com/ddgenome">
+                                    <i class="fa fa-github fa-1x"></i>
+                                </a>
+                                
+                            </div>
+                        
+                        </div>
+                
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/10/06/cloud-different/" data-toggle="tooltip" data-placement="top" title="Cloud Different">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="https://twitter.com/MonPlatformEng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.youtube.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-youtube-square fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/MonsantoCo">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="copyright text-muted">Copyright &copy; 2015 Engineering at Monsanto &nbsp;|&nbsp; Built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a><br />
+                    <a href="/sitemap.xml">Sitemap</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/legal-notice/Pages/default.aspx">Legal Notice</a> &nbsp;|&nbsp;
+                    <a href="http://www.monsanto.com/privacy-policy/Pages/default.aspx">Privacy Policy</a> &nbsp;|&nbsp;
+                    <a href="/contact">Contact Us</a>
+
+                    </p>
+                <div align="center"><br /><img src="/img/Monsanto_logo.jpg" width="170" height="54" border="0" /></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+<!-- Google Analytics JavaScript -->
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-43186905-16', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+
+    var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+                function () {
+                    document.location = url;
+                }
+        });
+    }
+</script>
+<script src="/js/main.js"></script>
+
+
+</body>
+
+</html>
