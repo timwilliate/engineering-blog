@@ -7,13 +7,32 @@
         <atom:link href="http://engineering.monsanto.com/feed.xml" rel="self" type="application/rss+xml" />
         
             <item>
+                <title>AWS re:Invent 2015</title>
+                
+                
+                    <description>&lt;p&gt;Monsanto sent several of our IT staff to &lt;a href=&quot;https://reinvent.awsevents.com/&quot; title=&quot;AWS re:Invent 2015&quot;&gt;AWS re:Invent&lt;/a&gt;
+last week. We learned a lot and were excited to hear about the new
+services announced, especially those around the EC2 Container Service,
+Kinesis, IoT, AWS Config, and the data import/export device Snowball.
+We also gave a few talks and look forward to connecting and
+collaborating with the many that came up after the talks and spoke to
+us. If you couldn&amp;#39;t attend in person, have a look and
+&lt;a href=&quot;http://engineering.monsanto.com/contact/&quot; title=&quot;Contact Monsanto Engineering&quot;&gt;let us know what you think&lt;/a&gt;.&lt;/p&gt;
+</description>
+                
+                <pubDate>Wed, 14 Oct 2015 00:00:00 -0500</pubDate>
+                <link>http://engineering.monsanto.com/2015/10/14/aws-reinvent/</link>
+                <guid isPermaLink="true">http://engineering.monsanto.com/2015/10/14/aws-reinvent/</guid>
+            </item>
+        
+            <item>
                 <title>Demystifying IAM Roles</title>
                 
                 
                     <description>&lt;h2&gt;TL;DR&lt;/h2&gt;
 </description>
                 
-                <pubDate>Wed, 07 Oct 2015 00:00:00 -0700</pubDate>
+                <pubDate>Wed, 07 Oct 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/10/07/demystifying-iam-roles/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/10/07/demystifying-iam-roles/</guid>
             </item>
@@ -37,7 +56,7 @@ capabilities in the cloud, you must turn to Infrastructure as a
 Service (IaaS).&lt;/p&gt;
 </description>
                 
-                <pubDate>Tue, 06 Oct 2015 00:00:00 -0700</pubDate>
+                <pubDate>Tue, 06 Oct 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/10/06/cloud-different/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/10/06/cloud-different/</guid>
             </item>
@@ -53,7 +72,7 @@ generate traces for each incoming request.  This is great, but we wanted more.
 Some of the things we wanted to improve included:&lt;/p&gt;
 </description>
                 
-                <pubDate>Thu, 24 Sep 2015 00:00:00 -0700</pubDate>
+                <pubDate>Thu, 24 Sep 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/24/better-spray-metrics-with-kamon/</guid>
             </item>
@@ -72,7 +91,7 @@ Some of the things we wanted to improve included:&lt;/p&gt;
 &lt;/style&gt;
 </description>
                 
-                <pubDate>Wed, 23 Sep 2015 00:00:00 -0700</pubDate>
+                <pubDate>Wed, 23 Sep 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/23/implicits-typeclasses/</guid>
             </item>
@@ -85,7 +104,7 @@ Some of the things we wanted to improve included:&lt;/p&gt;
 much of it is concerned with two major questions:&lt;/p&gt;
 </description>
                 
-                <pubDate>Mon, 21 Sep 2015 00:00:00 -0700</pubDate>
+                <pubDate>Mon, 21 Sep 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/09/21/leaflet-light-cluster/</guid>
             </item>
@@ -97,7 +116,7 @@ much of it is concerned with two major questions:&lt;/p&gt;
                     <description>&lt;p&gt;In the second installation of our open source &lt;a href=&quot;http://engineering.monsanto.com/2015/07/22/building-an-open-source-cloud-foundry-toolbox/&quot;&gt;Cloud Foundry (CF) toolbox series&lt;/a&gt; we would like to introduce &lt;a href=&quot;https://github.com/MonsantoCo/cf-metrics&quot;&gt;CF-Metrics&lt;/a&gt;, a comprehensive solution for Cloud Foundry monitoring and alerting based solely on open source projects.  In a world of unreliable cloud infrastructure and distributed micro service architectures, monitoring and alerting are as critical now as they&amp;#39;ve ever been.  Even when you learn to expect failure (or better yet &lt;a href=&quot;https://github.com/strepsirrhini-army/chaos-lemur&quot;&gt;embrace it&lt;/a&gt;) and build self healing platforms like Cloud Foundry, you still need monitoring and alerting to analyze why there was a failure and how to make it not happen again in the future.&lt;/p&gt;
 </description>
                 
-                <pubDate>Thu, 20 Aug 2015 00:00:00 -0700</pubDate>
+                <pubDate>Thu, 20 Aug 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/08/20/cf-metrics/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/20/cf-metrics/</guid>
             </item>
@@ -115,7 +134,7 @@ that hurdle by walking you through a simple app that hits most of the
 features you might regularly use.&lt;/p&gt;
 </description>
                 
-                <pubDate>Tue, 11 Aug 2015 00:00:00 -0700</pubDate>
+                <pubDate>Tue, 11 Aug 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/08/11/simple-spray/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/08/11/simple-spray/</guid>
             </item>
@@ -127,7 +146,7 @@ features you might regularly use.&lt;/p&gt;
                     <description>&lt;p&gt;This is the third post in our series on Scala implicits. The earlier posts cover &lt;a href=&quot;http://engineering.monsanto.com/2015/05/14/implicits-intro/&quot;&gt;implicit type parameters&lt;/a&gt; and &lt;a href=&quot;http://engineering.monsanto.com/2015/06/15/implicits-futures/&quot;&gt;implicit parameters with futures&lt;/a&gt;. In this post, we discuss implicit conversions.&lt;/p&gt;
 </description>
                 
-                <pubDate>Fri, 31 Jul 2015 00:00:00 -0700</pubDate>
+                <pubDate>Fri, 31 Jul 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/31/implicit-conversions/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/31/implicit-conversions/</guid>
             </item>
@@ -139,28 +158,9 @@ features you might regularly use.&lt;/p&gt;
                     <description>&lt;p&gt;This segment of our open source Cloud Foundry (CF) toolbox series introduces &lt;a href=&quot;https://github.com/MonsantoCo/cf-portal&quot;&gt;CF-Portal&lt;/a&gt;, a basic read-only view into your Cloud Foundry application landscape.  CF-Portal was one of the first applications we made for our CF toolbox, since unlike the branded CF offerings, the community project lacks any pre-packaged UI.&lt;/p&gt;
 </description>
                 
-                <pubDate>Wed, 29 Jul 2015 00:00:00 -0700</pubDate>
+                <pubDate>Wed, 29 Jul 2015 00:00:00 -0500</pubDate>
                 <link>http://engineering.monsanto.com/2015/07/29/cf-portal/</link>
                 <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/29/cf-portal/</guid>
-            </item>
-        
-            <item>
-                <title>Testing without mocking in Scala</title>
-                
-                
-                    <description>&lt;style scoped&gt;
-  .interface { color: #D907E8 }
-  .logic { color: #19BEFF }
-  .jsonClient {color: #E80D0C }
-  .functionParam {color: #1ab955 }
-  .port {color: #FF9C00 }
-  .pass {color: #D907E8 }
-&lt;/style&gt;
-</description>
-                
-                <pubDate>Tue, 28 Jul 2015 00:00:00 -0700</pubDate>
-                <link>http://engineering.monsanto.com/2015/07/28/avoiding-mocks/</link>
-                <guid isPermaLink="true">http://engineering.monsanto.com/2015/07/28/avoiding-mocks/</guid>
             </item>
         
     </channel>
