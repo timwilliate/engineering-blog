@@ -10,7 +10,7 @@ authors:
         githubProfile : "timwilliate"
         twitterHandle : "TimWilliate"
         avatarUrl : "https://avatars1.githubusercontent.com/u/7853157?v=3"
-tags: [genomics, graph, architecture, neo4j, graphconnect]
+tags: [genomics, graph, neo4j, graphconnect]
 ---
 
 Humanity faces complex challenges as it adapts to the impacts of a global population projected to eclipse [9.5 billion by 2050](http://esa.un.org/unpd/wpp/). In addition to requiring a greater amount of food, a population of this magnitude stresses global agriculture production by expanding the urban footprint at the expense of arable land. In the world's developing nations, the growing middle class is frequently choosing to adopt sources of animal protein, which is more resource intensive to produce, as a larger portion of their diets. This all adds up to the realization that humanity will be required to grow more food than it ever has before, while using fewer resources to do so.
@@ -39,12 +39,16 @@ In modern times the quantity of grain yielded by a corn plant is measured in [bu
 
 ![Line Development Pipeline](/img/graph-lineDevelopmentPipeline.png)
 
-A breeding cycle begins by selecting two parents, each displaying one or more desirable phenotypes, and crossing them to produce a large set of progeny plants which combine the genetics of both parents. This specific cross is frequently  called an **origin**. All progeny enter a selection pipeline which acts as a highly focused funnel of selective pressure. At each stage within the funnel only the progeny which display the desirable traits of both parents, without displaying any undesirable traits, are selected. Selected progeny are then crossed with each other and their progeny move onto the next round of selection. After each round of selection, the total number of progeny screened is reduced (the funnel narrows) until the cycle ends with a single progeny that displays all the best traits of the original parents. This seed from this plant will then go on to be used as a parent in future breeding cycles, or possibly in seed products sold to farmers.
+A breeding cycle begins by selecting two parents, each displaying one or more desirable phenotypes, and crossing them to produce a large set of progeny plants which combine the genetics of both parents. This specific cross is frequently  called an **origin**. All progeny enter a selection pipeline that acts as a highly focused funnel of selective pressure. At each stage within the funnel only the progeny which display the desirable traits of both parents, without displaying any undesirable traits, are selected. Selected progeny are then crossed with each other and their progeny move onto the next round of selection. After each round of selection, the total number of progeny screened is reduced (the funnel narrows) until the cycle ends with a single progeny that displays all the best traits of the original parents. This seed from this plant will then go on to be used as a parent in future breeding cycles, or possibly in seed products sold to farmers.
 
-At each stage of the selection pipeline decisions on which progeny will move forward are driven by the collection of two classes of dataset:
+At each stage of the selection pipeline decisions on which progeny will move forward to the next stage are driven by the collection of two classes of dataset:
 
 1.  **Genotype**: Plants are screened in the lab for genetic features predictive of phenotypes. This is called [genotype](https://en.wikipedia.org/wiki/Genotype) data and can be collected at high-throughput and low-cost
-2.  **Phenotype**: Plants are screened in field trials in order to make direct obseravtions of phenotypes. Collecting this data is expensive and time-intensive, as it requires the allocation of both land and the labor to conduct the field trial. 
+2.  **Phenotype**: Plants are screened in field trials in order to make direct obseravtions of phenotypes. Collecting this data is expensive and time-intensive, as it requires the allocation of both land and the labor to conduct the field trial.
+
+INSERT
+
+
 
 ### **Every Breeding Cycle Extends a Growing Tree of Genetic Ancestry**
 
@@ -64,7 +68,7 @@ At each stage of the selection pipeline decisions on which progeny will move for
 
 ![Benchmark Oracle](/img/graph-benchmarkOracle.png)
 
-![Ancestry Neo4j](/img/graphs-ancestryInGraph.png)
+![Ancestry Neo4j](/img/graph-ancestryInGraph.png)
 
 ![Oracle vs Neo4j](/img/graph-benchmarkOracleNeo4j.png)
 
@@ -114,7 +118,7 @@ At each stage of the selection pipeline decisions on which progeny will move for
     ]
 }
 ```
-![Genotype Layer](/img/graphs-genotypeLayer.png)
+![Genotype Layer](/img/graph-genotypeLayer.png)
 
 ```javascript
 {
@@ -139,6 +143,8 @@ At each stage of the selection pipeline decisions on which progeny will move for
 
 [Using Big Data for Good](http://engineering.monsanto.com/2015/05/20/using-big-data-for-good/)
 
+<script async class="speakerdeck-embed" data-id="18d67f875f0345948425142136ab3c6c" data-ratio="1.77777777777778" src="//speakerdeck.com/assets/embed.js"></script>
+
 To avoid these pitfalls, when architecting solutions in the cloud, you
 must design with the following five principles in mind.
 
@@ -156,14 +162,3 @@ must design with the following five principles in mind.
 5.  **Cost Effective**: You have to use commodity, cost-effective
     components so that executing on the first four principles does not
     break the bank.
-
-Done properly, cloud solutions can be more reliable and less costly.
-
-To learn more about how to architect "cloud first" solutions, learn
-about our journey to the cloud, and see how we use some of the tools
-and libraries we have open sourced, be sure to attend our talk at AWS
-re:Invent,
-[Cloud First: New Architecture for New Infrastructure][reinvent], this
-Thursday 8 October 2015 at 2:45 p.m. PT in Palazzo N.
-
-[reinvent]: https://www.portal.reinvent.awsevents.com/connect/sessionDetail.ww?SESSION_ID=2547 (AWS re:Invent Cloud First talk)
